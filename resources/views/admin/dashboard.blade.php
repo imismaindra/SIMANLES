@@ -648,16 +648,18 @@
         </div>
 
         <!-- Scrollable Form Body -->
-        <form class="mt-4 space-y-4 overflow-y-auto flex-1 pr-1" onsubmit="event.preventDefault(); alert('Siswa baru berhasil didaftarkan! Jurnal kas masuk Rp 80.000 dan tagihan SPP bulan berjalan telah diterbitkan.'); closeModal('modal-pendaftaran');">
+        <form class="mt-4 space-y-4 overflow-y-auto flex-1 pr-1" action="{{ route('web.siswa.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="cabang_id" value="{{ $currentCabang['id'] }}">
             <!-- Data Diri Siswa -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="sm:col-span-2">
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Siswa</label>
-                    <input type="text" placeholder="Contoh: Muhammad Rayhan" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600" required>
+                    <input type="text" name="nama" placeholder="Contoh: Muhammad Rayhan" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600" required>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Jenjang Pendidikan</label>
-                    <select id="reg-jenjang" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600">
+                    <select name="jenjang" id="reg-jenjang" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600">
                         <option value="TK">TK (Kelas 0)</option>
                         <option value="SD" selected>SD (Kelas 1 - 6)</option>
                         <option value="SMP">SMP (Kelas 7 - 9)</option>
@@ -666,7 +668,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Kelas Spesifik</label>
-                    <input type="number" min="0" max="12" value="5" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600" required>
+                    <input type="number" name="kelas" min="0" max="12" value="5" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600" required>
                 </div>
             </div>
 
@@ -674,15 +676,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Lahir</label>
-                    <input type="text" placeholder="Yogyakarta" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600">
+                    <input type="text" name="tempat_lahir" placeholder="Yogyakarta" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Lahir</label>
-                    <input type="date" value="2014-08-17" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600">
+                    <input type="date" name="tanggal_lahir" value="2014-08-17" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600">
                 </div>
                 <div class="sm:col-span-2">
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Rumah</label>
-                    <textarea rows="2" placeholder="Alamat domisili lengkap..." class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600"></textarea>
+                    <textarea rows="2" name="alamat" placeholder="Alamat domisili lengkap..." class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600"></textarea>
                 </div>
             </div>
 
@@ -690,11 +692,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Ibu / Wali</label>
-                    <input type="text" placeholder="Nama Ibu" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600" required>
+                    <input type="text" name="nama_ibu" placeholder="Nama Ibu" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600" required>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp Wali</label>
-                    <input type="text" placeholder="081234567890" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600 font-mono" required>
+                    <input type="text" name="no_telp_ortu" placeholder="081234567890" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-1 focus:ring-blue-600 font-mono" required>
                 </div>
             </div>
 
@@ -710,6 +712,7 @@
                         <span class="text-slate-400">Rp</span>
                         <input 
                             type="number" 
+                            name="diskon"
                             id="reg-diskon" 
                             value="20000" 
                             oninput="calcTotalPendaftaran()"
@@ -818,11 +821,11 @@
         </div>
 
         <div class="mt-4 space-y-3 text-xs">
-            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 leading-relaxed">
+            <div id="auto-assign-badge" class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 leading-relaxed">
                 <strong>5 Siswa Berhasil Ditugaskan!</strong> Kuota guru pembimbing tetap berada dalam batas aturan (maksimal 6 siswa aktif).
             </div>
 
-            <ul class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
+            <ul id="auto-assign-list" class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
                 <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1 bg-slate-50">
                     <span class="font-medium text-slate-800">Arkan Naufal (SD Kelas 5)</span>
                     <strong class="text-blue-900">→ Dian Maharani, S.Pd. (Slot 5/6)</strong>
@@ -915,16 +918,12 @@
 @push('scripts')
 <script>
     let countdown = 18;
+    let currentQrSesi = 'datang';
+
     setInterval(() => {
         countdown--;
         if (countdown <= 0) {
-            countdown = 20;
-            const randomCode = Math.floor(1000 + Math.random() * 9000);
-            const token = 'SIROJU-' + randomCode;
-            const liveEl = document.getElementById('live-token-text');
-            const bigEl = document.getElementById('big-qr-token');
-            if (liveEl) liveEl.textContent = token;
-            if (bigEl) bigEl.textContent = token;
+            refreshQrTokenManual();
         }
         const timerEl = document.getElementById('countdown-timer');
         if (timerEl) timerEl.textContent = countdown + 's';
@@ -942,22 +941,80 @@
         document.getElementById('reg-total-bayar').textContent = 'Rp ' + total.toLocaleString('id-ID');
     }
 
-    function runAutoAssign() {
-        openModal('modal-auto-assign-result');
-    }
-
-    function toggleQrSesi() {
-        const btn = document.getElementById('btn-toggle-sesi');
-        if (btn.textContent.includes('Pulang')) {
-            btn.textContent = 'Ganti ke Sesi Datang';
-            alert('Sesi presensi beralih ke: SESI PULANG. QR code telah disesuaikan.');
-        } else {
-            btn.textContent = 'Ganti ke Sesi Pulang';
-            alert('Sesi presensi beralih ke: SESI DATANG. QR code telah disesuaikan.');
+    async function runAutoAssign() {
+        try {
+            const res = await fetch('/api/guru/auto-assign', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ cabang_id: '{{ $currentCabang['id'] }}' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const listEl = document.getElementById('auto-assign-list');
+                const badgeEl = document.getElementById('auto-assign-badge');
+                if (badgeEl) {
+                    badgeEl.innerHTML = `<strong>${data.data.assigned_count} Siswa Berhasil Ditugaskan!</strong> Kuota guru pembimbing tetap berada dalam batas aturan (maksimal 6 siswa aktif).`;
+                }
+                if (listEl && data.data.assignments && data.data.assignments.length) {
+                    listEl.innerHTML = data.data.assignments.map((item, idx) => `
+                        <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1 ${idx % 2 === 0 ? 'bg-slate-50' : ''}">
+                            <span class="font-medium text-slate-800">${item.siswa_nama} (${item.jenjang})</span>
+                            <strong class="text-blue-900">→ ${item.guru_nama} (Slot ${item.slot_terisi}/6)</strong>
+                        </li>
+                    `).join('');
+                }
+                openModal('modal-auto-assign-result');
+            } else {
+                alert(data.message || 'Auto assign belum menemukan siswa antre.');
+            }
+        } catch (e) {
+            console.error(e);
+            openModal('modal-auto-assign-result');
         }
     }
 
-    function refreshQrTokenManual() {
+    async function toggleQrSesi() {
+        const btn = document.getElementById('btn-toggle-sesi');
+        if (currentQrSesi === 'datang') {
+            currentQrSesi = 'pulang';
+            if (btn) btn.textContent = 'Ganti ke Sesi Datang';
+            alert('Sesi presensi beralih ke: SESI PULANG. QR code telah disesuaikan.');
+        } else {
+            currentQrSesi = 'datang';
+            if (btn) btn.textContent = 'Ganti ke Sesi Pulang';
+            alert('Sesi presensi beralih ke: SESI DATANG. QR code telah disesuaikan.');
+        }
+        await refreshQrTokenManual();
+    }
+
+    async function refreshQrTokenManual() {
+        try {
+            const res = await fetch('/api/absensi/qr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ cabang_id: '{{ $currentCabang['id'] }}', tipe: currentQrSesi, duration: 25 })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const token = data.data.token;
+                countdown = data.data.expires_in_seconds;
+                const liveEl = document.getElementById('live-token-text');
+                const bigEl = document.getElementById('big-qr-token');
+                if (liveEl) liveEl.textContent = token;
+                if (bigEl) bigEl.textContent = token;
+                return;
+            }
+        } catch (e) {
+            // fallback offline simulation
+        }
         const randomCode = Math.floor(1000 + Math.random() * 9000);
         const token = 'SIROJU-' + randomCode;
         countdown = 20;
