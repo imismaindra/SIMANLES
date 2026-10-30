@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PresensiController extends Controller
 {
@@ -33,8 +34,12 @@ class PresensiController extends Controller
             ->first();
 
         if (! $activeQr) {
-            $activeQr = $presensiService->generateQrToken($cabangId, 'datang', 30);
+            $activeQr = $presensiService->generateQrToken($cabangId, 'datang', 25);
         }
+
+        // Generate scan URL & Real SVG QR Code
+        $scanUrl = route('presensi.scanner', ['token' => $activeQr->token, 'cabang_id' => $cabangId]);
+        $qrSvg = $this->renderQrSvg($scanUrl, 220);
 
         // Daftar Guru di Cabang ini
         $guruCabang = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
@@ -58,15 +63,18 @@ class PresensiController extends Controller
             ->get();
 
         // Statistik
-        $totalGuruBertugas = $guruCabang->count();
-        $sudahDatang = $absensiHariIni->whereNotNull('jam_datang')->count();
-        $sudahPulang = $absensiHariIni->whereNotNull('jam_pulang')->count();
-        $belumHadir = max(0, $totalGuruBertugas - $sudahDatang);
-        $persentaseKehadiran = $totalGuruBertugas > 0 ? round(($sudahDatang / $totalGuruBertugas) * 100, 1) : 0;
+        $summary = $presensiService->getHariIniSummary($cabangId);
+        $totalGuruBertugas = $summary['totalGuruBertugas'];
+        $sudahDatang = $summary['sudahDatang'];
+        $sudahPulang = $summary['sudahPulang'];
+        $belumHadir = $summary['belumHadir'];
+        $persentaseKehadiran = $summary['persentaseKehadiran'];
         $currentCabang = $context['currentCabang'];
 
         return view('admin.presensi.index', compact(
             'activeQr',
+            'qrSvg',
+            'scanUrl',
             'guruCabang',
             'absensiHariIni',
             'riwayatAbsensi',
@@ -79,6 +87,88 @@ class PresensiController extends Controller
             'currentCabang',
             'context'
         ));
+    }
+
+    /**
+     * Halaman Scanner Mandiri untuk Guru (Mobile/Desktop Web).
+     */
+    public function scannerPage(Request $request, CabangContextService $contextService): View
+    {
+        $context = $contextService->getContext($request);
+        $cabangId = $context['cabangId'];
+        $token = $request->query('token');
+
+        $guruList = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        // Jika tidak ada di cabang ini (misal pusat), ambil semua guru aktif
+        if ($guruList->isEmpty()) {
+            $guruList = Guru::where('is_active', true)->orderBy('nama', 'asc')->get();
+        }
+
+        $currentCabang = $context['currentCabang'];
+
+        return view('admin.presensi.scan', compact('token', 'guruList', 'currentCabang', 'context'));
+    }
+
+    /**
+     * Polling data realtime presensi hari ini untuk layar cabang/kiosk.
+     */
+    public function liveData(Request $request, PresensiService $service, CabangContextService $contextService): JsonResponse
+    {
+        $context = $contextService->getContext($request);
+        $cabangId = $context['cabangId'];
+        $today = Carbon::today()->toDateString();
+
+        $summary = $service->getHariIniSummary($cabangId);
+
+        $absensiHariIni = Absensi::with('guru')
+            ->where('cabang_id', $cabangId)
+            ->where('tanggal', $today)
+            ->orderBy('jam_datang', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $diffMinutes = null;
+                if ($item->jam_datang && $item->jam_pulang) {
+                    $diffMinutes = (int) $item->jam_datang->diffInMinutes($item->jam_pulang);
+                }
+
+                return [
+                    'id' => $item->id,
+                    'guru_nama' => $item->guru->nama ?? 'Guru',
+                    'no_pegawai' => $item->guru->no_pegawai ?? '-',
+                    'jam_datang' => $item->jam_datang ? $item->jam_datang->format('H:i:s') : null,
+                    'jam_pulang' => $item->jam_pulang ? $item->jam_pulang->format('H:i:s') : null,
+                    'durasi_menit' => $diffMinutes,
+                    'status' => $item->jam_pulang ? 'Selesai' : ($item->jam_datang ? 'Mengajar' : '-'),
+                ];
+            });
+
+        // Scan paling baru dalam 15 detik terakhir untuk notifikasi popup
+        $latestScan = Absensi::with('guru')
+            ->where('cabang_id', $cabangId)
+            ->where('tanggal', $today)
+            ->where('updated_at', '>=', Carbon::now()->subSeconds(15))
+            ->latest('updated_at')
+            ->first();
+
+        $latestScanData = null;
+        if ($latestScan) {
+            $tipe = ($latestScan->jam_pulang && $latestScan->jam_pulang->diffInSeconds(Carbon::now()) < 15) ? 'pulang' : 'datang';
+            $latestScanData = [
+                'guru_nama' => $latestScan->guru->nama ?? 'Guru',
+                'tipe' => $tipe,
+                'jam' => $tipe === 'pulang' ? $latestScan->jam_pulang?->format('H:i:s') : $latestScan->jam_datang?->format('H:i:s'),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'summary' => $summary,
+            'absensiHariIni' => $absensiHariIni,
+            'latestScan' => $latestScanData,
+        ]);
     }
 
     /**
@@ -114,9 +204,11 @@ class PresensiController extends Controller
         ]);
 
         $tipe = $validated['tipe'] ?? 'datang';
-        $duration = (int) ($validated['duration'] ?? 20);
+        $duration = (int) ($validated['duration'] ?? 25);
 
         $qr = $service->generateQrToken($validated['cabang_id'], $tipe, $duration);
+        $scanUrl = route('presensi.scanner', ['token' => $qr->token, 'cabang_id' => $qr->cabang_id]);
+        $qrSvg = $this->renderQrSvg($scanUrl, 240);
 
         return response()->json([
             'success' => true,
@@ -125,12 +217,14 @@ class PresensiController extends Controller
                 'tipe' => $qr->tipe,
                 'expires_at' => $qr->expires_at->toIso8601String(),
                 'expires_in_seconds' => $duration,
+                'qr_svg' => $qrSvg,
+                'scan_url' => $scanUrl,
             ],
         ]);
     }
 
     /**
-     * Proses scan QR token mandiri guru.
+     * Proses scan QR token mandiri guru (API).
      */
     public function scan(Request $request, PresensiService $service): JsonResponse
     {
@@ -158,5 +252,17 @@ class PresensiController extends Controller
                 'message' => $e->getMessage(),
             ], 400);
         }
+    }
+
+    /**
+     * Helper render SVG QR Code.
+     */
+    private function renderQrSvg(string $content, int $size = 220): string
+    {
+        return (string) QrCode::size($size)
+            ->color(15, 23, 42)
+            ->backgroundColor(255, 255, 255)
+            ->margin(1)
+            ->generate($content);
     }
 }

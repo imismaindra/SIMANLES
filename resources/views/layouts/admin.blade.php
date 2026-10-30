@@ -170,14 +170,18 @@
                                 <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
                                     class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('presensi.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 {{ request()->routeIs('presensi.*') ? 'text-blue-200' : 'text-blue-800' }}" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2">
-                                            <rect width="5" height="5" x="3" y="3" rx="1" />
-                                            <rect width="5" height="5" x="16" y="3" rx="1" />
-                                            <rect width="5" height="5" x="3" y="16" rx="1" />
-                                            <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
-                                            <path d="M21 21v.01" />
-                                            <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+                                        <svg class="w-4 h-4 {{ request()->routeIs('presensi.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                                            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                                            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                                            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                                            <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                                            <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                                            <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                                            <path d="M14 14h.01" />
+                                            <path d="M17 14v3" />
+                                            <path d="M14 17h3" />
                                         </svg>
                                         <span>Presensi & Layar QR</span>
                                     </div>
@@ -305,10 +309,17 @@
                         class="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 text-blue-900 border border-blue-200/70 hover:bg-blue-100 transition-colors"
                         title="Tampilkan QR code absensi guru">
                         <svg class="w-3.5 h-3.5 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            stroke-width="2">
-                            <rect width="5" height="5" x="3" y="3" rx="1" />
-                            <rect width="5" height="5" x="16" y="3" rx="1" />
-                            <rect width="5" height="5" x="3" y="16" rx="1" />
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                            <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                            <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                            <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                            <path d="M14 14h.01" />
+                            <path d="M17 14v3" />
+                            <path d="M14 17h3" />
                         </svg>
                         <span class="hidden sm:inline">QR Absen</span>
                     </button>
@@ -411,10 +422,17 @@
             <a href="{{ route('presensi.index') }}"
                 class="flex flex-col items-center justify-center -mt-4 bg-blue-900 text-white rounded-full w-12 h-12 shadow-lg hover:bg-blue-800 active:scale-95 transition-transform"
                 title="Presensi & Layar QR">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <rect width="5" height="5" x="3" y="3" rx="1" />
-                    <rect width="5" height="5" x="16" y="3" rx="1" />
-                    <rect width="5" height="5" x="3" y="16" rx="1" />
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                    <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                    <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                    <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                    <path d="M14 14h.01" />
+                    <path d="M17 14v3" />
+                    <path d="M14 17h3" />
                 </svg>
             </a>
 

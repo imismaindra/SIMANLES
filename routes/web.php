@@ -43,6 +43,8 @@ Route::delete('/jadwal/{id}', [JadwalController::class, 'destroy'])->name('web.j
 
 // 5. Presensi Guru & Layar QR
 Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi.index');
+Route::get('/presensi/live-data', [PresensiController::class, 'liveData'])->name('web.presensi.live-data');
+Route::get('/presensi/scan', [PresensiController::class, 'scannerPage'])->name('presensi.scanner');
 Route::post('/presensi/qr', [PresensiController::class, 'generateQr'])->name('web.presensi.qr');
 Route::post('/presensi/scan', [PresensiController::class, 'scanWeb'])->name('web.presensi.scan');
 

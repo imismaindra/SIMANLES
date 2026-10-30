@@ -103,4 +103,156 @@ class PresensiQrLogicTest extends TestCase
         $this->expectExceptionMessage('sudah melakukan absensi datang');
         $service->scan($tokenDatang2->token, $guru->id);
     }
+
+    /**
+     * Test scan QR dengan token berformat URL scan atau lowercase otomatis diekstrak & dinormalisasi.
+     */
+    public function test_qr_scan_supports_url_formatted_tokens_and_case_insensitivity(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CURL_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang URL Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru URL Test',
+            'email' => 'guru.url.'.uniqid().'@test.com',
+            'no_telp' => '081234567891',
+            'jenjang' => 'SD',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        $service = app(PresensiService::class);
+        $qrToken = $service->generateQrToken($cabang->id, 'datang', 25);
+
+        // Simulasi scan hasil native camera yang berupa full URL
+        $urlScanned = "http://localhost:8000/presensi/scan?token={$qrToken->token}&cabang_id={$cabang->id}";
+
+        $result = $service->scan($urlScanned, $guru->id);
+        $this->assertTrue($result['ok']);
+        $this->assertSame('datang', $result['tipe']);
+        $this->assertSame($guru->nama, $result['guru_nama']);
+    }
+
+    /**
+     * Test absensi pulang:
+     * - Ditolak jika belum absensi datang
+     * - Berhasil jika sudah datang dan menghitung durasi mengajar
+     * - Ditolak jika sudah pernah pulang
+     */
+    public function test_qr_scan_pulang_requires_prior_datang_and_calculates_duration(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CPUL_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang Pulang Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru Checkout',
+            'email' => 'guru.pulang.'.uniqid().'@test.com',
+            'no_telp' => '081234567892',
+            'jenjang' => 'SD',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        $service = app(PresensiService::class);
+
+        // 1. Coba pulang tanpa datang terlebih dahulu -> Harus Gagal
+        $tokenPulang1 = $service->generateQrToken($cabang->id, 'pulang', 25);
+        try {
+            $service->scan($tokenPulang1->token, $guru->id);
+            $this->fail('Harusnya gagal absensi pulang karena belum datang.');
+        } catch (Exception $e) {
+            $this->assertStringContainsString('belum melakukan absensi datang', $e->getMessage());
+        }
+
+        // 2. Lakukan absensi datang dulu
+        $tokenDatang = $service->generateQrToken($cabang->id, 'datang', 25);
+        $service->scan($tokenDatang->token, $guru->id);
+
+        // 3. Lakukan absensi pulang -> Harus Sukses
+        $tokenPulang2 = $service->generateQrToken($cabang->id, 'pulang', 25);
+        $resultPulang = $service->scan($tokenPulang2->token, $guru->id);
+
+        $this->assertTrue($resultPulang['ok']);
+        $this->assertSame('pulang', $resultPulang['tipe']);
+        $this->assertNotNull($resultPulang['jam_pulang']);
+
+        // 4. Coba scan pulang lagi -> Harus Ditolak
+        $tokenPulang3 = $service->generateQrToken($cabang->id, 'pulang', 25);
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('sudah melakukan absensi pulang');
+        $service->scan($tokenPulang3->token, $guru->id);
+    }
+
+    /**
+     * Test API endpoint absensi QR, scan, dan live data.
+     */
+    public function test_api_absensi_endpoints(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CAPI_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang API Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru API Test',
+            'email' => 'guru.api.'.uniqid().'@test.com',
+            'no_telp' => '081234567893',
+            'jenjang' => 'SD',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        // 1. POST /api/absensi/qr
+        $responseQr = $this->postJson(route('api.absensi.qr'), [
+            'cabang_id' => $cabang->id,
+            'tipe' => 'datang',
+            'duration' => 25,
+        ]);
+
+        $responseQr->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure([
+                'success',
+                'data' => ['token', 'tipe', 'expires_at', 'expires_in_seconds', 'qr_svg', 'scan_url'],
+            ]);
+
+        $token = $responseQr->json('data.token');
+
+        // 2. POST /api/absensi/scan
+        $responseScan = $this->postJson(route('api.absensi.scan'), [
+            'token' => $token,
+            'guru_id' => $guru->id,
+        ]);
+
+        $responseScan->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.tipe', 'datang')
+            ->assertJsonPath('data.guru_nama', $guru->nama);
+
+        // 3. GET /api/absensi/today
+        $responseToday = $this->getJson(route('api.absensi.today', ['cabang_id' => $cabang->id]));
+        $responseToday->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure([
+                'success',
+                'summary' => ['totalGuruBertugas', 'sudahDatang', 'sudahPulang', 'belumHadir', 'persentaseKehadiran'],
+                'absensiHariIni',
+            ]);
+
+        // 4. GET /presensi/scan (Scanner Page)
+        $responsePage = $this->get(route('presensi.scanner', ['cabang_id' => $cabang->id, 'token' => $token]));
+        $responsePage->assertOk()
+            ->assertSee('Presensi Mandiri Guru')
+            ->assertSee($guru->nama);
+    }
 }

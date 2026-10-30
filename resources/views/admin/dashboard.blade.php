@@ -48,10 +48,17 @@
                     <button type="button" onclick="openModal('modal-qr-display')"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2.5 sm:py-1.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-semibold text-xs shadow-2xs transition-colors shrink-0">
                         <svg class="w-4 h-4 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            stroke-width="2">
-                            <rect width="5" height="5" x="3" y="3" rx="1" />
-                            <rect width="5" height="5" x="16" y="3" rx="1" />
-                            <rect width="5" height="5" x="3" y="16" rx="1" />
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                            <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                            <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                            <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                            <path d="M14 14h.01" />
+                            <path d="M17 14v3" />
+                            <path d="M14 17h3" />
                         </svg>
                         <span>Layar QR Absen</span>
                     </button>
@@ -538,14 +545,24 @@
                     <div class="mt-4 flex items-center gap-4">
                         <!-- Live Dynamic QR Thumbnail (Responsive size) -->
                         <div onclick="openModal('modal-qr-display')"
-                            class="w-18 h-18 sm:w-20 sm:h-20 bg-white rounded-xl p-1.5 flex flex-col items-center justify-center shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform shadow-md"
+                            class="w-18 h-18 sm:w-20 sm:h-20 bg-white rounded-xl p-1.5 flex flex-col items-center justify-center shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform shadow-md border border-blue-200/60"
                             title="Klik untuk perbesar layar QR">
-                            <div
-                                class="w-full h-full border-2 border-slate-900 border-dashed rounded-lg flex flex-col items-center justify-center text-slate-900 font-mono text-[10px] font-bold text-center leading-tight">
-                                <span>[QR]</span>
-                                <span
-                                    class="text-[9px] text-blue-900 font-bold mt-0.5">{{ $qrTokenSession['token'] }}</span>
-                            </div>
+                            <svg class="w-8 h-8 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                                <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                                <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                                <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                                <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                                <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                                <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                                <path d="M14 14h.01" />
+                                <path d="M17 14v3" />
+                                <path d="M14 17h3" />
+                            </svg>
+                            <span class="text-[9px] text-blue-900 font-bold font-mono mt-0.5 truncate max-w-full">
+                                {{ $qrTokenSession['token'] }}
+                            </span>
                         </div>
 
                         <div class="space-y-1 text-xs min-w-0">
