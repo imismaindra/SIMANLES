@@ -64,4 +64,3 @@ class KasController extends Controller
         ]);
     }
 }
-

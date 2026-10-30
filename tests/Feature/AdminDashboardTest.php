@@ -17,12 +17,34 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Sang Siroju Lillah');
         $response->assertSee('logo.png');
         $response->assertSee('Dashboard Operasional');
-        $response->assertSee('Cabang Yogyakarta Diponegoro');
+        $response->assertSee('Cabang Ponokawan');
+        $response->assertSee('Pimpinan Cabang Ponokawan');
         $response->assertSee('Auto-Assign');
         $response->assertSee('Kapasitas Slot Guru');
         $response->assertSee('Jadwal Sesi Mengajar Hari Ini');
-        $response->assertSee('KW/CAB01/2026/10/0042');
+        $response->assertSee('KW/CAB-PNK/2026/10/');
         $response->assertSee('Master Tarif SPP Global');
+
+        // Verify teachers from SEEDER_DATA.md
+        $response->assertSee('Bu Divani');
+        $response->assertSee('Bu Nida');
+        $response->assertSee('Bu Annisa');
+
+        // Verify unassigned students from SEEDER_DATA.md
+        $response->assertSee('Azkiya');
+        $response->assertSee('Dinda');
+        $response->assertSee('Gibran');
+    }
+
+    /**
+     * Test admin dashboard can filter by branch.
+     */
+    public function test_admin_dashboard_can_switch_branch(): void
+    {
+        $response = $this->get('/?cabang_id=cab-1');
+        $response->assertStatus(200);
+        $response->assertSee('Cabang Jakarta Selatan');
+        $response->assertSee('Pimpinan Cabang Jakarta Selatan');
     }
 
     /**

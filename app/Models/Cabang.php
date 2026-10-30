@@ -61,4 +61,3 @@ class Cabang extends Model
         return $this->hasMany(QrToken::class, 'cabang_id');
     }
 }
-

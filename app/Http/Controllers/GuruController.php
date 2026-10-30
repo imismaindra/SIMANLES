@@ -107,4 +107,3 @@ class GuruController extends Controller
         return back()->with('success', "Auto-assign berhasil! {$result['assigned_count']} siswa berhasil dialokasikan ke guru.");
     }
 }
-

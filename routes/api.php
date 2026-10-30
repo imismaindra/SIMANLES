@@ -55,4 +55,3 @@ Route::prefix('absensi')->group(function () {
     Route::post('/qr', [PresensiController::class, 'generateQr'])->name('api.absensi.qr');
     Route::post('/scan', [PresensiController::class, 'scan'])->name('api.absensi.scan');
 });
-

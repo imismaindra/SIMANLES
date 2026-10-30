@@ -96,4 +96,3 @@ class PembayaranSpp extends Model
         return 'https://wa.me/'.$phone.'?text='.urlencode($text);
     }
 }
-

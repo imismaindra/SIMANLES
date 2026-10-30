@@ -73,4 +73,3 @@ class Siswa extends Model
         return $query->where('cabang_id', $cabangId);
     }
 }
-

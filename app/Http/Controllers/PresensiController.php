@@ -68,4 +68,3 @@ class PresensiController extends Controller
         }
     }
 }
-

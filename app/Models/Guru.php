@@ -100,4 +100,3 @@ class Guru extends Model
         return in_array($jenjang, $this->jenjang_list, true);
     }
 }
-

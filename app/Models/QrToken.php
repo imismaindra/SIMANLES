@@ -42,4 +42,3 @@ class QrToken extends Model
         return $this->expires_at->isPast();
     }
 }
-

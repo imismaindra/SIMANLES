@@ -49,4 +49,3 @@ class GenerateMonthlySppBilling extends Command
         return Command::SUCCESS;
     }
 }
-

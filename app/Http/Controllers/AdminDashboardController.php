@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Models\Siswa;
 use App\Models\TarifSpp;
 use App\Models\Transaksi;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -24,7 +25,7 @@ class AdminDashboardController extends Controller
     public function index(Request $request): View
     {
         $viewRole = $request->query('role', 'cabang'); // 'cabang' | 'pusat'
-        $selectedCabangParam = $request->query('cabang_id', 'CAB01');
+        $selectedCabangParam = $request->query('cabang_id', 'cab-ponokawan');
 
         // 1. Ambil Data Cabang
         $cabangs = Cabang::withCount(['siswa' => fn ($q) => $q->where('status', 'aktif')])
@@ -33,22 +34,24 @@ class AdminDashboardController extends Controller
         if ($cabangs->isEmpty()) {
             // Fallback default jika database kosong
             $selectedCabang = [
-                'id' => 'CAB01',
-                'kode' => 'CAB01',
-                'nama' => 'Cabang Yogyakarta Diponegoro',
-                'alamat' => 'Jl. Pangeran Diponegoro No. 45, Gowongan, Jetis, Kota Yogyakarta',
-                'pimpinan' => 'Ahmad Fauzi, M.Pd.',
+                'id' => 'cab-ponokawan',
+                'kode' => 'CAB-PNK',
+                'nama' => 'Cabang Ponokawan',
+                'alamat' => 'Jl. Raya Ponokawan No. 12, Krian, Sidoarjo',
+                'pimpinan' => 'Pimpinan Cabang Ponokawan',
                 'status' => 'aktif',
-                'siswa_aktif' => 24,
-                'guru_aktif' => 6,
+                'siswa_aktif' => 80,
+                'guru_aktif' => 12,
                 'kas_bersih' => 12550000,
-                'utilisasi_slot' => 88.0,
+                'utilisasi_slot' => 97.2,
             ];
             $daftarCabang = [$selectedCabang];
             $currentCabang = $selectedCabang;
-            $cabangId = 'CAB01';
+            $cabangId = 'cab-ponokawan';
         } else {
-            $matched = $cabangs->first(fn ($c) => $c->kode === $selectedCabangParam || $c->id === $selectedCabangParam) ?? $cabangs->first();
+            $matched = $cabangs->first(fn ($c) => $c->kode === $selectedCabangParam || $c->id === $selectedCabangParam)
+                ?? $cabangs->firstWhere('id', 'cab-ponokawan')
+                ?? $cabangs->first();
             $cabangId = $matched->id;
 
             $daftarCabang = $cabangs->map(function ($c) {
@@ -58,13 +61,14 @@ class AdminDashboardController extends Controller
                 $utilisasi = round(($siswaCount / $slotTotal) * 100, 1);
                 $kasMasuk = (float) Transaksi::where('cabang_id', $c->id)->where('tipe', 'masuk')->sum('nominal');
                 $kasKeluar = (float) Transaksi::where('cabang_id', $c->id)->where('tipe', 'keluar')->sum('nominal');
+                $pimpinanUser = User::where('cabang_id', $c->id)->where('role', 'cabang')->first();
 
                 return [
                     'id' => $c->id,
                     'kode' => $c->kode,
                     'nama' => $c->nama,
                     'alamat' => $c->alamat,
-                    'pimpinan' => 'Pimpinan '.$c->nama,
+                    'pimpinan' => $pimpinanUser ? $pimpinanUser->name : 'Pimpinan '.$c->nama,
                     'status' => $c->status,
                     'siswa_aktif' => $siswaCount,
                     'guru_aktif' => $guruCount,
@@ -121,36 +125,36 @@ class AdminDashboardController extends Controller
 
         $kpi = [
             'siswa_aktif' => [
-                'total' => $totalSiswaAktif ?: ($currentCabang['siswa_aktif'] ?? 24),
-                'belum_ada_guru' => $unassignedCount ?: 5,
-                'tk' => $tkCount ?: 3,
-                'sd' => $sdCount ?: 12,
-                'smp' => $smpCount ?: 6,
-                'sma_smk' => $smaCount ?: 3,
+                'total' => $totalSiswaAktif,
+                'belum_ada_guru' => $unassignedCount,
+                'tk' => $tkCount,
+                'sd' => $sdCount,
+                'smp' => $smpCount,
+                'sma_smk' => $smaCount,
             ],
             'kuota_guru' => [
-                'total_guru' => $totalGuru ?: 6,
-                'kapasitas_slot_total' => $kapasitasSlotTotal ?: 36,
-                'slot_terpakai' => $slotTerpakai ?: 21,
-                'slot_tersedia' => $slotTersedia ?: 15,
-                'guru_penuh' => $guruPenuhCount ?: 1,
-                'guru_tersedia' => $guruTersediaCount ?: 5,
+                'total_guru' => $totalGuru,
+                'kapasitas_slot_total' => $kapasitasSlotTotal,
+                'slot_terpakai' => $slotTerpakai,
+                'slot_tersedia' => $slotTersedia,
+                'guru_penuh' => $guruPenuhCount,
+                'guru_tersedia' => $guruTersediaCount,
                 'rasio_maksimal' => 6,
             ],
             'presensi_guru_hari_ini' => [
-                'total_bertugas' => max(1, $totalGuru),
+                'total_bertugas' => $totalGuru,
                 'sudah_datang' => max(0, $totalGuru - 1),
-                'belum_hadir' => 1,
+                'belum_hadir' => $totalGuru > 0 ? 1 : 0,
                 'izin_sakit' => 0,
-                'persentase_kehadiran' => 91.5,
+                'persentase_kehadiran' => $totalGuru > 0 ? round((max(0, $totalGuru - 1) / $totalGuru) * 100, 1) : 0,
             ],
             'buku_kas_bulan_ini' => [
-                'pemasukan' => $kasMasukBulanIni ?: 26850000,
-                'pengeluaran' => $kasKeluarBulanIni ?: 14300000,
-                'saldo_bersih' => ($kasMasukBulanIni - $kasKeluarBulanIni) ?: 12550000,
-                'spp_terbayar' => $sppTerbayar ?: 20,
-                'spp_tertunggak' => $sppTertunggak ?: 4,
-                'nominal_tertunggak' => $nominalTertunggak ?: 720000,
+                'pemasukan' => $kasMasukBulanIni,
+                'pengeluaran' => $kasKeluarBulanIni,
+                'saldo_bersih' => $kasMasukBulanIni - $kasKeluarBulanIni,
+                'spp_terbayar' => $sppTerbayar,
+                'spp_tertunggak' => $sppTertunggak,
+                'nominal_tertunggak' => $nominalTertunggak,
             ],
         ];
 

@@ -31,4 +31,3 @@ class Setting extends Model
         static::updateOrCreate(['kunci' => $key], ['nilai' => $value]);
     }
 }
-

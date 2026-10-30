@@ -99,4 +99,3 @@ class SiswaController extends Controller
         return back()->with('success', 'Data siswa berhasil dihapus.');
     }
 }
-
