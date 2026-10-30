@@ -63,6 +63,7 @@ class PresensiController extends Controller
         $sudahPulang = $absensiHariIni->whereNotNull('jam_pulang')->count();
         $belumHadir = max(0, $totalGuruBertugas - $sudahDatang);
         $persentaseKehadiran = $totalGuruBertugas > 0 ? round(($sudahDatang / $totalGuruBertugas) * 100, 1) : 0;
+        $currentCabang = $context['currentCabang'];
 
         return view('admin.presensi.index', compact(
             'activeQr',
@@ -75,6 +76,7 @@ class PresensiController extends Controller
             'belumHadir',
             'persentaseKehadiran',
             'today',
+            'currentCabang',
             'context'
         ));
     }

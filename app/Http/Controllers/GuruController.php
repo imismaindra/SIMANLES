@@ -47,6 +47,8 @@ class GuruController extends Controller
         $guruPenuh = $guruList->filter(fn ($g) => $g->siswa->count() >= 6)->count();
         $persentaseKapasitas = $kapasitasSlotTotal > 0 ? round(($slotTerpakai / $kapasitasSlotTotal) * 100, 1) : 0;
 
+        $currentCabang = $context['currentCabang'];
+
         return view('admin.guru.index', compact(
             'guruList',
             'unassignedStudents',
@@ -56,6 +58,7 @@ class GuruController extends Controller
             'slotTersedia',
             'guruPenuh',
             'persentaseKapasitas',
+            'currentCabang',
             'context'
         ));
     }

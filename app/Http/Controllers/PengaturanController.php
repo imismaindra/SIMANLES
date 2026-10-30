@@ -26,11 +26,13 @@ class PengaturanController extends Controller
 
         $tarifSpps = TarifSpp::all();
         $biayaPendaftaran = (float) Setting::get('biaya_pendaftaran', '100000');
+        $currentCabang = $context['currentCabang'];
 
         return view('admin.pengaturan.index', compact(
             'cabangs',
             'tarifSpps',
             'biayaPendaftaran',
+            'currentCabang',
             'context'
         ));
     }
@@ -77,4 +79,3 @@ class PengaturanController extends Controller
         return back()->with('success', "Cabang {$validated['nama']} berhasil ditambahkan.");
     }
 }
-

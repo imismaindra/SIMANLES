@@ -62,6 +62,7 @@ class JadwalController extends Controller
 
         $totalSesi = $jadwalList->count();
         $totalGuruTerjadwal = $jadwalList->pluck('guru_id')->unique()->count();
+        $currentCabang = $context['currentCabang'];
 
         return view('admin.jadwal.index', compact(
             'jadwalList',
@@ -71,6 +72,7 @@ class JadwalController extends Controller
             'daftarSiswa',
             'totalSesi',
             'totalGuruTerjadwal',
+            'currentCabang',
             'context'
         ));
     }

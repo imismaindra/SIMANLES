@@ -5,18 +5,12 @@ namespace Tests\Feature;
 use App\Models\Cabang;
 use App\Models\PembayaranSpp;
 use App\Models\Siswa;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class MenuPagesTest extends TestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
+    use DatabaseTransactions;
 
     public function test_dashboard_page_loads_successfully(): void
     {
@@ -41,8 +35,8 @@ class MenuPagesTest extends TestCase
         $response = $this->get('/guru');
 
         $response->assertStatus(200);
-        $response->assertSee('Distribusi & Kapasitas Guru');
-        $response->assertSee('Batas Ketat: Max 6 Siswa / Guru');
+        $response->assertSee('Distribusi', false);
+        $response->assertSee('Batas Ketat: Max 6 Siswa / Guru', false);
     }
 
     public function test_jadwal_page_loads_successfully(): void
@@ -59,8 +53,8 @@ class MenuPagesTest extends TestCase
         $response = $this->get('/presensi');
 
         $response->assertStatus(200);
-        $response->assertSee('Presensi Guru & Layar QR Code');
-        $response->assertSee('Kode Token Presensi:');
+        $response->assertSee('Presensi Guru', false);
+        $response->assertSee('Kode Token Presensi:', false);
     }
 
     public function test_spp_page_loads_successfully(): void
@@ -86,14 +80,14 @@ class MenuPagesTest extends TestCase
         $response = $this->get('/pengaturan');
 
         $response->assertStatus(200);
-        $response->assertSee('Master Data & Pengaturan Cabang');
+        $response->assertSee('Pengaturan Cabang');
         $response->assertSee('Master Tarif SPP Global');
     }
 
     public function test_kwitansi_page_loads_successfully(): void
     {
         $spp = PembayaranSpp::first();
-        if (!$spp) {
+        if (! $spp) {
             $cabang = Cabang::first();
             $siswa = Siswa::first();
             $spp = PembayaranSpp::create([

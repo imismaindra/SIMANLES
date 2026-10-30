@@ -89,6 +89,7 @@ class SiswaController extends Controller
             ->get();
 
         $biayaPendaftaranBaku = (float) Setting::get('biaya_pendaftaran', '100000');
+        $currentCabang = $context['currentCabang'];
 
         return view('admin.siswa.index', compact(
             'siswaList',
@@ -103,6 +104,7 @@ class SiswaController extends Controller
             'countSma',
             'daftarGuru',
             'biayaPendaftaranBaku',
+            'currentCabang',
             'context'
         ));
     }
