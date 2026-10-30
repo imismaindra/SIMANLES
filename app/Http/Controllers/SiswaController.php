@@ -2,13 +2,111 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cabang;
+use App\Models\Guru;
+use App\Models\Setting;
+use App\Models\Siswa;
+use App\Services\CabangContextService;
 use App\Services\SiswaService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class SiswaController extends Controller
 {
+    /**
+     * Halaman Data & Manajemen Siswa.
+     */
+    public function index(Request $request, CabangContextService $contextService): View
+    {
+        $context = $contextService->getContext($request);
+        $cabangId = $context['cabangId'];
+
+        $query = Siswa::with(['guru', 'cabang']);
+
+        // Filter Cabang
+        if ($request->filled('cabang_id')) {
+            $query->where('cabang_id', $request->query('cabang_id'));
+        } elseif ($context['viewRole'] !== 'pusat') {
+            $query->where('cabang_id', $cabangId);
+        }
+
+        // Filter Pencarian
+        if ($request->filled('q')) {
+            $search = $request->query('q');
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nama_ibu', 'like', "%{$search}%")
+                    ->orWhere('no_telp_ortu', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter Jenjang
+        if ($request->filled('jenjang')) {
+            $query->where('jenjang', $request->query('jenjang'));
+        }
+
+        // Filter Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        // Filter Guru
+        if ($request->filled('guru_filter')) {
+            if ($request->query('guru_filter') === 'unassigned') {
+                $query->whereNull('guru_id');
+            } elseif ($request->query('guru_filter') === 'assigned') {
+                $query->whereNotNull('guru_id');
+            }
+        }
+
+        $siswaList = $query->orderBy('nama', 'asc')->paginate(15)->withQueryString();
+
+        // Rekapitulasi Statistik
+        $baseStatQuery = Siswa::query();
+        if ($request->filled('cabang_id')) {
+            $baseStatQuery->where('cabang_id', $request->query('cabang_id'));
+        } elseif ($context['viewRole'] !== 'pusat') {
+            $baseStatQuery->where('cabang_id', $cabangId);
+        }
+
+        $totalSiswa = (clone $baseStatQuery)->count();
+        $totalAktif = (clone $baseStatQuery)->where('status', 'aktif')->count();
+        $totalBelumAdaGuru = (clone $baseStatQuery)->where('status', 'aktif')->whereNull('guru_id')->count();
+        $totalCuti = (clone $baseStatQuery)->where('status', 'cuti')->count();
+        $totalKeluar = (clone $baseStatQuery)->where('status', 'keluar')->count();
+
+        // Breakdown per jenjang
+        $countTk = (clone $baseStatQuery)->where('status', 'aktif')->where('jenjang', 'TK')->count();
+        $countSd = (clone $baseStatQuery)->where('status', 'aktif')->where('jenjang', 'SD')->count();
+        $countSmp = (clone $baseStatQuery)->where('status', 'aktif')->where('jenjang', 'SMP')->count();
+        $countSma = (clone $baseStatQuery)->where('status', 'aktif')->where('jenjang', 'SMA_SMK')->count();
+
+        // Daftar Guru Cabang untuk dropdown penugasan / form
+        $daftarGuru = Guru::withCount(['siswa' => fn ($q) => $q->where('status', 'aktif')])
+            ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+            ->get();
+
+        $biayaPendaftaranBaku = (float) Setting::get('biaya_pendaftaran', '100000');
+
+        return view('admin.siswa.index', compact(
+            'siswaList',
+            'totalSiswa',
+            'totalAktif',
+            'totalBelumAdaGuru',
+            'totalCuti',
+            'totalKeluar',
+            'countTk',
+            'countSd',
+            'countSmp',
+            'countSma',
+            'daftarGuru',
+            'biayaPendaftaranBaku',
+            'context'
+        ));
+    }
+
     /**
      * Daftarkan siswa baru.
      */

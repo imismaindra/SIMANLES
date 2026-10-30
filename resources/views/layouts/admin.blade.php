@@ -87,14 +87,13 @@
                 <nav class="mt-5 space-y-5 flex-1 text-sm">
                     <!-- Kelompok: Operasional Cabang -->
                     <div>
-                        <p class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Operasional
-                            Cabang</p>
+                        <p class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Operasional Cabang</p>
                         <ul class="space-y-1">
                             <li>
-                                <a href="{{ route('admin.dashboard', ['role' => 'cabang', 'cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-blue-900 text-white font-medium shadow-xs transition-colors">
+                                <a href="{{ route('admin.dashboard', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-blue-200" fill="none" viewBox="0 0 24 24"
+                                        <svg class="w-4 h-4 {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <rect width="7" height="9" x="3" y="3" rx="1" />
                                             <rect width="7" height="5" x="14" y="3" rx="1" />
@@ -103,32 +102,34 @@
                                         </svg>
                                         <span>Dashboard Cabang</span>
                                     </div>
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                    @if(request()->routeIs('admin.dashboard', 'dashboard', 'admin.home'))
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
-                                <a href="#siswa-baru" onclick="openModal('modal-pendaftaran'); toggleMobileMenu(false);"
-                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 transition-colors font-medium">
+                                <a href="{{ route('siswa.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('siswa.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24"
+                                        <svg class="w-4 h-4 {{ request()->routeIs('siswa.*') ? 'text-blue-200' : 'text-emerald-600' }}" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                                             <circle cx="9" cy="7" r="4" />
                                             <line x1="19" y1="8" x2="19" y2="14" />
                                             <line x1="22" y1="11" x2="16" y2="11" />
                                         </svg>
-                                        <span>Pendaftaran Siswa</span>
+                                        <span>Data & Pendaftaran Siswa</span>
                                     </div>
-                                    <span
-                                        class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200/60">+
-                                        Baru</span>
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded {{ request()->routeIs('siswa.*') ? 'bg-blue-800 text-blue-100' : 'bg-emerald-50 text-emerald-800 border border-emerald-200/60' }}">
+                                        {{ $currentCabang['siswa_aktif'] ?? 80 }}
+                                    </span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#alokasi-guru" onclick="toggleMobileMenu(false);"
-                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors font-medium">
+                                <a href="{{ route('guru.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('guru.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24"
+                                        <svg class="w-4 h-4 {{ request()->routeIs('guru.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                                             <circle cx="9" cy="7" r="4" />
@@ -137,17 +138,16 @@
                                         </svg>
                                         <span>Distribusi & Guru</span>
                                     </div>
-                                    <span
-                                        class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200/60 num-tabular">
-                                        {{ $kpi['siswa_aktif']['belum_ada_guru'] ?? 5 }} antre
+                                    <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded {{ request()->routeIs('guru.*') ? 'bg-blue-800 text-blue-100' : 'bg-amber-50 text-amber-900 border border-amber-200/60' }} num-tabular">
+                                        Max 6/guru
                                     </span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#jadwal" onclick="toggleMobileMenu(false);"
-                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors font-medium">
+                                <a href="{{ route('jadwal.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('jadwal.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24"
+                                        <svg class="w-4 h-4 {{ request()->routeIs('jadwal.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
                                             <line x1="16" x2="16" y1="2" y2="6" />
@@ -156,7 +156,7 @@
                                         </svg>
                                         <span>Jadwal Mengajar</span>
                                     </div>
-                                    <span class="text-[11px] text-slate-400 num-tabular">Bebas bentrok</span>
+                                    <span class="text-[11px] {{ request()->routeIs('jadwal.*') ? 'text-blue-200' : 'text-slate-400' }} num-tabular">Anti-bentrok</span>
                                 </a>
                             </li>
                         </ul>
@@ -164,14 +164,13 @@
 
                     <!-- Kelompok: Presensi QR Dinamis -->
                     <div>
-                        <p class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Presensi Guru
-                        </p>
+                        <p class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Presensi Guru</p>
                         <ul class="space-y-1">
                             <li>
-                                <button type="button" onclick="openModal('modal-qr-display'); toggleMobileMenu(false);"
-                                    class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-700 hover:text-blue-900 hover:bg-blue-50/70 border border-dashed border-blue-200 transition-colors font-medium text-left">
+                                <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('presensi.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-blue-800" fill="none" viewBox="0 0 24 24"
+                                        <svg class="w-4 h-4 {{ request()->routeIs('presensi.*') ? 'text-blue-200' : 'text-blue-800' }}" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <rect width="5" height="5" x="3" y="3" rx="1" />
                                             <rect width="5" height="5" x="16" y="3" rx="1" />
@@ -179,32 +178,10 @@
                                             <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
                                             <path d="M21 21v.01" />
                                             <path d="M12 7v3a2 2 0 0 1-2 2H7" />
-                                            <path d="M3 12h.01" />
-                                            <path d="M12 3h.01" />
-                                            <path d="M12 16v.01" />
-                                            <path d="M16 12h1" />
-                                            <path d="M21 12v.01" />
-                                            <path d="M12 21v-1" />
                                         </svg>
-                                        <span class="text-xs font-semibold">Buka Layar QR Presensi</span>
+                                        <span>Presensi & Layar QR</span>
                                     </div>
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                                </button>
-                            </li>
-                            <li>
-                                <a href="#rekap-presensi" onclick="toggleMobileMenu(false);"
-                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors font-medium">
-                                    <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 11 12 14 22 4" />
-                                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                                        </svg>
-                                        <span>Log Absensi Hari Ini</span>
-                                    </div>
-                                    <span
-                                        class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 num-tabular">14/16
-                                        hadir</span>
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 </a>
                             </li>
                         </ul>
@@ -212,33 +189,52 @@
 
                     <!-- Kelompok: Keuangan & Buku Kas Cabang -->
                     <div>
-                        <p class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Keuangan &
-                            Kas</p>
+                        <p class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Keuangan & Kas</p>
                         <ul class="space-y-1">
                             <li>
-                                <a href="#spp-cabang" onclick="toggleMobileMenu(false);"
-                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors font-medium">
+                                <a href="{{ route('spp.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('spp.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24"
+                                        <svg class="w-4 h-4 {{ request()->routeIs('spp.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <rect width="20" height="14" x="2" y="5" rx="2" />
                                             <line x1="2" x2="22" y1="10" y2="10" />
                                         </svg>
                                         <span>Tagihan & SPP Siswa</span>
                                     </div>
-                                    <span class="text-[11px] text-amber-800 font-semibold num-tabular">14 tempo</span>
+                                    <span class="text-[11px] font-semibold {{ request()->routeIs('spp.*') ? 'text-blue-100' : 'text-amber-800' }} num-tabular">Bulanan</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#buku-kas" onclick="toggleMobileMenu(false);"
-                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors font-medium">
+                                <a href="{{ route('kas.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('kas.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24"
+                                        <svg class="w-4 h-4 {{ request()->routeIs('kas.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="2">
                                             <line x1="12" x2="12" y1="2" y2="22" />
                                             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                         </svg>
                                         <span>Buku Kas & Kwitansi</span>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Kelompok: Master Data & Cabang -->
+                    <div>
+                        <p class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Master & Pengaturan</p>
+                        <ul class="space-y-1">
+                            <li>
+                                <a href="{{ route('pengaturan.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center justify-between px-3 py-2.5 rounded-lg {{ request()->routeIs('pengaturan.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium' }} transition-colors">
+                                    <div class="flex items-center gap-2.5">
+                                        <svg class="w-4 h-4 {{ request()->routeIs('pengaturan.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="3" />
+                                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                        </svg>
+                                        <span>Master Data & Cabang</span>
                                     </div>
                                 </a>
                             </li>
@@ -332,6 +328,42 @@
 
             <!-- Main Canvas Body (Fluid with padding scaled for mobile) -->
             <main class="flex-1 p-3.5 sm:p-5 lg:p-8 max-w-7xl w-full mx-auto">
+                {{-- Global Flash Messages --}}
+                @if(session('success'))
+                    <div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm flex items-center justify-between gap-3 shadow-2xs">
+                        <div class="flex items-center gap-2.5">
+                            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-medium">{{ session('success') }}</span>
+                        </div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900 font-bold p-1">&times;</button>
+                    </div>
+                @endif
+
+                @if(session('error') || $errors->any())
+                    <div class="mb-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-sm flex items-start justify-between gap-3 shadow-2xs">
+                        <div class="flex items-start gap-2.5">
+                            <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                @if(session('error'))
+                                    <span class="font-semibold">{{ session('error') }}</span>
+                                @else
+                                    <span class="font-semibold">Periksa kembali data yang dimasukkan:</span>
+                                    <ul class="list-disc list-inside mt-1 space-y-0.5 text-xs text-rose-700">
+                                        @foreach($errors->all() as $err)
+                                            <li>{{ $err }}</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </div>
+                        </div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-900 font-bold p-1">&times;</button>
+                    </div>
+                @endif
+
                 @yield('content')
             </main>
 
@@ -355,9 +387,8 @@
         <div class="flex items-center justify-around max-w-md mx-auto">
             <!-- 1. Home / Dashboard -->
             <a href="{{ route('admin.dashboard') }}"
-                class="flex flex-col items-center justify-center p-2 text-blue-900 font-semibold min-w-[56px] text-[10px]">
-                <svg class="w-5 h-5 text-blue-900 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2">
+                class="flex flex-col items-center justify-center p-2 {{ request()->routeIs('admin.dashboard') ? 'text-blue-900 font-bold' : 'text-slate-500 hover:text-slate-900' }} min-w-[56px] text-[10px]">
+                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <rect width="7" height="9" x="3" y="3" rx="1" />
                     <rect width="7" height="5" x="14" y="3" rx="1" />
                     <rect width="7" height="9" x="14" y="12" rx="1" />
@@ -366,35 +397,31 @@
                 <span>Beranda</span>
             </a>
 
-            <!-- 2. Jadwal Sesi -->
-            <a href="#jadwal"
-                class="flex flex-col items-center justify-center p-2 text-slate-500 hover:text-slate-900 min-w-[56px] text-[10px]">
-                <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2">
-                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                    <line x1="16" x2="16" y1="2" y2="6" />
-                    <line x1="8" x2="8" y1="2" y2="6" />
-                    <line x1="3" x2="21" y1="10" y2="10" />
+            <!-- 2. Siswa -->
+            <a href="{{ route('siswa.index') }}"
+                class="flex flex-col items-center justify-center p-2 {{ request()->routeIs('siswa.*') ? 'text-blue-900 font-bold' : 'text-slate-500 hover:text-slate-900' }} min-w-[56px] text-[10px]">
+                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
                 </svg>
-                <span>Jadwal</span>
+                <span>Siswa</span>
             </a>
 
             <!-- 3. Primary Center: QR Absen (Floating Target) -->
-            <button type="button" onclick="openModal('modal-qr-display')"
+            <a href="{{ route('presensi.index') }}"
                 class="flex flex-col items-center justify-center -mt-4 bg-blue-900 text-white rounded-full w-12 h-12 shadow-lg hover:bg-blue-800 active:scale-95 transition-transform"
-                title="Tampilkan QR Presensi">
+                title="Presensi & Layar QR">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <rect width="5" height="5" x="3" y="3" rx="1" />
                     <rect width="5" height="5" x="16" y="3" rx="1" />
                     <rect width="5" height="5" x="3" y="16" rx="1" />
                 </svg>
-            </button>
+            </a>
 
             <!-- 4. Keuangan & SPP -->
-            <a href="#spp-cabang"
-                class="flex flex-col items-center justify-center p-2 text-slate-500 hover:text-slate-900 min-w-[56px] text-[10px]">
-                <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2">
+            <a href="{{ route('spp.index') }}"
+                class="flex flex-col items-center justify-center p-2 {{ request()->routeIs('spp.*') ? 'text-blue-900 font-bold' : 'text-slate-500 hover:text-slate-900' }} min-w-[56px] text-[10px]">
+                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <rect width="20" height="14" x="2" y="5" rx="2" />
                     <line x1="2" x2="22" y1="10" y2="10" />
                 </svg>
@@ -404,8 +431,7 @@
             <!-- 5. Menu Drawer -->
             <button type="button" onclick="toggleMobileMenu()"
                 class="flex flex-col items-center justify-center p-2 text-slate-500 hover:text-slate-900 min-w-[56px] text-[10px]">
-                <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2">
+                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
                 <span>Menu</span>

@@ -2,14 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
+use App\Models\Siswa;
+use App\Services\CabangContextService;
 use App\Services\GuruService;
 use Exception;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class GuruController extends Controller
 {
+    /**
+     * Halaman Distribusi & Manajemen Guru.
+     */
+    public function index(Request $request, CabangContextService $contextService): View
+    {
+        $context = $contextService->getContext($request);
+        $cabangId = $context['cabangId'];
+
+        // Daftar Guru di Cabang ini beserta relasi siswa bimbingan dan kualifikasi jenjang
+        $guruList = Guru::with([
+            'siswa' => fn ($q) => $q->where('status', 'aktif')->orderBy('nama', 'asc'),
+            'cabang',
+        ])
+            ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        // Siswa aktif tanpa guru di cabang ini
+        $unassignedStudents = Siswa::where('cabang_id', $cabangId)
+            ->where('status', 'aktif')
+            ->whereNull('guru_id')
+            ->orderBy('jenjang', 'asc')
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        // Rekapitulasi Kapasitas
+        $totalGuru = $guruList->count();
+        $kapasitasSlotTotal = $totalGuru * 6;
+        $slotTerpakai = $guruList->sum(fn ($g) => $g->siswa->count());
+        $slotTersedia = max(0, $kapasitasSlotTotal - $slotTerpakai);
+        $guruPenuh = $guruList->filter(fn ($g) => $g->siswa->count() >= 6)->count();
+        $persentaseKapasitas = $kapasitasSlotTotal > 0 ? round(($slotTerpakai / $kapasitasSlotTotal) * 100, 1) : 0;
+
+        return view('admin.guru.index', compact(
+            'guruList',
+            'unassignedStudents',
+            'totalGuru',
+            'kapasitasSlotTotal',
+            'slotTerpakai',
+            'slotTersedia',
+            'guruPenuh',
+            'persentaseKapasitas',
+            'context'
+        ));
+    }
+
     /**
      * Tugaskan siswa ke guru (dengan proteksi kapasitas 6 siswa dan kualifikasi jenjang).
      */

@@ -2,13 +2,72 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaksi;
+use App\Services\CabangContextService;
 use App\Services\KasService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class KasController extends Controller
 {
+    /**
+     * Halaman Buku Kas & Keuangan Cabang.
+     */
+    public function index(Request $request, CabangContextService $contextService, KasService $service): View
+    {
+        $context = $contextService->getContext($request);
+        $cabangId = $context['cabangId'];
+
+        $selectedBulan = $request->filled('bulan') ? (int) $request->query('bulan') : Carbon::now()->month;
+        $selectedTahun = $request->filled('tahun') ? (int) $request->query('tahun') : Carbon::now()->year;
+        $selectedTipe = $request->query('tipe', 'semua');
+        $selectedKategori = $request->query('kategori', 'semua');
+
+        $query = Transaksi::where('cabang_id', $cabangId);
+
+        if ($selectedTahun) {
+            $query->whereYear('tanggal', $selectedTahun);
+        }
+        if ($selectedBulan) {
+            $query->whereMonth('tanggal', $selectedBulan);
+        }
+        if ($selectedTipe !== 'semua' && in_array($selectedTipe, ['masuk', 'keluar'])) {
+            $query->where('tipe', $selectedTipe);
+        }
+        if ($selectedKategori !== 'semua' && ! empty($selectedKategori)) {
+            $query->where('kategori', $selectedKategori);
+        }
+
+        $transaksiList = $query->orderBy('tanggal', 'desc')->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Rekapitulasi Laba Rugi periode ini
+        $rekap = $service->getRekapLabaRugi($cabangId, $selectedBulan, $selectedTahun);
+
+        // Kategori-kategori yang sudah ada di database untuk filter
+        $kategoriList = Transaksi::where('cabang_id', $cabangId)->pluck('kategori')->unique()->filter()->values()->all();
+
+        $namaBulanList = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
+        return view('admin.kas.index', compact(
+            'transaksiList',
+            'rekap',
+            'kategoriList',
+            'selectedBulan',
+            'selectedTahun',
+            'selectedTipe',
+            'selectedKategori',
+            'namaBulanList',
+            'context'
+        ));
+    }
+
     /**
      * Catat mutasi kas masuk / keluar di cabang.
      */
