@@ -5,12 +5,12 @@ namespace Tests\Feature;
 use App\Models\Cabang;
 use App\Models\PembayaranSpp;
 use App\Models\Siswa;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class MenuPagesTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     public function test_dashboard_page_loads_successfully(): void
     {

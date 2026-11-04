@@ -6,13 +6,13 @@ use App\Models\Cabang;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Services\JadwalService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class JadwalLogicTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /**
      * Test pembuatan jadwal sukses saat tidak ada bentrok waktu.

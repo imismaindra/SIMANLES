@@ -108,7 +108,7 @@ class PresensiService
 
         return DB::transaction(function () use ($guru, $qr, $cabangNama, $today, $now) {
             $absensi = Absensi::where('guru_id', $guru->id)
-                ->where('tanggal', $today)
+                ->whereDate('tanggal', $today)
                 ->lockForUpdate()
                 ->first();
 
@@ -186,7 +186,7 @@ class PresensiService
         $totalGuruBertugas = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))->count();
 
         $absensiHariIni = Absensi::where('cabang_id', $cabangId)
-            ->where('tanggal', $today)
+            ->whereDate('tanggal', $today)
             ->get();
 
         $sudahDatang = $absensiHariIni->whereNotNull('jam_datang')->count();

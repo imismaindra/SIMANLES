@@ -6,7 +6,6 @@ use App\Models\Cabang;
 use App\Models\Guru;
 use App\Services\PresensiService;
 use Exception;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -14,8 +13,6 @@ use Tests\TestCase;
 
 class PresensiQrLogicTest extends TestCase
 {
-    use DatabaseTransactions;
-
     /**
      * Test token QR berumur pendek (15-30 detik) dan token baru menggantikan token lama.
      */

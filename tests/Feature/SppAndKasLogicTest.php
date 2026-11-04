@@ -8,12 +8,12 @@ use App\Models\Siswa;
 use App\Models\TarifSpp;
 use App\Models\Transaksi;
 use App\Services\SppService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SppAndKasLogicTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /**
      * Test otomasi tagihan SPP bulanan yang idempoten (Cron tanggal 1 00:05).
