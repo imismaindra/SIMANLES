@@ -94,7 +94,7 @@ class PresensiQrLogicTest extends TestCase
         $this->assertDatabaseHas('absensi', [
             'guru_id' => $guru->id,
             'cabang_id' => $cabangA->id,
-            'tanggal' => Carbon::today()->toDateString(),
+            'tanggal' => Carbon::today()->toDateTimeString(),
         ]);
 
         // Kasus 3: Guru mencoba scan datang lagi pada hari yang sama (Ditolak)
