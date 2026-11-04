@@ -77,6 +77,7 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            vendor/**
             .env
             .env.*
             storage/app/**
@@ -93,11 +94,12 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 45022 }}
           script: |
             set -e
             cd ${{ secrets.APP_PATH }}
-            php artisan down --retry=5
+            php artisan down --retry=5 || true
+            composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
             ${{ inputs.skip_migrations == 'false' && 'php artisan migrate --force' || 'echo "Skipping migrations"' }}
             php artisan optimize
-            php artisan up
+            php artisan up || true

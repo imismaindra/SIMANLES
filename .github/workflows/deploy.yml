@@ -37,29 +37,6 @@ jobs:
           name: production-assets
           path: public/build/
 
-      # --- PHP deps (no dev) for upload ---
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.4"
-          extensions: mbstring, bcmath, pdo, zip
-          coverage: none
-          tools: composer:v2
-
-      - name: Get Composer cache dir
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-prod-${{ hashFiles('**/composer.lock') }}
-          restore-keys: composer-prod-
-
-      - name: Install production Composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader --classmap-authoritative
-
       # --- Upload via FTP (rsync-style: only changed files) ---
       - name: Deploy files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -76,6 +53,7 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
+            vendor/**
             .env
             .env.*
             storage/app/**
@@ -103,10 +81,10 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 45022 }}
           script: |
             cd ${{ secrets.APP_PATH }}
-            php artisan down --retry=5 --render="errors::503" --secret="${{ secrets.MAINTENANCE_SECRET }}"
+            php artisan down --retry=5 --render="errors::503" --secret="${{ secrets.MAINTENANCE_SECRET }}" || true
 
       - name: Run post-deploy commands
         uses: appleboy/ssh-action@v1
@@ -114,10 +92,13 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 45022 }}
           script: |
             set -e
             cd ${{ secrets.APP_PATH }}
+
+            # Install/update dependencies directly on server
+            composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
             # Migrate database
             php artisan migrate --force
@@ -145,10 +126,10 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 45022 }}
           script: |
             cd ${{ secrets.APP_PATH }}
-            php artisan up
+            php artisan up || true
 
       # --- Notify ---
       - name: Notify deployment result
