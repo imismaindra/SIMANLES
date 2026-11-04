@@ -1,0 +1,161 @@
+name: CD — Deploy to cPanel
+
+on:
+  workflow_run:
+    workflows: ["CI — Test & Lint"]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false   # never cancel an in-flight deploy
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history needed for rsync change detection
+
+      # --- Restore built assets from CI ---
+      - name: Download production assets
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: ci.yml
+          workflow_conclusion: success
+          branch: main
+          name: production-assets
+          path: public/build/
+
+      # --- PHP deps (no dev) for upload ---
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, bcmath, pdo, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Get Composer cache dir
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-prod-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-prod-
+
+      - name: Install production Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader --classmap-authoritative
+
+      # --- Upload via FTP (rsync-style: only changed files) ---
+      - name: Deploy files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          protocol: ftps
+          local-dir: ./
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}/
+          # Exclude files that must NOT be overwritten on server
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .env
+            .env.*
+            storage/app/**
+            storage/logs/**
+            storage/framework/sessions/**
+            storage/framework/cache/**
+            .github/**
+            tests/**
+            phpunit.xml
+            *.md
+            AGENTS.md
+            CLAUDE.md
+            skills-lock.json
+            boost.json
+            opencode.json
+            .npmrc
+            .editorconfig
+          dangerous-clean-slate: false
+          dry-run: false
+
+      # --- Post-deploy: run artisan commands via cPanel API ---
+      - name: Put app in maintenance mode
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.APP_PATH }}
+            php artisan down --retry=5 --render="errors::503" --secret="${{ secrets.MAINTENANCE_SECRET }}"
+
+      - name: Run post-deploy commands
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd ${{ secrets.APP_PATH }}
+
+            # Migrate database
+            php artisan migrate --force
+
+            # Clear & rebuild all caches
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan event:clear
+            php artisan cache:clear
+            php artisan optimize
+
+            # Ensure storage link
+            php artisan storage:link --relative || true
+
+            # Fix directory permissions
+            find storage -type d -exec chmod 755 {} \;
+            find storage -type f -exec chmod 644 {} \;
+            find bootstrap/cache -type d -exec chmod 755 {} \;
+
+      - name: Bring app back online
+        uses: appleboy/ssh-action@v1
+        if: always()
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            cd ${{ secrets.APP_PATH }}
+            php artisan up
+
+      # --- Notify ---
+      - name: Notify deployment result
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          COMMIT="${{ github.sha }}"
+          SHORT="${COMMIT:0:7}"
+          ACTOR="${{ github.actor }}"
+          echo "Deployment ${STATUS} — ${SHORT} by ${ACTOR}"

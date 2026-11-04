@@ -1,0 +1,103 @@
+name: Hotfix — Emergency Deploy (skip CI)
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for hotfix deploy"
+        required: true
+      skip_migrations:
+        description: "Skip database migrations?"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  hotfix:
+    name: Hotfix Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, bcmath, pdo, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Get Composer cache dir
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-prod-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-prod-
+
+      - name: Install production dependencies
+        run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader --classmap-authoritative
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install NPM dependencies
+        run: npm ci --prefer-offline
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Deploy files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          protocol: ftps
+          local-dir: ./
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .env
+            .env.*
+            storage/app/**
+            storage/logs/**
+            storage/framework/sessions/**
+            storage/framework/cache/**
+            .github/**
+            tests/**
+          dangerous-clean-slate: false
+
+      - name: Maintenance mode & post-deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd ${{ secrets.APP_PATH }}
+            php artisan down --retry=5
+            ${{ inputs.skip_migrations == 'false' && 'php artisan migrate --force' || 'echo "Skipping migrations"' }}
+            php artisan optimize
+            php artisan up
