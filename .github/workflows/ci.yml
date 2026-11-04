@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: ["8.3"]
+        php: ["8.4"]
 
     steps:
       - name: Checkout
@@ -30,6 +30,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring, bcmath, pdo, pdo_mysql, pdo_sqlite, xml, zip, gd, intl, opcache
+
           coverage: none
           tools: composer:v2
 
