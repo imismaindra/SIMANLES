@@ -16,6 +16,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: simanles_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     strategy:
       fail-fast: true
       matrix:
@@ -69,15 +83,27 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-      - name: Run migrations (SQLite in-memory)
-        run: php artisan migrate --force --env=testing
+      - name: Run migrations (MySQL)
+        run: php artisan migrate --force
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: simanles_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
 
       # --- Tests ---
       - name: Run PHPUnit tests
         run: php artisan test --compact
         env:
           APP_ENV: testing
-          DB_URL: ""
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: simanles_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
 
       # --- Code style ---
       - name: Check code style with Pint

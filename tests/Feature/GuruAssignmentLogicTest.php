@@ -7,14 +7,14 @@ use App\Models\Guru;
 use App\Models\Siswa;
 use App\Services\GuruService;
 use Exception;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class GuruAssignmentLogicTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /**
      * Test penolakan penugasan jika kualifikasi jenjang guru tidak cocok dengan jenjang siswa.

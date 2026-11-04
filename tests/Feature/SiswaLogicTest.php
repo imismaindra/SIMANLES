@@ -7,12 +7,12 @@ use App\Models\PembayaranSpp;
 use App\Models\Siswa;
 use App\Models\Transaksi;
 use App\Services\SiswaService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SiswaLogicTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /**
      * Test pendaftaran siswa baru menghitung diskon secara akurat,
