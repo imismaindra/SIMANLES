@@ -107,7 +107,7 @@ jobs:
 
       # --- Code style ---
       - name: Check code style with Pint
-        run: vendor/bin/pint --test --format github
+        run: vendor/bin/pint --test
 
   build-assets:
     name: Build & Cache Production Assets
