@@ -20,6 +20,9 @@ class Absensi extends Model
         'tanggal',
         'jam_datang',
         'jam_pulang',
+        'status',
+        'keterangan',
+        'metode',
     ];
 
     protected function casts(): array
