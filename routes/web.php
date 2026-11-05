@@ -47,6 +47,7 @@ Route::get('/presensi/live-data', [PresensiController::class, 'liveData'])->name
 Route::get('/presensi/scan', [PresensiController::class, 'scannerPage'])->name('presensi.scanner');
 Route::post('/presensi/qr', [PresensiController::class, 'generateQr'])->name('web.presensi.qr');
 Route::post('/presensi/scan', [PresensiController::class, 'scanWeb'])->name('web.presensi.scan');
+Route::post('/presensi/manual', [PresensiController::class, 'storeManual'])->name('web.presensi.manual');
 
 // 6. Keuangan & Tagihan SPP Siswa
 Route::get('/spp', [SppController::class, 'index'])->name('spp.index');
