@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/scan', [PresensiController::class, 'scannerPage'])->name('presensi.scanner');
         Route::post('/qr', [PresensiController::class, 'generateQr'])->name('web.presensi.qr')->middleware('role:pusat,cabang');
         Route::post('/scan', [PresensiController::class, 'scanWeb'])->name('web.presensi.scan');
+        Route::post('/manual', [PresensiController::class, 'storeManual'])->name('web.presensi.manual')->middleware('role:pusat,cabang');
     });
 
     // 6. Keuangan & Tagihan SPP Siswa (Pusat & Cabang)

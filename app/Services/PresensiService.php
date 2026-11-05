@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Absensi;
 use App\Models\Cabang;
 use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\QrToken;
 use BaconQrCode\Renderer\Color\Rgb;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
@@ -20,19 +21,19 @@ use Illuminate\Validation\ValidationException;
 class PresensiService
 {
     /**
-     * Generate token QR dinamis berumur pendek (30 detik) untuk sesi datang atau pulang.
-     * Token baru diterbitkan dengan masa aktif 30 detik dan masa toleransi.
+     * Generate token QR dinamis (default 60 detik) untuk sesi auto, datang, atau pulang.
+     * Token baru secara otomatis menggantikan token lama cabang tersebut.
      */
-    public function generateQrToken(string $cabangId, string $tipe = 'datang', int $durationSeconds = 30): QrToken
+    public function generateQrToken(string $cabangId, string $tipe = 'auto', int $durationSeconds = 60): QrToken
     {
         return DB::transaction(function () use ($cabangId, $tipe, $durationSeconds) {
-            // Bersihkan token kedaluwarsa yang sudah lewat lebih dari 2 menit
-            QrToken::where('expires_at', '<', Carbon::now()->subMinutes(2))->delete();
+            $duration = max(10, $durationSeconds);
 
-            // Hapus token sebelumnya untuk cabang dan tipe ini
-            QrToken::where('cabang_id', $cabangId)
-                ->where('tipe', $tipe)
-                ->delete();
+            // Bersihkan token kedaluwarsa yang sudah lewat lebih dari 10 menit
+            QrToken::where('expires_at', '<', Carbon::now()->subMinutes(10))->delete();
+
+            // Hapus token aktif sebelumnya untuk cabang ini agar selalu fresh
+            QrToken::where('cabang_id', $cabangId)->delete();
 
             $tokenString = 'SIROJU-'.mt_rand(1000, 9999);
             while (QrToken::where('token', $tokenString)->exists()) {
@@ -43,7 +44,7 @@ class PresensiService
                 'token' => $tokenString,
                 'cabang_id' => $cabangId,
                 'tipe' => $tipe,
-                'expires_at' => Carbon::now()->addSeconds($durationSeconds),
+                'expires_at' => Carbon::now()->addSeconds($duration),
             ]);
         });
     }
@@ -51,9 +52,9 @@ class PresensiService
     /**
      * Proses scan QR presensi mandiri oleh guru:
      * 1. Normalisasi token (mendukung format plain SIROJU-XXXX, 4 digit angka, maupun URL scan)
-     * 2. Cek validitas & kedaluwarsa token QR (dengan grace window 15 detik toleransi clock-drift)
+     * 2. Cek validitas & kedaluwarsa token QR (dengan grace period 45 detik untuk toleransi koneksi HP & clock drift)
      * 3. Cek apakah guru terdaftar di cabang yang menayangkan QR
-     * 4. Catat jam_datang atau jam_pulang hari ini
+     * 4. Smart Auto-Detect: otomatis mencatat jam_datang atau jam_pulang sesuai status hari ini
      *
      * @return array{
      *     ok: bool,
@@ -72,7 +73,7 @@ class PresensiService
      *
      * @throws Exception
      */
-    public function scan(string $token, string $guruId): array
+    public function scan(string $token, string $guruId, ?string $requestedTipe = null): array
     {
         // Normalisasi token: ekstrak token SIROJU-XXXX bila dikirim sebagai URL lengkap atau angka 4 digit
         $rawToken = trim($token);
@@ -84,13 +85,13 @@ class PresensiService
             $normalizedToken = strtoupper($rawToken);
         }
 
-        // Cari token QR dengan grace period 15 detik untuk mengantisipasi jeda kamera/jaringan
+        // Cari token QR dengan grace period 45 detik untuk mengantisipasi jeda kamera/jaringan/clock-drift
         $qr = QrToken::where(function ($q) use ($normalizedToken, $rawToken) {
             $q->where('token', $normalizedToken)
                 ->orWhere('token', 'SIROJU-'.strtoupper($rawToken))
                 ->orWhere('token', strtoupper($rawToken));
         })
-            ->where('expires_at', '>', Carbon::now()->subSeconds(15))
+            ->where('expires_at', '>', Carbon::now()->subSeconds(45))
             ->latest('created_at')
             ->first();
 
@@ -121,13 +122,38 @@ class PresensiService
         $today = Carbon::today()->toDateString();
         $now = Carbon::now();
 
-        return DB::transaction(function () use ($guru, $qr, $cabangNama, $today, $now) {
+        return DB::transaction(function () use ($guru, $qr, $cabangNama, $today, $now, $requestedTipe) {
             $absensi = Absensi::where('guru_id', $guru->id)
                 ->whereDate('tanggal', $today)
                 ->lockForUpdate()
                 ->first();
 
-            if ($qr->tipe === 'datang') {
+            // Tentukan tipe aksi: apakah diminta spesifik atau otomatis
+            $effectiveTipe = $requestedTipe;
+
+            if (! $effectiveTipe || $effectiveTipe === 'auto') {
+                if ($qr->tipe === 'auto') {
+                    // Auto-detect berdasarkan kondisi kehadiran hari ini
+                    if (! $absensi || ! $absensi->jam_datang) {
+                        $effectiveTipe = 'datang';
+                    } elseif (! $absensi->jam_pulang) {
+                        // Proteksi debounce minimal 1 menit agar tidak sengaja dobel scan
+                        if ($absensi->jam_datang && $absensi->jam_datang->diffInSeconds($now) < 60) {
+                            $jamFormat = $absensi->jam_datang->format('H:i');
+                            throw new Exception("Anda baru saja melakukan absensi datang pada pukul {$jamFormat} WIB. Silakan lakukan absensi pulang setelah selesai mengajar.");
+                        }
+                        $effectiveTipe = 'pulang';
+                    } else {
+                        $datangStr = $absensi->jam_datang ? $absensi->jam_datang->format('H:i') : '-';
+                        $pulangStr = $absensi->jam_pulang ? $absensi->jam_pulang->format('H:i') : '-';
+                        throw new Exception("Anda sudah menyelesaikan absensi datang ({$datangStr} WIB) dan pulang ({$pulangStr} WIB) untuk hari ini.");
+                    }
+                } else {
+                    $effectiveTipe = $qr->tipe;
+                }
+            }
+
+            if ($effectiveTipe === 'datang') {
                 if ($absensi && $absensi->jam_datang) {
                     $jamDatang = $absensi->jam_datang->format('H:i');
                     throw new Exception("Anda sudah melakukan absensi datang hari ini pada pukul {$jamDatang} WIB.");
@@ -140,9 +166,15 @@ class PresensiService
                         'cabang_id' => $qr->cabang_id,
                         'tanggal' => $today,
                         'jam_datang' => $now,
+                        'status' => 'hadir',
+                        'metode' => 'qr',
                     ]);
                 } else {
-                    $absensi->update(['jam_datang' => $now]);
+                    $absensi->update([
+                        'jam_datang' => $now,
+                        'status' => 'hadir',
+                        'metode' => 'qr',
+                    ]);
                 }
 
                 $jam = $now->format('H:i:s');
@@ -157,7 +189,9 @@ class PresensiService
                     throw new Exception("Anda sudah melakukan absensi pulang hari ini pada pukul {$jamPulang} WIB.");
                 }
 
-                $absensi->update(['jam_pulang' => $now]);
+                $absensi->update([
+                    'jam_pulang' => $now,
+                ]);
                 $jam = $now->format('H:i:s');
             }
 
@@ -168,7 +202,7 @@ class PresensiService
 
             return [
                 'ok' => true,
-                'tipe' => $qr->tipe,
+                'tipe' => $effectiveTipe,
                 'guru_id' => $guru->id,
                 'guru_nama' => $guru->nama,
                 'no_pegawai' => $guru->no_pegawai,
@@ -184,21 +218,107 @@ class PresensiService
     }
 
     /**
-     * Hitung ringkasan statistik kehadiran hari ini untuk suatu cabang.
+     * Catat kehadiran manual oleh Admin (bisa untuk izin, sakit, alpa, atau input telat).
+     */
+    public function recordManual(
+        string $cabangId,
+        string $guruId,
+        string $tanggal,
+        string $status = 'hadir',
+        ?string $jamDatang = null,
+        ?string $jamPulang = null,
+        ?string $keterangan = null
+    ): Absensi {
+        $guru = Guru::findOrFail($guruId);
+
+        $absensi = Absensi::where('guru_id', $guruId)
+            ->whereDate('tanggal', $tanggal)
+            ->first();
+
+        $data = [
+            'cabang_id' => $cabangId,
+            'guru_id' => $guruId,
+            'user_id' => $guru->user_id,
+            'tanggal' => $tanggal,
+            'status' => $status,
+            'keterangan' => $keterangan,
+            'metode' => 'manual',
+        ];
+
+        if ($status === 'hadir') {
+            if ($jamDatang) {
+                $data['jam_datang'] = Carbon::parse("{$tanggal} {$jamDatang}");
+            } elseif (! $absensi?->jam_datang) {
+                $data['jam_datang'] = Carbon::parse("{$tanggal} ".Carbon::now()->format('H:i:s'));
+            }
+
+            if ($jamPulang) {
+                $data['jam_pulang'] = Carbon::parse("{$tanggal} {$jamPulang}");
+            }
+        } else {
+            // Jika izin, sakit, atau alpa, jam datang/pulang opsional / null
+            if ($jamDatang) {
+                $data['jam_datang'] = Carbon::parse("{$tanggal} {$jamDatang}");
+            }
+            if ($jamPulang) {
+                $data['jam_pulang'] = Carbon::parse("{$tanggal} {$jamPulang}");
+            }
+        }
+
+        if (! $absensi) {
+            return Absensi::create($data);
+        }
+
+        $absensi->update($data);
+
+        return $absensi->fresh();
+    }
+
+    /**
+     * Hitung ringkasan statistik kehadiran hari ini untuk suatu cabang dengan sinkronisasi Jadwal.
      *
      * @return array{
      *     totalGuruBertugas: int,
+     *     totalGuruCabang: int,
+     *     totalGuruTerjadwal: int,
      *     sudahDatang: int,
      *     sudahPulang: int,
+     *     sedangMengajar: int,
+     *     izinSakit: int,
      *     belumHadir: int,
-     *     persentaseKehadiran: float
+     *     persentaseKehadiran: float,
+     *     hariIni: string
      * }
      */
     public function getHariIniSummary(string $cabangId): array
     {
         $today = Carbon::today()->toDateString();
 
-        $totalGuruBertugas = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))->count();
+        $dayMap = [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu',
+        ];
+        $todayHari = $dayMap[Carbon::today()->dayOfWeekIso] ?? 'Senin';
+
+        // 1. Guru yang memiliki jadwal mengajar di cabang ini pada hari ini
+        $guruTerjadwalIds = Jadwal::where('cabang_id', $cabangId)
+            ->where('hari', $todayHari)
+            ->pluck('guru_id')
+            ->unique()
+            ->all();
+        $totalGuruTerjadwal = count($guruTerjadwalIds);
+
+        // 2. Total seluruh guru yang teralokasi di cabang ini
+        $totalGuruCabang = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))->count();
+
+        // Jika ada jadwal terdaftar hari ini, gunakan total jadwal sebagai acuan target hadir
+        // Jika belum ada jadwal yang disetting sama sekali, fallback ke total guru cabang
+        $totalGuruBertugas = $totalGuruTerjadwal > 0 ? $totalGuruTerjadwal : $totalGuruCabang;
 
         $absensiHariIni = Absensi::where('cabang_id', $cabangId)
             ->whereDate('tanggal', $today)
@@ -206,15 +326,76 @@ class PresensiService
 
         $sudahDatang = $absensiHariIni->whereNotNull('jam_datang')->count();
         $sudahPulang = $absensiHariIni->whereNotNull('jam_pulang')->count();
-        $belumHadir = max(0, $totalGuruBertugas - $sudahDatang);
+        $sedangMengajar = max(0, $sudahDatang - $sudahPulang);
+
+        // Guru izin/sakit
+        $izinSakit = $absensiHariIni->whereIn('status', ['izin', 'sakit', 'alpa'])->count();
+
+        $belumHadir = max(0, $totalGuruBertugas - $sudahDatang - $izinSakit);
         $persentaseKehadiran = $totalGuruBertugas > 0 ? round(($sudahDatang / $totalGuruBertugas) * 100, 1) : 0.0;
 
         return [
             'totalGuruBertugas' => $totalGuruBertugas,
+            'totalGuruCabang' => $totalGuruCabang,
+            'totalGuruTerjadwal' => $totalGuruTerjadwal,
             'sudahDatang' => $sudahDatang,
             'sudahPulang' => $sudahPulang,
+            'sedangMengajar' => $sedangMengajar,
+            'izinSakit' => $izinSakit,
             'belumHadir' => $belumHadir,
             'persentaseKehadiran' => $persentaseKehadiran,
+            'hariIni' => $todayHari,
+        ];
+    }
+
+    /**
+     * Cek status presensi guru hari ini (untuk memudahkan tampilan scan mobile).
+     *
+     * @return array{
+     *     guru_id: string,
+     *     guru_nama: string,
+     *     has_datang: bool,
+     *     has_pulang: bool,
+     *     jam_datang: ?string,
+     *     jam_pulang: ?string,
+     *     status: string,
+     *     next_action: string,
+     *     status_label: string
+     * }
+     */
+    public function getGuruTodayStatus(string $guruId, string $cabangId): array
+    {
+        $guru = Guru::findOrFail($guruId);
+        $today = Carbon::today()->toDateString();
+
+        $absensi = Absensi::where('guru_id', $guruId)
+            ->whereDate('tanggal', $today)
+            ->first();
+
+        $hasDatang = ! empty($absensi?->jam_datang);
+        $hasPulang = ! empty($absensi?->jam_pulang);
+
+        if (! $hasDatang) {
+            $nextAction = 'datang';
+            $statusLabel = 'Belum Presensi Datang';
+        } elseif (! $hasPulang) {
+            $nextAction = 'pulang';
+            $statusLabel = 'Sedang Mengajar (Masuk: '.$absensi->jam_datang->format('H:i').' WIB)';
+        } else {
+            $nextAction = 'selesai';
+            $statusLabel = 'Selesai Mengajar (Pulang: '.$absensi->jam_pulang->format('H:i').' WIB)';
+        }
+
+        return [
+            'guru_id' => $guru->id,
+            'guru_nama' => $guru->nama,
+            'has_datang' => $hasDatang,
+            'has_pulang' => $hasPulang,
+            'jam_datang' => $absensi?->jam_datang?->format('H:i:s'),
+            'jam_pulang' => $absensi?->jam_pulang?->format('H:i:s'),
+            'status' => $absensi?->status ?? 'belum_hadir',
+            'next_action' => $nextAction,
+            'status_label' => $statusLabel,
         ];
     }
 

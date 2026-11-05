@@ -130,6 +130,8 @@ class AdminDashboardController extends Controller
         $sppTertunggak = PembayaranSpp::where('cabang_id', $cabangId)->where('status', 'belum_bayar')->count();
         $nominalTertunggak = (float) PembayaranSpp::where('cabang_id', $cabangId)->where('status', 'belum_bayar')->sum('nominal');
 
+        $presensiSummary = app(PresensiService::class)->getHariIniSummary($cabangId);
+
         $kpi = [
             'siswa_aktif' => [
                 'total' => $totalSiswaAktif,
@@ -149,11 +151,13 @@ class AdminDashboardController extends Controller
                 'rasio_maksimal' => 6,
             ],
             'presensi_guru_hari_ini' => [
-                'total_bertugas' => $totalGuru,
-                'sudah_datang' => max(0, $totalGuru - 1),
-                'belum_hadir' => $totalGuru > 0 ? 1 : 0,
-                'izin_sakit' => 0,
-                'persentase_kehadiran' => $totalGuru > 0 ? round((max(0, $totalGuru - 1) / $totalGuru) * 100, 1) : 0,
+                'total_bertugas' => $presensiSummary['totalGuruBertugas'],
+                'sudah_datang' => $presensiSummary['sudahDatang'],
+                'sudah_pulang' => $presensiSummary['sudahPulang'],
+                'sedang_mengajar' => $presensiSummary['sedangMengajar'],
+                'belum_hadir' => $presensiSummary['belumHadir'],
+                'izin_sakit' => $presensiSummary['izinSakit'],
+                'persentase_kehadiran' => $presensiSummary['persentaseKehadiran'],
             ],
             'buku_kas_bulan_ini' => [
                 'pemasukan' => $kasMasukBulanIni,
@@ -165,15 +169,15 @@ class AdminDashboardController extends Controller
             ],
         ];
 
-        // 4. Sesi Presensi QR Dinamis
+        // 4. Sesi Presensi QR Dinamis (Ambil aktif atau generate riil)
         $qrTokenModel = QrToken::where('cabang_id', $cabangId)
             ->where('expires_at', '>', Carbon::now())
             ->latest('created_at')
             ->first();
 
-        if (! $qrTokenModel) {
+        if (! $qrTokenModel || $qrTokenModel->isExpired()) {
             try {
-                $qrTokenModel = $presensiService->generateQrToken($cabangId, 'datang', 25);
+                $qrTokenModel = $presensiService->generateQrToken($cabangId, 'auto', 60);
             } catch (\Throwable $e) {
                 // fallback if cabang not found in DB
             }
@@ -184,14 +188,14 @@ class AdminDashboardController extends Controller
                 'token' => $qrTokenModel->token,
                 'tipe' => $qrTokenModel->tipe,
                 'expires_in_seconds' => max(1, Carbon::now()->diffInSeconds($qrTokenModel->expires_at, false)),
-                'dibuat_pukul' => $qrTokenModel->created_at->format('H:i:s').' WIB',
+                'dibuat_pukul' => $qrTokenModel->created_at ? $qrTokenModel->created_at->format('H:i:s').' WIB' : Carbon::now()->format('H:i:s').' WIB',
                 'lokasi_layar' => 'Meja Resepsionis Cabang',
             ];
         } else {
             $qrTokenSession = [
                 'token' => 'SIROJU-8492',
-                'tipe' => 'datang',
-                'expires_in_seconds' => 25,
+                'tipe' => 'auto',
+                'expires_in_seconds' => 60,
                 'dibuat_pukul' => Carbon::now()->format('H:i:s').' WIB',
                 'lokasi_layar' => 'Meja Resepsionis Lantai 1',
             ];

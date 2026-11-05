@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-900 text-slate-100">
+<html lang="id" class="h-full bg-slate-950 text-slate-100">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -36,17 +36,27 @@
     <!-- Top Navigation Header -->
     <header class="bg-slate-900/90 border-b border-slate-800/80 backdrop-blur-md px-4 py-3.5 sticky top-0 z-30">
         <div class="max-w-md mx-auto flex items-center justify-between">
-            <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id']]) }}" class="flex items-center gap-2.5 group">
-                <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center p-1">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center p-1.5 shadow-xs">
                     <img src="{{ asset('logoo.png') }}" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h1 class="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors">Presensi Guru</h1>
-                    <p class="text-[10px] text-slate-400 font-medium">{{ $currentCabang['nama'] }}</p>
+                    <h1 class="font-bold text-sm text-white flex items-center gap-2">
+                        Presensi Guru
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
+                            Mandiri
+                        </span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-medium">{{ $currentCabang['nama'] }}</p>
                 </div>
-            </a>
+            </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div id="live-time" class="text-xs font-mono font-bold text-emerald-400">--:--:-- WIB</div>
+                    <div class="text-[10px] text-slate-400">{{ \Illuminate\Support\Carbon::now()->translatedFormat('d M Y') }}</div>
+                </div>
+
                 @if(auth()->user()?->role === 'guru')
                 <a href="{{ route('jadwal.index') }}" 
                     class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5">
@@ -69,10 +79,10 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-md w-full mx-auto p-4 flex flex-col justify-center space-y-4">
+    <main class="flex-1 max-w-md w-full mx-auto p-4 flex flex-col justify-start space-y-4">
 
         <!-- Result / Notification Alert Modal -->
-        <div id="result-box" class="hidden rounded-2xl p-4 border transition-all duration-300">
+        <div id="result-box" class="hidden rounded-2xl p-4 border transition-all duration-300 shadow-xl">
             <div class="flex items-start gap-3">
                 <div id="result-icon-container" class="p-2 rounded-xl shrink-0 mt-0.5"></div>
                 <div class="flex-1">
@@ -129,7 +139,47 @@
                     Nama tersimpan otomatis di perangkat ini
                 </p>
             @endif
+
+            <!-- Teacher Status Today Strip -->
+            <div id="guru-status-container" class="mt-2.5 hidden">
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <span id="guru-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                        <span id="guru-status-text" class="text-slate-300 font-medium">Memuat status...</span>
+                    </div>
+                    <span id="guru-action-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                        Otomatis
+                    </span>
+                </div>
+            </div>
         </div>
+
+        <!-- If Token is provided in URL via Kiosk QR scan -->
+        @if(!empty($token))
+        <div id="quick-confirm-card" class="bg-emerald-950/40 border-2 border-emerald-600/70 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Token QR Terdeteksi</span>
+                </div>
+                <span class="font-mono text-xs font-black text-emerald-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700">
+                    {{ $token }}
+                </span>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Kamera Anda telah memindai QR layar cabang. Tekan tombol di bawah untuk menyelesaikan pencatatan kehadiran.
+            </p>
+
+            <button type="button" onclick="submitScannedToken('{{ $token }}')" id="btn-quick-confirm"
+                class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                <span id="quick-btn-label">Konfirmasi Presensi Sekarang</span>
+            </button>
+        </div>
+        @endif
 
         <!-- Attendance Action Tabs (Camera Scan vs Manual Input) -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
@@ -279,9 +329,9 @@
         <!-- Instructions & Security Footer -->
         <div class="p-3.5 rounded-xl bg-slate-900/50 border border-slate-800 text-[11px] text-slate-400 space-y-1">
             <p class="font-bold text-slate-300">Panduan Presensi Mandiri:</p>
-            <p>1. Pastikan Anda sudah memilih nama pengajar yang sesuai.</p>
-            <p>2. Arahkan kamera ke layar QR cabang. Sistem otomatis mencatat jam datang atau pulang.</p>
-            <p>3. Token berdurasi 25 detik untuk mencegah kecurangan dan titip absen.</p>
+            <p>1. Pilih nama pengajar Anda. Sistem otomatis mengingat pilihan di perangkat ini.</p>
+            <p>2. Arahkan kamera ke layar cabang atau masukkan kode token.</p>
+            <p>3. Sistem otomatis mencatat <strong>Jam Datang</strong> pada kedatangan awal dan <strong>Jam Pulang</strong> saat selesai mengajar.</p>
         </div>
     </main>
 
@@ -290,30 +340,35 @@
         &copy; {{ date('Y') }} LKP Sang Siroju Lillah — Sistem Informasi Manajemen Les
     </footer>
 
-    <!-- Audio Beep for Success & Error -->
     <script>
         let html5QrCode = null;
-        let currentFacingMode = "environment"; // Belakang (back camera)
+        let currentFacingMode = "environment";
         let isProcessing = false;
         let activeTab = 'camera';
 
-        // Restore saved teacher ID from localStorage
         document.addEventListener('DOMContentLoaded', () => {
+            startClock();
+
+            @if($loggedGuru)
+                fetchTeacherStatus('{{ $loggedGuru->id }}');
+            @endif
+
             const savedGuruId = localStorage.getItem('simanles_guru_id');
             const selectGuru = document.getElementById('select-guru');
             if (savedGuruId && selectGuru && selectGuru.options) {
                 for (let opt of selectGuru.options) {
                     if (opt.value === savedGuruId) {
                         selectGuru.value = savedGuruId;
+                        fetchTeacherStatus(savedGuruId);
                         document.getElementById('guru-saved-hint')?.classList.remove('hidden');
                         break;
                     }
                 }
             }
 
-            // If token passed via URL parameter, open manual tab or auto-submit
             const urlToken = "{{ $token ?? '' }}";
             if (urlToken) {
+                // Jangan paksa tab camera jika sudah ada token dari scan luar
                 switchTab('manual');
                 const manualInput = document.getElementById('manual-token-input');
                 if (manualInput) manualInput.value = urlToken;
@@ -330,13 +385,67 @@
             }
         });
 
-        function onGuruSelected(guruId) {
+        function startClock() {
+            function tick() {
+                const now = new Date();
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                const el = document.getElementById('live-time');
+                if (el) el.textContent = `${h}:${m}:${s} WIB`;
+            }
+            tick();
+            setInterval(tick, 1000);
+        }
+
+        async function onGuruSelected(guruId) {
             if (guruId) {
                 localStorage.setItem('simanles_guru_id', guruId);
-                document.getElementById('guru-saved-hint').classList.remove('hidden');
+                await fetchTeacherStatus(guruId);
             } else {
                 localStorage.removeItem('simanles_guru_id');
-                document.getElementById('guru-saved-hint').classList.add('hidden');
+                document.getElementById('guru-status-container').classList.add('hidden');
+            }
+        }
+
+        async function fetchTeacherStatus(guruId) {
+            const container = document.getElementById('guru-status-container');
+            const dot = document.getElementById('guru-status-dot');
+            const text = document.getElementById('guru-status-text');
+            const badge = document.getElementById('guru-action-badge');
+
+            try {
+                const resp = await fetch(`{{ route('api.absensi.guru-status') }}?guru_id=${guruId}&cabang_id={{ $currentCabang['id'] }}`);
+                const res = await resp.json();
+
+                if (res.success) {
+                    const d = res.data;
+                    container.classList.remove('hidden');
+                    text.textContent = d.status_label;
+
+                    if (d.next_action === 'datang') {
+                        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+                        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-800';
+                        badge.textContent = 'Aksi Berikutnya: Datang';
+                    } else if (d.next_action === 'pulang') {
+                        dot.className = 'w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse';
+                        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800';
+                        badge.textContent = 'Aksi Berikutnya: Pulang';
+                    } else {
+                        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+                        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800';
+                        badge.textContent = 'Presensi Lengkap';
+                    }
+
+                    const quickLabel = document.getElementById('quick-btn-label');
+                    if (quickLabel) {
+                        if (d.next_action === 'datang') quickLabel.textContent = 'Konfirmasi Presensi Datang';
+                        else if (d.next_action === 'pulang') quickLabel.textContent = 'Konfirmasi Presensi Pulang';
+                        else quickLabel.textContent = 'Presensi Hari Ini Sudah Selesai';
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed fetching status:', e);
             }
         }
 
@@ -381,9 +490,7 @@
                     (decodedText, decodedResult) => {
                         onScanSuccess(decodedText);
                     },
-                    (errorMessage) => {
-                        // ignore frame parse errors
-                    }
+                    (errorMessage) => {}
                 );
 
                 if (loadingEl) loadingEl.classList.add('hidden');
@@ -423,10 +530,8 @@
             if (isProcessing) return;
             isProcessing = true;
 
-            // Vibrate phone if supported
             if (navigator.vibrate) navigator.vibrate(80);
 
-            // Extract token from URL or plain text
             let token = decodedText.trim();
             const match = token.match(/SIROJU-[\w\d]+/i);
             if (match) {
@@ -435,7 +540,7 @@
 
             const guruId = document.getElementById('select-guru').value;
             if (!guruId) {
-                showResult(false, 'Pilih Guru Terlebih Dahulu', 'Silakan pilih nama Anda pada menu dropdown di atas sebelum melakukan scan QR.');
+                showResult(false, 'Pilih Guru Terlebih Dahulu', 'Silakan pilih nama Anda pada menu pilihan di atas sebelum melakukan scan QR.');
                 setTimeout(() => { isProcessing = false; }, 2000);
                 return;
             }
@@ -444,12 +549,34 @@
             setTimeout(() => { isProcessing = false; }, 3000);
         }
 
+        async function submitScannedToken(token) {
+            const guruId = document.getElementById('select-guru').value;
+            if (!guruId) {
+                showResult(false, 'Pilih Guru Terlebih Dahulu', 'Silakan pilih nama Anda pada menu pilihan di atas terlebih dahulu.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-quick-confirm');
+            btn.disabled = true;
+            btn.innerHTML = 'Memproses...';
+
+            await executeAttendance(token, guruId);
+
+            btn.disabled = false;
+            btn.innerHTML = `
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Konfirmasi Presensi Sekarang</span>
+            `;
+        }
+
         async function submitManualAttendance() {
             let token = document.getElementById('manual-token-input').value.trim();
             const guruId = document.getElementById('select-guru').value;
 
             if (!guruId) {
-                showResult(false, 'Pilih Guru Terlebih Dahulu', 'Silakan pilih nama Anda pada menu dropdown di atas.');
+                showResult(false, 'Pilih Guru Terlebih Dahulu', 'Silakan pilih nama Anda pada menu pilihan di atas.');
                 return;
             }
 
@@ -502,6 +629,7 @@
                         `Halo <strong>${res.guru_nama}</strong>, kehadiran sesi <strong>${sessionName}</strong> Anda telah tercatat pada pukul <strong>${res.jam} WIB</strong> di ${res.cabang_nama}.`,
                         `Token: ${token} | Tanggal: ${res.tanggal}`
                     );
+                    fetchTeacherStatus(guruId);
 
                     // Update live scan log
                     const logList = document.getElementById('log-scan-list');
@@ -541,7 +669,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                showResult(false, 'Terjadi Kesalahan', 'Tidak dapat terhubung ke server. Periksa jaringan internet Anda.');
+                showResult(false, 'Terjadi Kesalahan', 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
             }
         }
 
@@ -582,7 +710,6 @@
                 detailsEl.classList.add('hidden');
             }
 
-            // Scroll into view smoothly
             box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
@@ -592,4 +719,3 @@
     </script>
 </body>
 </html>
-

@@ -223,6 +223,9 @@ class PresensiQrLogicTest extends TestCase
                 'data' => ['token', 'tipe', 'expires_at', 'expires_in_seconds', 'qr_svg', 'scan_url'],
             ]);
 
+        // SVG harus siap dipakai inline di HTML (tanpa prolog XML).
+        $this->assertStringStartsWith('<svg', $responseQr->json('data.qr_svg'));
+
         $token = $responseQr->json('data.token');
 
         // 2. POST /api/absensi/scan
@@ -249,8 +252,100 @@ class PresensiQrLogicTest extends TestCase
         // 4. GET /presensi/scan (Scanner Page)
         $responsePage = $this->get(route('presensi.scanner', ['cabang_id' => $cabang->id, 'token' => $token]));
         $responsePage->assertOk()
-            ->assertSee('Presensi Mandiri Guru')
+            ->assertSee('Presensi Guru')
             ->assertSee($guru->nama);
+
+        // 5. GET /api/absensi/guru-status
+        $responseStatus = $this->getJson(route('api.absensi.guru-status', ['guru_id' => $guru->id, 'cabang_id' => $cabang->id]));
+        $responseStatus->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.guru_nama', $guru->nama);
+    }
+
+    /**
+     * Test mode smart auto-detect: token auto otomatis mencatat datang pada scan pertama,
+     * dan mencatat pulang pada scan kedua setelah jeda waktu mengajar.
+     */
+    public function test_smart_auto_detect_attendance_flow(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CAUTO_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang Smart Auto Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru Smart Flow',
+            'email' => 'guru.smart.'.uniqid().'@test.com',
+            'no_telp' => '081234567894',
+            'jenjang' => 'SD',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        $service = app(PresensiService::class);
+
+        // 1. Scan pertama dengan token mode 'auto' -> harus otomatis tercatat sebagai 'datang'
+        $tokenAuto1 = $service->generateQrToken($cabang->id, 'auto', 60);
+        $resDatang = $service->scan($tokenAuto1->token, $guru->id);
+
+        $this->assertTrue($resDatang['ok']);
+        $this->assertSame('datang', $resDatang['tipe']);
+        $this->assertNotNull($resDatang['jam_datang']);
+
+        // 2. Majukan waktu 2 jam untuk simulasi selesai sesi les
+        Carbon::setTestNow(Carbon::now()->addHours(2));
+
+        // 3. Scan kedua dengan token baru mode 'auto' -> harus otomatis tercatat sebagai 'pulang'
+        $tokenAuto2 = $service->generateQrToken($cabang->id, 'auto', 60);
+        $resPulang = $service->scan($tokenAuto2->token, $guru->id);
+
+        $this->assertTrue($resPulang['ok']);
+        $this->assertSame('pulang', $resPulang['tipe']);
+        $this->assertNotNull($resPulang['jam_pulang']);
+        $this->assertGreaterThanOrEqual(120, $resPulang['durasi_menit']);
+
+        // Reset Carbon test time
+        Carbon::setTestNow();
+    }
+
+    /**
+     * Test presensi manual oleh admin (Hadir, Izin, Sakit).
+     */
+    public function test_admin_manual_attendance_recording(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CMAN_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang Manual Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru Izin Sakit',
+            'email' => 'guru.izin.'.uniqid().'@test.com',
+            'no_telp' => '081234567895',
+            'jenjang' => 'SMP',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        $service = app(PresensiService::class);
+
+        $absensi = $service->recordManual(
+            cabangId: $cabang->id,
+            guruId: $guru->id,
+            tanggal: Carbon::today()->toDateString(),
+            status: 'izin',
+            jamDatang: null,
+            jamPulang: null,
+            keterangan: 'Izin tugas luar kota'
+        );
+
+        $this->assertSame('izin', $absensi->status);
+        $this->assertSame('manual', $absensi->metode);
+        $this->assertSame('Izin tugas luar kota', $absensi->keterangan);
     }
 
     /**
