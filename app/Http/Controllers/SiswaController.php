@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\SiswaImport;
 use App\Models\Cabang;
 use App\Models\Guru;
 use App\Models\Setting;
 use App\Models\Siswa;
+use App\Services\AuditService;
 use App\Services\CabangContextService;
 use App\Services\SiswaService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SiswaController extends Controller
 {
@@ -183,11 +186,79 @@ class SiswaController extends Controller
     }
 
     /**
+     * Perbarui profil rincian data siswa.
+     */
+    public function update(Request $request, string $id, SiswaService $service): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'jenjang' => 'nullable|in:TK,SD,SMP,SMA_SMK',
+            'kelas' => 'required|integer|min:0|max:12',
+            'tempat_lahir' => 'nullable|string|max:100',
+            'tanggal_lahir' => 'nullable|date',
+            'alamat' => 'nullable|string',
+            'nama_ibu' => 'nullable|string|max:255',
+            'no_telp_ortu' => 'nullable|string|max:30',
+        ]);
+
+        $siswa = $service->updateProfile($id, $validated);
+
+        AuditService::log(
+            'Update Profil Siswa',
+            "Memperbarui profil siswa {$siswa->nama} (Kelas {$siswa->kelas} {$siswa->jenjang})."
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Profil siswa {$siswa->nama} berhasil diperbarui.",
+                'data' => $siswa,
+            ]);
+        }
+
+        return back()->with('success', "Profil siswa {$siswa->nama} berhasil diperbarui.");
+    }
+
+    /**
+     * Import data siswa secara massal via Excel (.xlsx / .csv).
+     */
+    public function importExcel(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'cabang_id' => 'required|string|exists:cabang,id',
+        ], [
+            'file.required' => 'File Excel wajib diunggah.',
+            'file.mimes' => 'Format file harus berupa Excel (.xlsx, .xls) atau CSV.',
+            'cabang_id.required' => 'Cabang tujuan wajib dipilih.',
+        ]);
+
+        $cabangId = $request->input('cabang_id');
+        $import = new SiswaImport($cabangId);
+
+        try {
+            Excel::import($import, $request->file('file'));
+
+            return back()->with('success', "Import selesai: {$import->importedCount} data siswa berhasil dimasukkan.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal memproses file Excel: '.$e->getMessage());
+        }
+    }
+
+    /**
      * Soft delete siswa.
      */
     public function destroy(Request $request, string $id, SiswaService $service): JsonResponse|RedirectResponse
     {
+        $siswa = Siswa::find($id);
+        $nama = $siswa ? $siswa->nama : $id;
+
         $service->softDelete($id);
+
+        AuditService::log(
+            'Hapus Siswa',
+            "Menghapus data siswa {$nama} (soft delete)."
+        );
 
         if ($request->wantsJson()) {
             return response()->json([

@@ -181,7 +181,7 @@
                     <!-- Countdown Indicator -->
                     <div class="mt-3 flex items-center gap-2 text-xs text-slate-300">
                         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                        <span>Kedaluwarsa otomatis dalam: <strong id="qr-countdown" class="text-amber-300 num-tabular font-mono text-sm">25 detik</strong></span>
+                        <span>Kedaluwarsa otomatis dalam: <strong id="qr-countdown" class="text-amber-300 num-tabular font-mono text-sm">30 detik</strong></span>
                     </div>
                 </div>
             </div>
@@ -429,7 +429,7 @@
         <!-- Animated Progress / Countdown Indicator -->
         <div class="mt-4 flex items-center gap-2 text-sm text-slate-300">
             <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
-            <span>Kode berubah otomatis dalam: <strong id="kiosk-countdown" class="text-amber-300 font-mono text-base font-bold">25 detik</strong></span>
+            <span>Kode berubah otomatis dalam: <strong id="kiosk-countdown" class="text-amber-300 font-mono text-base font-bold">30 detik</strong></span>
         </div>
     </div>
 
@@ -458,27 +458,32 @@
 
 <script>
     let currentTipe = '{{ $activeQr->tipe ?? 'datang' }}';
-    let countdownSec = 25;
+    const initialExpires = new Date('{{ $activeQr?->expires_at?->toIso8601String() }}');
+    const nowMs = new Date();
+    let initialRemaining = Math.max(1, Math.round((initialExpires - nowMs) / 1000));
+    let countdownSec = (initialRemaining > 0 && initialRemaining <= 30) ? initialRemaining : 30;
     let timerInterval = null;
     let livePollInterval = null;
     let clockInterval = null;
+    let isRefreshing = false;
 
-    function startTimer() {
+    function startTimer(initialSeconds = null) {
         clearInterval(timerInterval);
-        countdownSec = 25;
+        countdownSec = (initialSeconds !== null) ? initialSeconds : 30;
         updateCountdownDisplay();
 
         timerInterval = setInterval(() => {
             countdownSec--;
             updateCountdownDisplay();
             if (countdownSec <= 0) {
+                clearInterval(timerInterval);
                 refreshQrToken();
             }
         }, 1000);
     }
 
     function updateCountdownDisplay() {
-        const text = countdownSec + ' detik';
+        const text = Math.max(0, countdownSec) + ' detik';
         const el = document.getElementById('qr-countdown');
         const kioskEl = document.getElementById('kiosk-countdown');
         if (el) el.textContent = text;
@@ -486,6 +491,10 @@
     }
 
     async function refreshQrToken(forcedTipe) {
+        if (isRefreshing) return;
+        isRefreshing = true;
+        clearInterval(timerInterval);
+
         if (forcedTipe) {
             currentTipe = forcedTipe;
             updateSessionUI(forcedTipe);
@@ -495,27 +504,54 @@
         if (refreshBtn) refreshBtn.classList.add('opacity-50');
 
         try {
-            const resp = await fetch('{{ route('web.presensi.qr') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    cabang_id: '{{ $currentCabang['id'] }}',
-                    tipe: currentTipe,
-                    duration: 25
-                })
-            });
+            const payload = {
+                cabang_id: '{{ $currentCabang['id'] }}',
+                tipe: currentTipe,
+                duration: 30
+            };
+
+            let resp;
+            try {
+                resp = await fetch('{{ route('web.presensi.qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                // Fallback route API jika network/CSRF terputus
+                resp = await fetch('{{ route('api.absensi.qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            if (!resp.ok && (resp.status === 419 || resp.status === 401 || resp.status === 403)) {
+                resp = await fetch('{{ route('api.absensi.qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
 
             const json = await resp.json();
-            if (json.success) {
+            if (json.success && json.data) {
                 const token = json.data.token;
                 const qrSvg = json.data.qr_svg;
 
                 // Update token displays
-                document.getElementById('display-qr-token').textContent = token;
+                const displayEl = document.getElementById('display-qr-token');
+                if (displayEl) displayEl.textContent = token;
                 const simInput = document.getElementById('sim-token-input');
                 if (simInput) simInput.value = token;
                 const kioskToken = document.getElementById('kiosk-token-display');
@@ -529,11 +565,16 @@
                     if (kioskQrWrapper) kioskQrWrapper.innerHTML = qrSvg;
                 }
 
-                startTimer();
+                startTimer(30);
+            } else {
+                // Retry token refresh in 3s on error
+                setTimeout(() => startTimer(3), 3000);
             }
         } catch (e) {
             console.error('Failed refreshing token:', e);
+            setTimeout(() => startTimer(3), 3000);
         } finally {
+            isRefreshing = false;
             if (refreshBtn) refreshBtn.classList.remove('opacity-50');
         }
     }

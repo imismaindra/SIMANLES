@@ -47,6 +47,15 @@
             </a>
 
             <div class="flex items-center gap-2">
+                @if(auth()->user()?->role === 'guru')
+                <a href="{{ route('jadwal.index') }}" 
+                    class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span>Jadwal Saya</span>
+                </a>
+                @else
                 <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id']]) }}" 
                     class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,6 +63,7 @@
                     </svg>
                     <span>Layar Cabang</span>
                 </a>
+                @endif
             </div>
         </div>
     </header>
@@ -78,28 +88,47 @@
             </div>
         </div>
 
+        @php
+            $loggedGuru = auth()->user()?->guru;
+        @endphp
+
         <!-- Teacher Selection Card -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                1. Pilih Akun Guru Pengajar *
-            </label>
-            <div class="relative">
-                <select id="select-guru" onchange="onGuruSelected(this.value)"
-                    class="w-full px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
-                    <option value="">-- Pilih Nama Anda --</option>
-                    @foreach($guruList as $g)
-                        <option value="{{ $g->id }}" data-nama="{{ $g->nama }}">
-                            {{ $g->nama }} ({{ $g->no_pegawai ?: 'NIP Guru' }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <p id="guru-saved-hint" class="text-[10px] text-emerald-400 mt-1.5 hidden flex items-center gap-1">
-                <svg class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Nama tersimpan otomatis di perangkat ini
-            </p>
+            @if($loggedGuru)
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Akun Pengajar Anda</p>
+                        <h3 class="text-sm font-bold text-white mt-0.5">{{ $loggedGuru->nama }}</h3>
+                        <p class="text-[11px] text-slate-400 font-mono">{{ $loggedGuru->no_pegawai ?: 'NIP Guru' }} · {{ $currentCabang['nama'] }}</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Terverifikasi
+                    </span>
+                </div>
+                <input type="hidden" id="select-guru" value="{{ $loggedGuru->id }}">
+            @else
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    1. Pilih Akun Guru Pengajar *
+                </label>
+                <div class="relative">
+                    <select id="select-guru" onchange="onGuruSelected(this.value)"
+                        class="w-full px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                        <option value="">-- Pilih Nama Anda --</option>
+                        @foreach($guruList as $g)
+                            <option value="{{ $g->id }}" data-nama="{{ $g->nama }}">
+                                {{ $g->nama }} ({{ $g->no_pegawai ?: 'NIP Guru' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <p id="guru-saved-hint" class="text-[10px] text-emerald-400 mt-1.5 hidden flex items-center gap-1">
+                    <svg class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Nama tersimpan otomatis di perangkat ini
+                </p>
+            @endif
         </div>
 
         <!-- Attendance Action Tabs (Camera Scan vs Manual Input) -->
@@ -192,6 +221,61 @@
             </div>
         </div>
 
+        <!-- Teacher's Scan Attendance History Log -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Log Presensi Saya</h3>
+                </div>
+                <span class="text-[10px] text-slate-400 font-mono">{{ $currentCabang['nama'] }}</span>
+            </div>
+
+            <div id="log-scan-empty" class="{{ isset($riwayatPresensi) && $riwayatPresensi->isNotEmpty() ? 'hidden' : '' }} text-center py-4 text-xs text-slate-500">
+                Belum ada riwayat scan presensi tercatat.
+            </div>
+
+            <div id="log-scan-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                @if(isset($riwayatPresensi) && $riwayatPresensi->isNotEmpty())
+                    @foreach($riwayatPresensi as $item)
+                        @php
+                            $durasi = ($item->jam_datang && $item->jam_pulang) ? (int)$item->jam_datang->diffInMinutes($item->jam_pulang) : null;
+                        @endphp
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 text-xs">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-bold text-white">{{ $item->tanggal ? $item->tanggal->format('d/m/Y') : '-' }}</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">· {{ $item->cabang->nama ?? 'Cabang' }}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2 font-mono">
+                                    <span class="text-emerald-400">Masuk: {{ $item->jam_datang ? $item->jam_datang->format('H:i') : '-' }}</span>
+                                    <span>·</span>
+                                    <span class="text-sky-400">Pulang: {{ $item->jam_pulang ? $item->jam_pulang->format('H:i') : '-' }}</span>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                @if($item->jam_pulang)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                                        {{ $durasi ? $durasi . ' mnt' : 'Selesai' }}
+                                    </span>
+                                @elseif($item->jam_datang)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse">
+                                        Mengajar
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400">
+                                        Tercatat
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+
         <!-- Instructions & Security Footer -->
         <div class="p-3.5 rounded-xl bg-slate-900/50 border border-slate-800 text-[11px] text-slate-400 space-y-1">
             <p class="font-bold text-slate-300">Panduan Presensi Mandiri:</p>
@@ -217,11 +301,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedGuruId = localStorage.getItem('simanles_guru_id');
             const selectGuru = document.getElementById('select-guru');
-            if (savedGuruId && selectGuru) {
+            if (savedGuruId && selectGuru && selectGuru.options) {
                 for (let opt of selectGuru.options) {
                     if (opt.value === savedGuruId) {
                         selectGuru.value = savedGuruId;
-                        document.getElementById('guru-saved-hint').classList.remove('hidden');
+                        document.getElementById('guru-saved-hint')?.classList.remove('hidden');
                         break;
                     }
                 }
@@ -231,7 +315,16 @@
             const urlToken = "{{ $token ?? '' }}";
             if (urlToken) {
                 switchTab('manual');
-                document.getElementById('manual-token-input').value = urlToken;
+                const manualInput = document.getElementById('manual-token-input');
+                if (manualInput) manualInput.value = urlToken;
+
+                // Auto submit jika akun pengajar sudah terverifikasi
+                const activeGuruId = selectGuru ? selectGuru.value : null;
+                if (activeGuruId) {
+                    setTimeout(() => {
+                        submitManualAttendance();
+                    }, 500);
+                }
             } else {
                 startCameraScanner();
             }
@@ -352,7 +445,7 @@
         }
 
         async function submitManualAttendance() {
-            const token = document.getElementById('manual-token-input').value.trim();
+            let token = document.getElementById('manual-token-input').value.trim();
             const guruId = document.getElementById('select-guru').value;
 
             if (!guruId) {
@@ -363,6 +456,11 @@
             if (!token) {
                 showResult(false, 'Kode Token Kosong', 'Silakan masukkan kode token presensi yang tertera di layar cabang.');
                 return;
+            }
+
+            // Normalisasi jika guru hanya mengetik angka token 4 digit
+            if (/^\d{4,6}$/.test(token)) {
+                token = 'SIROJU-' + token;
             }
 
             const btn = document.getElementById('btn-submit-manual');
@@ -404,6 +502,39 @@
                         `Halo <strong>${res.guru_nama}</strong>, kehadiran sesi <strong>${sessionName}</strong> Anda telah tercatat pada pukul <strong>${res.jam} WIB</strong> di ${res.cabang_nama}.`,
                         `Token: ${token} | Tanggal: ${res.tanggal}`
                     );
+
+                    // Update live scan log
+                    const logList = document.getElementById('log-scan-list');
+                    const logEmpty = document.getElementById('log-scan-empty');
+                    if (logEmpty) logEmpty.classList.add('hidden');
+                    if (logList) {
+                        const durasiText = res.durasi_menit ? `${res.durasi_menit} mnt` : (res.tipe === 'pulang' ? 'Selesai' : 'Mengajar');
+                        const badgeClass = res.tipe === 'pulang' 
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' 
+                            : 'bg-amber-500/20 text-amber-400 border-amber-500/40 animate-pulse';
+
+                        const newLogHtml = `
+                            <div class="p-2.5 rounded-xl bg-slate-950 border border-emerald-500/60 flex items-center justify-between gap-2 text-xs transition-all">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-bold text-emerald-300">Hari ini (${res.tanggal})</span>
+                                        <span class="text-[10px] text-slate-400 font-medium">· ${res.cabang_nama}</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2 font-mono">
+                                        <span class="text-emerald-400">Masuk: ${res.jam_datang || '-'}</span>
+                                        <span>·</span>
+                                        <span class="text-sky-400">Pulang: ${res.jam_pulang || '-'}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${badgeClass}">
+                                        ${durasiText}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                        logList.insertAdjacentHTML('afterbegin', newLogHtml);
+                    }
                 } else {
                     const msg = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Gagal mencatat presensi');
                     showResult(false, 'Presensi Gagal', msg);

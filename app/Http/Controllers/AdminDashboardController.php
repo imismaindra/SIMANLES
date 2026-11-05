@@ -25,8 +25,14 @@ class AdminDashboardController extends Controller
      */
     public function index(Request $request, PresensiService $presensiService): View
     {
-        $viewRole = $request->query('role', 'cabang'); // 'cabang' | 'pusat'
+        $user = $request->user();
+        $viewRole = $request->query('role', $user?->role === 'pusat' ? 'pusat' : 'cabang'); // 'cabang' | 'pusat'
         $selectedCabangParam = $request->query('cabang_id', 'cab-ponokawan');
+
+        if ($user && $user->role === 'cabang' && $user->cabang_id) {
+            $selectedCabangParam = $user->cabang_id;
+            $viewRole = 'cabang';
+        }
 
         // 1. Ambil Data Cabang
         $cabangs = Cabang::withCount(['siswa' => fn ($q) => $q->where('status', 'aktif')])

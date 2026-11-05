@@ -23,6 +23,15 @@
 
             <!-- Header Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Trigger Import Excel Siswa -->
+                <button type="button" onclick="openModal('modal-import-siswa')"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 font-semibold text-xs border border-emerald-200/80 transition-colors">
+                    <svg class="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    <span>Import Excel</span>
+                </button>
+
                 <!-- Trigger Kenaikan Kelas Massal -->
                 <button type="button" onclick="openModal('modal-kenaikan-kelas')"
                     class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 active:bg-slate-300 text-slate-700 font-semibold text-xs border border-slate-200/80 transition-colors">
@@ -263,6 +272,14 @@
                             </td>
                             <td class="py-3 px-4 text-right">
                                 <div class="inline-flex items-center gap-1.5 justify-end">
+                                    <!-- Edit Profil Siswa Button -->
+                                    <button type="button" onclick='openEditSiswa(@json($s))'
+                                        class="p-1 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors" title="Edit Profil Siswa">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+
                                     <!-- Form Toggle Status (Aktif / Cuti / Keluar) -->
                                     <div class="relative inline-block text-left" x-data="{ open: false }">
                                         <select onchange="updateSiswaStatus('{{ $s->id }}', this.value)"
@@ -464,6 +481,141 @@
     </div>
 </div>
 
+<!-- Modal 3: Import Siswa Excel -->
+<div id="modal-import-siswa" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200/80">
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Import Data Siswa (Excel / CSV)</h3>
+                <p class="text-xs text-slate-500">Cabang: <strong>{{ $currentCabang['nama'] }}</strong></p>
+            </div>
+            <button type="button" onclick="closeModal('modal-import-siswa')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('web.siswa.import') }}" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <input type="hidden" name="cabang_id" value="{{ $currentCabang['id'] }}">
+
+            <div class="p-3 bg-blue-50/70 border border-blue-200/70 rounded-xl text-xs text-blue-900 space-y-1">
+                <p class="font-bold">Format Kolom Header Excel:</p>
+                <p class="font-mono text-[11px] bg-white p-1.5 rounded border border-blue-200">
+                    nama, kelas, tempat_lahir, tanggal_lahir, alamat, nama_ibu, no_telp_ortu
+                </p>
+                <p class="text-[11px] text-blue-800 mt-1">Jenjang ditentukan otomatis dari kelas (0=TK, 1-6=SD, 7-9=SMP, 10-12=SMA).</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Pilih File (.xlsx, .xls, .csv) *</label>
+                <input type="file" name="file" required accept=".xlsx,.xls,.csv"
+                    class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-900 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-xl p-1 bg-slate-50">
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button type="button" onclick="closeModal('modal-import-siswa')"
+                    class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold shadow-xs">
+                    Mulai Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 4: Edit Profil Siswa -->
+<div id="modal-edit-siswa" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden my-8">
+        <div class="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/70">
+            <div>
+                <h3 class="font-bold text-base text-slate-900" id="modal-edit-siswa-title">Edit Profil Siswa</h3>
+                <p class="text-xs text-slate-500">Perbarui identitas, jenjang, dan kontak wali siswa</p>
+            </div>
+            <button type="button" onclick="closeModal('modal-edit-siswa')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="form-edit-siswa" method="POST" action="" class="p-5 sm:p-6 space-y-4">
+            @csrf
+            @method('PUT')
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Siswa *</label>
+                    <input type="text" name="nama" id="edit-siswa-nama" required
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kelas *</label>
+                    <input type="number" name="kelas" id="edit-siswa-kelas" required min="0" max="12"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jenjang Pendidikan</label>
+                    <select name="jenjang" id="edit-siswa-jenjang"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="TK">TK (Pendidikan Anak Usia Dini)</option>
+                        <option value="SD">SD (Sekolah Dasar)</option>
+                        <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
+                        <option value="SMA_SMK">SMA / SMK (Sekolah Menengah Atas)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tempat Lahir</label>
+                    <input type="text" name="tempat_lahir" id="edit-siswa-tempat-lahir"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Lahir</label>
+                    <input type="date" name="tanggal_lahir" id="edit-siswa-tanggal-lahir"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Ibu / Wali</label>
+                    <input type="text" name="nama_ibu" id="edit-siswa-nama-ibu"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp / Telp Ortu</label>
+                    <input type="text" name="no_telp_ortu" id="edit-siswa-telp-ortu" placeholder="08xxxxxxxxxx"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Tempat Tinggal</label>
+                    <textarea name="alamat" id="edit-siswa-alamat" rows="2"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal('modal-edit-siswa')"
+                    class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     const baku = {{ $biayaPendaftaranBaku }};
 
@@ -474,6 +626,21 @@
 
         document.getElementById('display-diskon').textContent = '- Rp ' + diskonVal.toLocaleString('id-ID');
         document.getElementById('display-total-bayar').textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
+
+    function openEditSiswa(data) {
+        document.getElementById('form-edit-siswa').action = '/siswa/' + data.id;
+        document.getElementById('modal-edit-siswa-title').textContent = 'Edit Profil: ' + data.nama;
+        document.getElementById('edit-siswa-nama').value = data.nama || '';
+        document.getElementById('edit-siswa-kelas').value = data.kelas !== undefined ? data.kelas : 1;
+        document.getElementById('edit-siswa-jenjang').value = data.jenjang || 'SD';
+        document.getElementById('edit-siswa-tempat-lahir').value = data.tempat_lahir || '';
+        document.getElementById('edit-siswa-tanggal-lahir').value = data.tanggal_lahir ? data.tanggal_lahir.substring(0, 10) : '';
+        document.getElementById('edit-siswa-nama-ibu').value = data.nama_ibu || '';
+        document.getElementById('edit-siswa-telp-ortu').value = data.no_telp_ortu || '';
+        document.getElementById('edit-siswa-alamat').value = data.alamat || '';
+
+        openModal('modal-edit-siswa');
     }
 
     function updateSiswaStatus(id, newStatus) {

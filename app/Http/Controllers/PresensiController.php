@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class PresensiController extends Controller
@@ -26,8 +27,13 @@ class PresensiController extends Controller
     /**
      * Halaman Presensi Guru & Layar QR Code Dinamis.
      */
-    public function index(Request $request, CabangContextService $contextService, PresensiService $presensiService): View
+    public function index(Request $request, CabangContextService $contextService, PresensiService $presensiService): View|RedirectResponse
     {
+        // Guru diarahkan ke halaman scanner mandiri (bukan layar kiosk generator cabang)
+        if (Auth::user()?->role === 'guru') {
+            return redirect()->route('presensi.scanner');
+        }
+
         $context = $contextService->getContext($request);
         $cabangId = $context['cabangId'];
         $today = Carbon::today()->toDateString();
@@ -39,7 +45,7 @@ class PresensiController extends Controller
             ->first();
 
         if (! $activeQr) {
-            $activeQr = $presensiService->generateQrToken($cabangId, 'datang', 25);
+            $activeQr = $presensiService->generateQrToken($cabangId, 'datang', 30);
         }
 
         // Generate scan URL & Real SVG QR Code
@@ -102,6 +108,7 @@ class PresensiController extends Controller
         $context = $contextService->getContext($request);
         $cabangId = $context['cabangId'];
         $token = $request->query('token');
+        $loggedGuru = Auth::user()?->guru;
 
         $guruList = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
@@ -112,9 +119,20 @@ class PresensiController extends Controller
             $guruList = Guru::where('is_active', true)->orderBy('nama', 'asc')->get();
         }
 
+        // Ambil riwayat presensi mandiri guru yang sedang login (UC-08 / UC-09)
+        $riwayatPresensi = collect();
+        if ($loggedGuru) {
+            $riwayatPresensi = Absensi::with('cabang')
+                ->where('guru_id', $loggedGuru->id)
+                ->orderBy('tanggal', 'desc')
+                ->orderBy('jam_datang', 'desc')
+                ->take(15)
+                ->get();
+        }
+
         $currentCabang = $context['currentCabang'];
 
-        return view('admin.presensi.scan', compact('token', 'guruList', 'currentCabang', 'context'));
+        return view('admin.presensi.scan', compact('token', 'guruList', 'currentCabang', 'context', 'loggedGuru', 'riwayatPresensi'));
     }
 
     /**
@@ -209,7 +227,7 @@ class PresensiController extends Controller
         ]);
 
         $tipe = $validated['tipe'] ?? 'datang';
-        $duration = (int) ($validated['duration'] ?? 25);
+        $duration = (int) ($validated['duration'] ?? 30);
 
         $qr = $service->generateQrToken($validated['cabang_id'], $tipe, $duration);
         $scanUrl = route('presensi.scanner', ['token' => $qr->token, 'cabang_id' => $qr->cabang_id]);

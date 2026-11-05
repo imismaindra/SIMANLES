@@ -59,6 +59,7 @@
                         <th class="py-3 px-4 text-center">Siswa Aktif</th>
                         <th class="py-3 px-4 text-center">Guru Pengajar</th>
                         <th class="py-3 px-4 text-center">Status</th>
+                        <th class="py-3 px-4 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200/70">
@@ -83,9 +84,29 @@
                                 {{ $cb->guru_count }} Guru
                             </td>
                             <td class="py-3 px-4 text-center">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold {{ $cb->status === 'aktif' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200' }}">
                                     {{ ucfirst($cb->status) }}
                                 </span>
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                <div class="inline-flex items-center gap-2 justify-end">
+                                    <!-- Edit Cabang Button -->
+                                    <button type="button" onclick='openEditCabang(@json($cb))'
+                                        class="p-1 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors" title="Edit Cabang">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Toggle Status Cabang -->
+                                    <form method="POST" action="{{ route('web.pengaturan.cabang.toggle', $cb->id) }}" onsubmit="return confirm('{{ $cb->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }} cabang {{ $cb->nama }}?');" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="px-2 py-0.5 rounded text-[10px] font-bold border transition-colors {{ $cb->status === 'aktif' ? 'text-amber-800 border-amber-300 bg-amber-50 hover:bg-amber-100' : 'text-emerald-800 border-emerald-300 bg-emerald-50 hover:bg-emerald-100' }}">
+                                            {{ $cb->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -257,5 +278,68 @@
         </form>
     </div>
 </div>
+
+<!-- Modal: Edit Data Cabang -->
+<div id="modal-edit-cabang" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200/80">
+            <div>
+                <h3 class="font-bold text-slate-900 text-base" id="modal-edit-cabang-title">Edit Data Cabang</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Perbarui nama dan lokasi fisik cabang</p>
+            </div>
+            <button type="button" onclick="closeModal('modal-edit-cabang')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="form-edit-cabang" method="POST" action="" class="space-y-4">
+            @csrf
+            @method('PUT')
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Cabang (Permanen)</label>
+                <input type="text" id="edit-cabang-kode" disabled
+                    class="w-full px-3 py-2 text-xs font-mono font-bold bg-slate-100 text-slate-500 rounded-xl border border-slate-200 cursor-not-allowed">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Cabang *</label>
+                <input type="text" name="nama" id="edit-cabang-nama" required
+                    class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Fisik</label>
+                <textarea name="alamat" id="edit-cabang-alamat" rows="2"
+                    class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button type="button" onclick="closeModal('modal-edit-cabang')"
+                    class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditCabang(data) {
+        document.getElementById('form-edit-cabang').action = '/pengaturan/cabang/' + data.id;
+        document.getElementById('modal-edit-cabang-title').textContent = 'Edit: ' + data.nama;
+        document.getElementById('edit-cabang-kode').value = data.kode || '';
+        document.getElementById('edit-cabang-nama').value = data.nama || '';
+        document.getElementById('edit-cabang-alamat').value = data.alamat || '';
+
+        openModal('modal-edit-cabang');
+    }
+</script>
 @endsection
 

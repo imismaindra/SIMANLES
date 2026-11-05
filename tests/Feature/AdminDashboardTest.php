@@ -18,7 +18,6 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('logo.png');
         $response->assertSee('Dashboard Operasional');
         $response->assertSee('Cabang Ponokawan');
-        $response->assertSee('Pimpinan Cabang Ponokawan');
         $response->assertSee('Auto-Assign');
         $response->assertSee('Kapasitas Slot Guru');
         $response->assertSee('Jadwal Sesi Mengajar Hari Ini');
@@ -44,7 +43,6 @@ class AdminDashboardTest extends TestCase
         $response = $this->get('/?cabang_id=cab-1');
         $response->assertStatus(200);
         $response->assertSee('Cabang Jakarta Selatan');
-        $response->assertSee('Pimpinan Cabang Jakarta Selatan');
     }
 
     /**

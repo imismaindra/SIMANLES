@@ -20,14 +20,14 @@ use Illuminate\Validation\ValidationException;
 class PresensiService
 {
     /**
-     * Generate token QR dinamis berumur pendek (15 - 30 detik) untuk sesi datang atau pulang.
-     * Token baru secara otomatis menggantikan token lama cabang tersebut.
+     * Generate token QR dinamis berumur pendek (30 detik) untuk sesi datang atau pulang.
+     * Token baru diterbitkan dengan masa aktif 30 detik dan masa toleransi.
      */
-    public function generateQrToken(string $cabangId, string $tipe = 'datang', int $durationSeconds = 25): QrToken
+    public function generateQrToken(string $cabangId, string $tipe = 'datang', int $durationSeconds = 30): QrToken
     {
         return DB::transaction(function () use ($cabangId, $tipe, $durationSeconds) {
-            // Bersihkan token kedaluwarsa yang sudah lewat lebih dari 5 menit
-            QrToken::where('expires_at', '<', Carbon::now()->subMinutes(5))->delete();
+            // Bersihkan token kedaluwarsa yang sudah lewat lebih dari 2 menit
+            QrToken::where('expires_at', '<', Carbon::now()->subMinutes(2))->delete();
 
             // Hapus token sebelumnya untuk cabang dan tipe ini
             QrToken::where('cabang_id', $cabangId)
@@ -50,8 +50,8 @@ class PresensiService
 
     /**
      * Proses scan QR presensi mandiri oleh guru:
-     * 1. Normalisasi token (mendukung format plain SIROJU-XXXX maupun URL scan)
-     * 2. Cek validitas & kedaluwarsa token QR
+     * 1. Normalisasi token (mendukung format plain SIROJU-XXXX, 4 digit angka, maupun URL scan)
+     * 2. Cek validitas & kedaluwarsa token QR (dengan grace window 15 detik toleransi clock-drift)
      * 3. Cek apakah guru terdaftar di cabang yang menayangkan QR
      * 4. Catat jam_datang atau jam_pulang hari ini
      *
@@ -74,31 +74,40 @@ class PresensiService
      */
     public function scan(string $token, string $guruId): array
     {
-        // Normalisasi token: ekstrak token SIROJU-XXXX bila dikirim sebagai URL lengkap
+        // Normalisasi token: ekstrak token SIROJU-XXXX bila dikirim sebagai URL lengkap atau angka 4 digit
         $rawToken = trim($token);
         if (preg_match('/SIROJU-[\w\d]+/i', $rawToken, $matches)) {
             $normalizedToken = strtoupper($matches[0]);
+        } elseif (preg_match('/^\d{4,6}$/', $rawToken)) {
+            $normalizedToken = 'SIROJU-'.$rawToken;
         } else {
             $normalizedToken = strtoupper($rawToken);
         }
 
-        $qr = QrToken::where('token', $normalizedToken)
-            ->where('expires_at', '>', Carbon::now())
+        // Cari token QR dengan grace period 15 detik untuk mengantisipasi jeda kamera/jaringan
+        $qr = QrToken::where(function ($q) use ($normalizedToken, $rawToken) {
+            $q->where('token', $normalizedToken)
+                ->orWhere('token', 'SIROJU-'.strtoupper($rawToken))
+                ->orWhere('token', strtoupper($rawToken));
+        })
+            ->where('expires_at', '>', Carbon::now()->subSeconds(15))
+            ->latest('created_at')
             ->first();
 
         if (! $qr) {
             throw ValidationException::withMessages([
-                'token' => 'Kode QR telah kedaluwarsa atau tidak valid. Silakan scan kode terbaru pada layar cabang.',
+                'token' => 'Kode QR telah kedaluwarsa atau tidak valid. Silakan scan atau masukkan kode 4 digit terbaru pada layar cabang.',
             ]);
         }
 
-        $guru = Guru::with('cabang')->findOrFail($guruId);
+        $guru = Guru::with('cabang', 'user')->findOrFail($guruId);
 
         // Verifikasi keanggotaan guru di cabang yang menayangkan QR
         $isMember = DB::table('guru_cabang')
             ->where('guru_id', $guru->id)
             ->where('cabang_id', $qr->cabang_id)
-            ->exists();
+            ->exists()
+            || ($guru->user && $guru->user->cabang_id === $qr->cabang_id);
 
         if (! $isMember) {
             throw ValidationException::withMessages([

@@ -252,4 +252,36 @@ class PresensiQrLogicTest extends TestCase
             ->assertSee('Presensi Mandiri Guru')
             ->assertSee($guru->nama);
     }
+
+    /**
+     * Test input token hanya berupa 4 digit angka tetap berhasil divalidasi.
+     */
+    public function test_qr_scan_accepts_pure_numeric_token(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CNUM_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang Numeric Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru Numeric Test',
+            'email' => 'guru.num.'.uniqid().'@test.com',
+            'no_telp' => '081234567894',
+            'jenjang' => 'SD',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        $service = app(PresensiService::class);
+        $qr = $service->generateQrToken($cabang->id, 'datang', 30);
+
+        // Ekstrak hanya 4 digit angka dari SIROJU-XXXX
+        $digitsOnly = str_replace('SIROJU-', '', $qr->token);
+
+        $res = $service->scan($digitsOnly, $guru->id);
+        $this->assertTrue($res['ok']);
+        $this->assertSame('datang', $res['tipe']);
+    }
 }
