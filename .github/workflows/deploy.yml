@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history needed for rsync change detection
+          fetch-depth: 0
 
       # --- Restore built assets from CI ---
       - name: Download production assets
@@ -37,44 +37,7 @@ jobs:
           name: production-assets
           path: public/build/
 
-      # --- Upload via FTP (rsync-style: only changed files) ---
-      - name: Deploy files via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: ${{ secrets.FTP_PORT || 21 }}
-          protocol: ftps
-          local-dir: ./
-          server-dir: ${{ secrets.FTP_REMOTE_DIR }}/
-          # Exclude files that must NOT be overwritten on server
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            vendor/**
-            .env
-            .env.*
-            storage/app/**
-            storage/logs/**
-            storage/framework/sessions/**
-            storage/framework/cache/**
-            .github/**
-            tests/**
-            phpunit.xml
-            *.md
-            AGENTS.md
-            CLAUDE.md
-            skills-lock.json
-            boost.json
-            opencode.json
-            .npmrc
-            .editorconfig
-          dangerous-clean-slate: false
-          dry-run: false
-
-      # --- Post-deploy: run artisan commands via cPanel API ---
+      # --- Put app in maintenance mode first ---
       - name: Put app in maintenance mode
         uses: appleboy/ssh-action@v1
         with:
@@ -86,6 +49,20 @@ jobs:
             cd ${{ secrets.APP_PATH }}
             php artisan down --retry=5 --render="errors::503" --secret="${{ secrets.MAINTENANCE_SECRET }}" || true
 
+      # --- Sync files via SSH (Rsync) — menggantikan FTP lama ---
+      - name: Sync files via SSH (Rsync)
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT || 45022 }}
+          TARGET: ${{ secrets.APP_PATH }}
+          SOURCE: "./"
+          ARGS: "-rlgoDzvc -i"
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /vendor/, .env, .env.*, /storage/app/, /storage/logs/, /storage/framework/sessions/, /storage/framework/cache/, /tests/, /phpunit.xml, *.md, /AGENTS.md, /CLAUDE.md, /skills-lock.json, /boost.json, /opencode.json, .npmrc, .editorconfig"
+
+      # --- Run post-deploy commands on server ---
       - name: Run post-deploy commands
         uses: appleboy/ssh-action@v1
         with:
@@ -119,6 +96,7 @@ jobs:
             find storage -type f -exec chmod 644 {} \;
             find bootstrap/cache -type d -exec chmod 755 {} \;
 
+      # --- Bring app back online ---
       - name: Bring app back online
         uses: appleboy/ssh-action@v1
         if: always()
