@@ -6,6 +6,12 @@ use App\Models\Absensi;
 use App\Models\Cabang;
 use App\Models\Guru;
 use App\Models\QrToken;
+use BaconQrCode\Renderer\Color\Rgb;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\Fill;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -201,5 +207,22 @@ class PresensiService
             'belumHadir' => $belumHadir,
             'persentaseKehadiran' => $persentaseKehadiran,
         ];
+    }
+
+    /**
+     * Render SVG QR Code string bersih tanpa deklarasi XML (inline SVG ready).
+     */
+    public function renderQrSvg(string $content, int $size = 220): string
+    {
+        $fill = Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(15, 23, 42));
+        $renderer = new ImageRenderer(
+            new RendererStyle($size, 1, null, null, $fill),
+            new SvgImageBackEnd
+        );
+        $writer = new Writer($renderer);
+
+        $svg = $writer->writeString($content);
+
+        return trim(preg_replace('/<\?xml.*?\?>/i', '', $svg));
     }
 }

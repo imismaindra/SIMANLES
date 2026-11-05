@@ -12,6 +12,7 @@ use App\Models\Siswa;
 use App\Models\TarifSpp;
 use App\Models\Transaksi;
 use App\Models\User;
+use App\Services\PresensiService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -22,7 +23,7 @@ class AdminDashboardController extends Controller
      * Display the official LKP Sang Siroju Lillah Multi-Cabang Admin Dashboard.
      * Follows KONSEP_SISTEM_MANAJEMEN_LES.md specification.
      */
-    public function index(Request $request): View
+    public function index(Request $request, PresensiService $presensiService): View
     {
         $viewRole = $request->query('role', 'cabang'); // 'cabang' | 'pusat'
         $selectedCabangParam = $request->query('cabang_id', 'cab-ponokawan');
@@ -159,7 +160,19 @@ class AdminDashboardController extends Controller
         ];
 
         // 4. Sesi Presensi QR Dinamis
-        $qrTokenModel = QrToken::where('cabang_id', $cabangId)->latest('created_at')->first();
+        $qrTokenModel = QrToken::where('cabang_id', $cabangId)
+            ->where('expires_at', '>', Carbon::now())
+            ->latest('created_at')
+            ->first();
+
+        if (! $qrTokenModel) {
+            try {
+                $qrTokenModel = $presensiService->generateQrToken($cabangId, 'datang', 25);
+            } catch (\Throwable $e) {
+                // fallback if cabang not found in DB
+            }
+        }
+
         if ($qrTokenModel && ! $qrTokenModel->isExpired()) {
             $qrTokenSession = [
                 'token' => $qrTokenModel->token,
@@ -172,11 +185,15 @@ class AdminDashboardController extends Controller
             $qrTokenSession = [
                 'token' => 'SIROJU-8492',
                 'tipe' => 'datang',
-                'expires_in_seconds' => 18,
+                'expires_in_seconds' => 25,
                 'dibuat_pukul' => Carbon::now()->format('H:i:s').' WIB',
                 'lokasi_layar' => 'Meja Resepsionis Lantai 1',
             ];
         }
+
+        $scanUrl = route('presensi.scanner', ['token' => $qrTokenSession['token'], 'cabang_id' => $cabangId]);
+        $qrSvg = $presensiService->renderQrSvg($scanUrl, 200);
+        $qrSvgThumbnail = $presensiService->renderQrSvg($scanUrl, 68);
 
         // 5. Siswa Belum Punya Guru
         $unassignedDb = Siswa::where('cabang_id', $cabangId)
@@ -295,7 +312,9 @@ class AdminDashboardController extends Controller
             'todaySchedules',
             'recentPayments',
             'recentKasTransactions',
-            'qrTokenSession'
+            'qrTokenSession',
+            'qrSvg',
+            'qrSvgThumbnail'
         ));
     }
 }

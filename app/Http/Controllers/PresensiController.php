@@ -7,6 +7,12 @@ use App\Models\Guru;
 use App\Models\QrToken;
 use App\Services\CabangContextService;
 use App\Services\PresensiService;
+use BaconQrCode\Renderer\Color\Rgb;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\Fill;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +20,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PresensiController extends Controller
 {
@@ -259,10 +264,15 @@ class PresensiController extends Controller
      */
     private function renderQrSvg(string $content, int $size = 220): string
     {
-        return (string) QrCode::size($size)
-            ->color(15, 23, 42)
-            ->backgroundColor(255, 255, 255)
-            ->margin(1)
-            ->generate($content);
+        $fill = Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(15, 23, 42));
+        $renderer = new ImageRenderer(
+            new RendererStyle($size, 1, null, null, $fill),
+            new SvgImageBackEnd
+        );
+        $writer = new Writer($renderer);
+
+        $svg = $writer->writeString($content);
+
+        return trim(preg_replace('/<\?xml.*?\?>/i', '', $svg));
     }
 }
