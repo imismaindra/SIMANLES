@@ -25,3 +25,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/tests/Feature/AllRoutesCoverageTest.php
+/tests/Feature/AuthAndRbacTest.php
+/PENTEST_DAN_AUDIT_MANUAL.md
+/KOMPARASI_FITUR_DAN_FLOW_MIGRASI.md

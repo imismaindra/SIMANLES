@@ -7,22 +7,33 @@ use App\Models\Guru;
 use App\Models\QrToken;
 use App\Services\CabangContextService;
 use App\Services\PresensiService;
+use BaconQrCode\Renderer\Color\Rgb;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\Fill;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PresensiController extends Controller
 {
     /**
      * Halaman Presensi Guru, Layar QR Code Dinamis & Riwayat Kehadiran.
      */
-    public function index(Request $request, CabangContextService $contextService, PresensiService $presensiService): View
+    public function index(Request $request, CabangContextService $contextService, PresensiService $presensiService): View|RedirectResponse
     {
+        // Guru diarahkan ke halaman scanner mandiri (bukan layar kiosk generator cabang)
+        if (Auth::user()?->role === 'guru') {
+            return redirect()->route('presensi.scanner');
+        }
+
         $context = $contextService->getContext($request);
         $cabangId = $context['cabangId'];
         $today = Carbon::today()->toDateString();
@@ -35,7 +46,9 @@ class PresensiController extends Controller
             ->first();
 
         if (! $activeQr) {
-            $activeQr = $presensiService->generateQrToken($cabangId, 'auto', 60);
+            if (! $activeQr) {
+                $activeQr = $presensiService->generateQrToken($cabangId, 'auto', 60);
+            }
         }
 
         // Generate scan URL & Real SVG QR Code
@@ -120,6 +133,7 @@ class PresensiController extends Controller
         $context = $contextService->getContext($request);
         $cabangId = $context['cabangId'];
         $token = $request->query('token');
+        $loggedGuru = Auth::user()?->guru;
 
         $guruList = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
@@ -130,9 +144,20 @@ class PresensiController extends Controller
             $guruList = Guru::where('is_active', true)->orderBy('nama', 'asc')->get();
         }
 
+        // Ambil riwayat presensi mandiri guru yang sedang login (UC-08 / UC-09)
+        $riwayatPresensi = collect();
+        if ($loggedGuru) {
+            $riwayatPresensi = Absensi::with('cabang')
+                ->where('guru_id', $loggedGuru->id)
+                ->orderBy('tanggal', 'desc')
+                ->orderBy('jam_datang', 'desc')
+                ->take(15)
+                ->get();
+        }
+
         $currentCabang = $context['currentCabang'];
 
-        return view('admin.presensi.scan', compact('token', 'guruList', 'currentCabang', 'context'));
+        return view('admin.presensi.scan', compact('token', 'guruList', 'currentCabang', 'context', 'loggedGuru', 'riwayatPresensi'));
     }
 
     /**
@@ -352,13 +377,15 @@ class PresensiController extends Controller
      */
     private function renderQrSvg(string $content, int $size = 220): string
     {
-        $svg = (string) QrCode::size($size)
-            ->color(15, 23, 42)
-            ->backgroundColor(255, 255, 255)
-            ->margin(1)
-            ->generate($content);
+        $fill = Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(15, 23, 42));
+        $renderer = new ImageRenderer(
+            new RendererStyle($size, 1, null, null, $fill),
+            new SvgImageBackEnd
+        );
+        $writer = new Writer($renderer);
 
-        // The XML prolog is invalid when the SVG is embedded inline in HTML.
-        return (string) preg_replace('/^<\?xml[^>]*\?>\s*/', '', $svg);
+        $svg = $writer->writeString($content);
+
+        return trim(preg_replace('/<\?xml.*?\?>/i', '', $svg));
     }
 }

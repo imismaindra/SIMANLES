@@ -10,37 +10,62 @@
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200/70">
             <div>
                 <div class="flex items-center gap-2.5 flex-wrap">
-                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Jadwal Mengajar</h1>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200/70">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
-                        {{ $currentCabang['nama'] }}
-                    </span>
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        Proteksi Anti-Bentrok Lintas Cabang Aktif
-                    </span>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                        {{ $isGuru ? 'Jadwal Mengajar & Riwayat Kehadiran' : 'Jadwal Mengajar' }}
+                    </h1>
+                    @if($isGuru)
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/70">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            {{ $loggedGuru->nama ?? auth()->user()->name }} (Pengajar)
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                            UC-08
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200/70">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
+                            {{ $currentCabang['nama'] }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            Proteksi Anti-Bentrok Lintas Cabang Aktif
+                        </span>
+                    @endif
                 </div>
                 <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Atur jadwal sesi privat mingguan (Senin s/d Sabtu). Sistem secara otomatis mendeteksi dan mencegah bentrok jam mengajar guru meskipun berada di cabang yang berbeda.
+                    {{ $isGuru 
+                        ? 'Portal Pengajar: Pantau jadwal bimbingan privat mingguan Anda dan periksa log riwayat kehadiran presensi datang/pulang.' 
+                        : 'Atur jadwal sesi privat mingguan (Senin s/d Sabtu). Sistem secara otomatis mendeteksi dan mencegah bentrok jam mengajar guru meskipun berada di cabang yang berbeda.' }}
                 </p>
             </div>
 
-            <!-- Add Schedule Trigger Button -->
-            <button type="button" onclick="openModal('modal-tambah-jadwal')"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold text-xs shadow-xs transition-colors shrink-0">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>+ Buat Sesi Jadwal</span>
-            </button>
+            <!-- Action Button -->
+            @if($isGuru)
+                <a href="{{ route('presensi.scanner') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Scan Presensi QR (UC-09)</span>
+                </a>
+            @else
+                <button type="button" onclick="openModal('modal-tambah-jadwal')"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold text-xs shadow-xs transition-colors shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>+ Buat Sesi Jadwal</span>
+                </button>
+            @endif
         </div>
 
         <!-- Filter Toolbar -->
         <div class="mt-4">
-            <form method="GET" action="{{ route('jadwal.index') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <form method="GET" action="{{ route('jadwal.index') }}" class="grid grid-cols-1 {{ $isGuru ? 'sm:grid-cols-2' : 'sm:grid-cols-3' }} gap-3">
                 <input type="hidden" name="cabang_id" value="{{ request('cabang_id', $currentCabang['id']) }}">
 
                 <div>
@@ -54,6 +79,7 @@
                     </select>
                 </div>
 
+                @if(! $isGuru)
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Guru</label>
                     <select name="guru_id" onchange="this.form.submit()"
@@ -64,11 +90,12 @@
                         @endforeach
                     </select>
                 </div>
+                @endif
 
                 <div class="flex items-end gap-2">
                     <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 w-full flex items-center justify-between text-xs">
                         <span class="text-slate-500">Total Sesi:</span>
-                        <span class="font-bold text-slate-900 num-tabular">{{ $totalSesi }} Sesi ({{ $totalGuruTerjadwal }} Guru)</span>
+                        <span class="font-bold text-slate-900 num-tabular">{{ $totalSesi }} Sesi {{ $isGuru ? 'Mengajar Anda' : "($totalGuruTerjadwal Guru)" }}</span>
                     </div>
                     @if(request()->hasAny(['hari', 'guru_id']))
                         <a href="{{ route('jadwal.index', ['cabang_id' => request('cabang_id', $currentCabang['id'])]) }}"
@@ -108,6 +135,7 @@
                                     {{ substr($j->jam_mulai, 0, 5) }} - {{ substr($j->jam_selesai, 0, 5) }}
                                 </span>
 
+                                @if(! $isGuru)
                                 <!-- Delete Action Form -->
                                 <form method="POST" action="{{ route('web.jadwal.destroy', $j->id) }}" onsubmit="return confirm('Hapus sesi jadwal ini?');" class="opacity-0 group-hover:opacity-100 transition-opacity">
                                     @csrf
@@ -116,6 +144,7 @@
                                         &times;
                                     </button>
                                 </form>
+                                @endif
                             </div>
 
                             <!-- Teacher Name -->
@@ -195,6 +224,7 @@
                                     {{ $jd->cabang->nama ?? $currentCabang['nama'] }}
                                 </span>
                             </td>
+                            @if(! $isGuru)
                             <td class="py-3 px-4 text-right">
                                 <form method="POST" action="{{ route('web.jadwal.destroy', $jd->id) }}" onsubmit="return confirm('Hapus sesi jadwal {{ $jd->hari }} pukul {{ $jd->jam_mulai }}?');" class="inline">
                                     @csrf
@@ -206,10 +236,11 @@
                                     </button>
                                 </form>
                             </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-10 text-center text-slate-400 text-sm">
+                            <td colspan="{{ $isGuru ? '5' : '6' }}" class="py-10 text-center text-slate-400 text-sm">
                                 Tidak ada jadwal mengajar pada kriteria ini.
                             </td>
                         </tr>
@@ -219,8 +250,114 @@
         </div>
     </div>
 
+    @if($isGuru)
+    <!-- Riwayat Log Presensi & Kehadiran Guru (UC-08) -->
+    <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-2xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/70">
+            <div>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">Riwayat Log Kehadiran Saya</h2>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold border border-blue-200">
+                        UC-08
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Log riwayat scan presensi datang dan pulang mandiri Anda yang tercatat oleh sistem SIMANLES.
+                </p>
+            </div>
+            <a href="{{ route('presensi.scanner') }}"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition-colors shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                </svg>
+                <span>Buka Scanner Kamera (UC-09)</span>
+            </a>
+        </div>
+
+        @if(isset($riwayatPresensiGuru) && $riwayatPresensiGuru->isNotEmpty())
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50/60">
+                            <th class="py-2.5 px-3">Tanggal</th>
+                            <th class="py-2.5 px-3">Cabang</th>
+                            <th class="py-2.5 px-3">Jam Datang</th>
+                            <th class="py-2.5 px-3">Jam Pulang</th>
+                            <th class="py-2.5 px-3">Durasi</th>
+                            <th class="py-2.5 px-3 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach($riwayatPresensiGuru as $abs)
+                            @php
+                                $durasi = null;
+                                if ($abs->jam_datang && $abs->jam_pulang) {
+                                    $durasi = (int) $abs->jam_datang->diffInMinutes($abs->jam_pulang);
+                                }
+                            @endphp
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">
+                                    {{ $abs->tanggal ? $abs->tanggal->isoFormat('dddd, D MMMM Y') : '-' }}
+                                </td>
+                                <td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+                                    {{ $abs->cabang->nama ?? 'Cabang' }}
+                                </td>
+                                <td class="py-3 px-3 font-mono font-medium text-emerald-600 whitespace-nowrap">
+                                    {{ $abs->jam_datang ? $abs->jam_datang->format('H:i:s') . ' WIB' : '-' }}
+                                </td>
+                                <td class="py-3 px-3 font-mono font-medium text-slate-600 whitespace-nowrap">
+                                    {{ $abs->jam_pulang ? $abs->jam_pulang->format('H:i:s') . ' WIB' : '-' }}
+                                </td>
+                                <td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+                                    @if($durasi !== null)
+                                        <span class="font-semibold text-slate-800">{{ $durasi }} menit</span>
+                                    @elseif($abs->jam_datang)
+                                        <span class="text-amber-600 font-medium">Sedang berlangsung</span>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="py-3 px-3 text-right whitespace-nowrap">
+                                    @if($abs->jam_pulang)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            Selesai Mengajar
+                                        </span>
+                                    @elseif($abs->jam_datang)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                            Sedang Mengajar
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
+                                            Tercatat
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="py-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="text-xs font-semibold text-slate-700">Belum Ada Catatan Presensi</p>
+                <p class="text-[11px] text-slate-400 mt-0.5 max-w-sm mx-auto">
+                    Anda belum melakukan scan QR presensi. Buka kamera pemindai di cabang untuk mencatat jam datang.
+                </p>
+            </div>
+        @endif
+    </div>
+    @endif
+
 </div>
 
+@if(! $isGuru)
 <!-- Modal: Buat Jadwal Baru -->
 <div id="modal-tambah-jadwal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in duration-150">
@@ -303,5 +440,6 @@
         </form>
     </div>
 </div>
+@endif
 @endsection
 

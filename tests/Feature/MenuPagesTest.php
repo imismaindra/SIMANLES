@@ -19,6 +19,9 @@ class MenuPagesTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Dashboard Operasional');
         $response->assertSee('Sang Siroju Lillah');
+        $response->assertSee('dashboard-thumb-qr', false);
+        $response->assertSee('dashboard-modal-qr', false);
+        $response->assertSee('<svg', false);
     }
 
     public function test_siswa_page_loads_successfully(): void
@@ -55,6 +58,9 @@ class MenuPagesTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Presensi Guru', false);
         $response->assertSee('Kode Token Presensi:', false);
+        $response->assertSee('qr-code-wrapper', false);
+        $response->assertSee('kiosk-qr-wrapper', false);
+        $response->assertSee('<svg', false);
     }
 
     public function test_spp_page_loads_successfully(): void

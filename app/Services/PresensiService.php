@@ -7,6 +7,12 @@ use App\Models\Cabang;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\QrToken;
+use BaconQrCode\Renderer\Color\Rgb;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\Fill;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -45,8 +51,8 @@ class PresensiService
 
     /**
      * Proses scan QR presensi mandiri oleh guru:
-     * 1. Normalisasi token (mendukung format plain SIROJU-XXXX maupun URL scan)
-     * 2. Cek validitas & kedaluwarsa token QR (dengan grace period 45 detik untuk toleransi koneksi HP)
+     * 1. Normalisasi token (mendukung format plain SIROJU-XXXX, 4 digit angka, maupun URL scan)
+     * 2. Cek validitas & kedaluwarsa token QR (dengan grace period 45 detik untuk toleransi koneksi HP & clock drift)
      * 3. Cek apakah guru terdaftar di cabang yang menayangkan QR
      * 4. Smart Auto-Detect: otomatis mencatat jam_datang atau jam_pulang sesuai status hari ini
      *
@@ -69,32 +75,40 @@ class PresensiService
      */
     public function scan(string $token, string $guruId, ?string $requestedTipe = null): array
     {
-        // Normalisasi token: ekstrak token SIROJU-XXXX bila dikirim sebagai URL lengkap
+        // Normalisasi token: ekstrak token SIROJU-XXXX bila dikirim sebagai URL lengkap atau angka 4 digit
         $rawToken = trim($token);
         if (preg_match('/SIROJU-[\w\d]+/i', $rawToken, $matches)) {
             $normalizedToken = strtoupper($matches[0]);
+        } elseif (preg_match('/^\d{4,6}$/', $rawToken)) {
+            $normalizedToken = 'SIROJU-'.$rawToken;
         } else {
             $normalizedToken = strtoupper($rawToken);
         }
 
-        // Grace period 45 detik agar guru yang memuat halaman di HP tidak langsung gagal
-        $qr = QrToken::where('token', $normalizedToken)
+        // Cari token QR dengan grace period 45 detik untuk mengantisipasi jeda kamera/jaringan/clock-drift
+        $qr = QrToken::where(function ($q) use ($normalizedToken, $rawToken) {
+            $q->where('token', $normalizedToken)
+                ->orWhere('token', 'SIROJU-'.strtoupper($rawToken))
+                ->orWhere('token', strtoupper($rawToken));
+        })
             ->where('expires_at', '>', Carbon::now()->subSeconds(45))
+            ->latest('created_at')
             ->first();
 
         if (! $qr) {
             throw ValidationException::withMessages([
-                'token' => 'Kode QR telah kedaluwarsa atau tidak valid. Silakan scan kode terbaru pada layar cabang.',
+                'token' => 'Kode QR telah kedaluwarsa atau tidak valid. Silakan scan atau masukkan kode 4 digit terbaru pada layar cabang.',
             ]);
         }
 
-        $guru = Guru::with('cabang')->findOrFail($guruId);
+        $guru = Guru::with('cabang', 'user')->findOrFail($guruId);
 
         // Verifikasi keanggotaan guru di cabang yang menayangkan QR
         $isMember = DB::table('guru_cabang')
             ->where('guru_id', $guru->id)
             ->where('cabang_id', $qr->cabang_id)
-            ->exists();
+            ->exists()
+            || ($guru->user && $guru->user->cabang_id === $qr->cabang_id);
 
         if (! $isMember) {
             throw ValidationException::withMessages([
@@ -383,5 +397,22 @@ class PresensiService
             'next_action' => $nextAction,
             'status_label' => $statusLabel,
         ];
+    }
+
+    /**
+     * Render SVG QR Code string bersih tanpa deklarasi XML (inline SVG ready).
+     */
+    public function renderQrSvg(string $content, int $size = 220): string
+    {
+        $fill = Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(15, 23, 42));
+        $renderer = new ImageRenderer(
+            new RendererStyle($size, 1, null, null, $fill),
+            new SvgImageBackEnd
+        );
+        $writer = new Writer($renderer);
+
+        $svg = $writer->writeString($content);
+
+        return trim(preg_replace('/<\?xml.*?\?>/i', '', $svg));
     }
 }
