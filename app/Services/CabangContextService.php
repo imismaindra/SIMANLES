@@ -6,6 +6,7 @@ use App\Models\Cabang;
 use App\Models\Transaksi;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CabangContextService
 {
@@ -22,8 +23,22 @@ class CabangContextService
     public function getContext(?Request $request = null): array
     {
         $req = $request ?? request();
-        $viewRole = $req->query('role', 'cabang');
+        $user = Auth::user();
+
+        $viewRole = $req->query('role', $user?->role === 'pusat' ? 'pusat' : 'cabang');
         $selectedCabangParam = $req->query('cabang_id', 'cab-ponokawan');
+
+        if ($user) {
+            if ($user->role === 'cabang' && $user->cabang_id) {
+                $selectedCabangParam = $user->cabang_id;
+                $viewRole = 'cabang';
+            } elseif ($user->role === 'guru') {
+                $viewRole = 'guru';
+                if ($user->cabang_id && ! $req->filled('cabang_id')) {
+                    $selectedCabangParam = $user->cabang_id;
+                }
+            }
+        }
 
         $cabangs = Cabang::withCount(['siswa' => fn ($q) => $q->where('status', 'aktif')])->get();
 

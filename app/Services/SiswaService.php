@@ -164,6 +164,34 @@ class SiswaService
     }
 
     /**
+     * Update profil rincian data siswa.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function updateProfile(string $siswaId, array $data): Siswa
+    {
+        return DB::transaction(function () use ($siswaId, $data) {
+            $siswa = Siswa::findOrFail($siswaId);
+
+            $kelas = isset($data['kelas']) ? (int) $data['kelas'] : $siswa->kelas;
+            $jenjang = $data['jenjang'] ?? $this->resolveJenjangFromKelas($kelas);
+
+            $siswa->update([
+                'nama' => $data['nama'] ?? $siswa->nama,
+                'jenjang' => $jenjang,
+                'kelas' => $kelas,
+                'tempat_lahir' => $data['tempat_lahir'] ?? $siswa->tempat_lahir,
+                'tanggal_lahir' => $data['tanggal_lahir'] ?? $siswa->tanggal_lahir,
+                'alamat' => $data['alamat'] ?? $siswa->alamat,
+                'nama_ibu' => $data['nama_ibu'] ?? $siswa->nama_ibu,
+                'no_telp_ortu' => $data['no_telp_ortu'] ?? $siswa->no_telp_ortu,
+            ]);
+
+            return $siswa;
+        });
+    }
+
+    /**
      * Soft delete siswa (audit trail kas dan SPP masa lalu tetap utuh).
      */
     public function softDelete(string $siswaId): bool

@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Guru;
 use App\Models\Siswa;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class GuruService
@@ -170,6 +172,135 @@ class GuruService
                 'unassigned_count' => $unassignedCount,
                 'assignments' => $assignments,
             ];
+        });
+    }
+
+    /**
+     * Daftarkan guru baru beserta akun login dan relasi jenjang/cabang.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function createGuru(array $data): Guru
+    {
+        return DB::transaction(function () use ($data) {
+            $cabangId = $data['cabang_id'] ?? null;
+            $email = $data['email'] ?? ('guru_'.mt_rand(1000, 9999).'@lespintar.id');
+            $tglLahir = $data['tanggal_lahir'] ?? '1995-01-01';
+            $nip = $data['no_pegawai'] ?? ('NIP-'.mt_rand(10000, 99999));
+            $kualifikasi = (array) ($data['kualifikasi'] ?? [$data['jenjang'] ?? 'SD']);
+            $jenjangUtama = $data['jenjang'] ?? ($kualifikasi[0] ?? 'SD');
+
+            // 1. Buat User akun guru
+            $user = User::create([
+                'name' => $data['nama'],
+                'email' => $email,
+                'password' => Hash::make($tglLahir),
+                'role' => 'guru',
+                'no_pegawai' => $nip,
+                'tanggal_lahir' => $tglLahir,
+                'cabang_id' => $cabangId,
+                'is_active' => true,
+            ]);
+
+            // 2. Buat profil Guru
+            $guru = Guru::create([
+                'user_id' => $user->id,
+                'nama' => $data['nama'],
+                'email' => $email,
+                'no_telp' => $data['no_telp'] ?? '',
+                'no_pegawai' => $nip,
+                'tanggal_lahir' => $tglLahir,
+                'alamat' => $data['alamat'] ?? '',
+                'jenjang' => $jenjangUtama,
+                'is_active' => true,
+            ]);
+
+            // 3. Attach ke cabang
+            if ($cabangId) {
+                $guru->cabang()->syncWithoutDetaching([$cabangId]);
+            }
+
+            // 4. Attach kualifikasi jenjang
+            foreach ($kualifikasi as $j) {
+                DB::table('guru_jenjang')->updateOrInsert([
+                    'guru_id' => $guru->id,
+                    'jenjang' => $j,
+                ]);
+            }
+
+            return $guru;
+        });
+    }
+
+    /**
+     * Update data profil guru & kualifikasi jenjang.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function updateGuru(string $guruId, array $data): Guru
+    {
+        return DB::transaction(function () use ($guruId, $data) {
+            $guru = Guru::findOrFail($guruId);
+
+            $payload = [
+                'nama' => $data['nama'] ?? $guru->nama,
+                'no_telp' => $data['no_telp'] ?? $guru->no_telp,
+                'alamat' => $data['alamat'] ?? $guru->alamat,
+            ];
+
+            if (isset($data['is_active'])) {
+                $payload['is_active'] = (bool) $data['is_active'];
+            }
+
+            if (isset($data['jenjang'])) {
+                $payload['jenjang'] = $data['jenjang'];
+            }
+
+            $guru->update($payload);
+
+            if ($guru->user) {
+                $guru->user->update([
+                    'name' => $payload['nama'],
+                    'is_active' => $payload['is_active'] ?? $guru->user->is_active,
+                ]);
+            }
+
+            if (! empty($data['kualifikasi'])) {
+                DB::table('guru_jenjang')->where('guru_id', $guru->id)->delete();
+                foreach ((array) $data['kualifikasi'] as $j) {
+                    DB::table('guru_jenjang')->insert([
+                        'guru_id' => $guru->id,
+                        'jenjang' => $j,
+                    ]);
+                }
+            }
+
+            if (! empty($data['cabang_id'])) {
+                $guru->cabang()->syncWithoutDetaching([$data['cabang_id']]);
+            }
+
+            return $guru;
+        });
+    }
+
+    /**
+     * Hapus atau nonaktifkan guru.
+     */
+    public function deleteGuru(string $guruId): bool
+    {
+        return DB::transaction(function () use ($guruId) {
+            $guru = Guru::findOrFail($guruId);
+
+            // Lepas bimbingan siswa
+            Siswa::where('guru_id', $guruId)->update(['guru_id' => null]);
+
+            if ($guru->user) {
+                $guru->user->update(['is_active' => false]);
+            }
+
+            $guru->update(['is_active' => false]);
+
+            return true;
         });
     }
 }

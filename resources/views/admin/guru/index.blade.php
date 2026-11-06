@@ -24,13 +24,32 @@
                 </p>
             </div>
 
-            <!-- Auto-Assign Action Trigger Button -->
-            <div class="flex items-center gap-2.5 shrink-0">
+            <!-- Action Buttons: Import, Tambah Guru & Auto-Assign -->
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <!-- Trigger Import Excel Guru -->
+                <button type="button" onclick="openModal('modal-import-guru')"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 font-semibold text-xs border border-emerald-200/80 transition-colors">
+                    <svg class="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    <span>Import Excel</span>
+                </button>
+
+                <!-- Trigger Tambah Guru Baru -->
+                <button type="button" onclick="openModal('modal-tambah-guru')"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold text-xs shadow-xs transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span>+ Tambah Guru</span>
+                </button>
+
                 <form method="POST" action="{{ route('web.guru.auto-assign') }}" class="inline">
                     @csrf
                     <input type="hidden" name="cabang_id" value="{{ $currentCabang['id'] }}">
                     <button type="submit" {{ $unassignedStudents->isEmpty() ? 'disabled' : '' }}
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl {{ $unassignedStudents->isNotEmpty() ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold' : 'bg-slate-100 text-slate-400 cursor-not-allowed' }} text-xs shadow-xs transition-colors">
+                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl {{ $unassignedStudents->isNotEmpty() ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold' : 'bg-slate-100 text-slate-400 cursor-not-allowed' }} text-xs shadow-xs transition-colors">
                         <svg class="w-4 h-4 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
@@ -176,10 +195,29 @@
                                 </div>
                             </div>
 
-                            <!-- Full or Available Badge -->
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold {{ $isFull ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' }} shrink-0">
-                                {{ $isFull ? '6/6 PENUH' : 'Tersisa ' . (6 - $assignedCount) . ' Slot' }}
-                            </span>
+                            <!-- Actions & Status Badges -->
+                            <div class="flex items-center gap-1 shrink-0">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold {{ $isFull ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' }}">
+                                    {{ $isFull ? '6/6 PENUH' : 'Tersisa ' . (6 - $assignedCount) . ' Slot' }}
+                                </span>
+                                <!-- Edit Guru -->
+                                <button type="button" onclick='openEditGuru(@json($guru))'
+                                    class="p-1 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors" title="Edit Profil & Kualifikasi Guru">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <!-- Hapus / Nonaktifkan Guru -->
+                                <form method="POST" action="{{ route('web.guru.destroy', $guru->id) }}" onsubmit="return confirm('Nonaktifkan guru {{ $guru->nama }}? Seluruh siswa bimbingan akan dilepas ke antrean.');" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Nonaktifkan Guru">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
 
                         <!-- Kualifikasi Jenjang Badges -->
@@ -299,7 +337,219 @@
     </div>
 </div>
 
+<!-- Modal 2: Tambah Guru Baru -->
+<div id="modal-tambah-guru" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden my-8">
+        <div class="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/70">
+            <div>
+                <h3 class="font-bold text-base text-slate-900">Tambah Guru Baru</h3>
+                <p class="text-xs text-slate-500">Cabang Penempatan: <strong>{{ $currentCabang['nama'] }}</strong></p>
+            </div>
+            <button type="button" onclick="closeModal('modal-tambah-guru')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('web.guru.store') }}" class="p-5 sm:p-6 space-y-4">
+            @csrf
+            <input type="hidden" name="cabang_id" value="{{ $currentCabang['id'] }}">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Guru & Gelar *</label>
+                    <input type="text" name="nama" required placeholder="Contoh: Rina Novitasari, S.Pd."
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Pengguna (Untuk Login)</label>
+                    <input type="email" name="email" placeholder="guru@lespintar.id"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Pegawai / NIP</label>
+                    <input type="text" name="no_pegawai" placeholder="NIP-3105"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp / HP</label>
+                    <input type="text" name="no_telp" placeholder="08xxxxxxxxxx"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Lahir (Password Default Akun)</label>
+                    <input type="date" name="tanggal_lahir"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kualifikasi Jenjang Mengajar *</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        @foreach(['TK', 'SD', 'SMP', 'SMA_SMK'] as $jenjangOpt)
+                            <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-medium cursor-pointer hover:bg-slate-100">
+                                <input type="checkbox" name="kualifikasi[]" value="{{ $jenjangOpt }}" class="rounded text-blue-900 focus:ring-blue-600">
+                                <span>{{ $jenjangOpt === 'SMA_SMK' ? 'SMA / SMK' : $jenjangOpt }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Tempat Tinggal</label>
+                    <textarea name="alamat" rows="2" placeholder="Jl. Mawar No..."
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal('modal-tambah-guru')"
+                    class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs">
+                    Simpan Data Guru
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 3: Edit Profil & Kualifikasi Guru -->
+<div id="modal-edit-guru" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden my-8">
+        <div class="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/70">
+            <div>
+                <h3 class="font-bold text-base text-slate-900" id="modal-edit-guru-title">Edit Profil Guru</h3>
+                <p class="text-xs text-slate-500">Perbarui kontak dan kualifikasi jenjang mengajar</p>
+            </div>
+            <button type="button" onclick="closeModal('modal-edit-guru')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form id="form-edit-guru" method="POST" action="" class="p-5 sm:p-6 space-y-4">
+            @csrf
+            @method('PUT')
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Guru & Gelar *</label>
+                    <input type="text" name="nama" id="edit-guru-nama" required
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp / HP</label>
+                    <input type="text" name="no_telp" id="edit-guru-telp" placeholder="08xxxxxxxxxx"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kualifikasi Jenjang Mengajar *</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        @foreach(['TK', 'SD', 'SMP', 'SMA_SMK'] as $jenjangOpt)
+                            <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-medium cursor-pointer hover:bg-slate-100">
+                                <input type="checkbox" name="kualifikasi[]" value="{{ $jenjangOpt }}" id="edit-kualifikasi-{{ $jenjangOpt }}" class="rounded text-blue-900 focus:ring-blue-600">
+                                <span>{{ $jenjangOpt === 'SMA_SMK' ? 'SMA / SMK' : $jenjangOpt }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Tempat Tinggal</label>
+                    <textarea name="alamat" id="edit-guru-alamat" rows="2"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal('modal-edit-guru')"
+                    class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 4: Import Guru Excel -->
+<div id="modal-import-guru" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200/80">
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Import Data Guru (Excel / CSV)</h3>
+                <p class="text-xs text-slate-500">Cabang Penempatan: <strong>{{ $currentCabang['nama'] }}</strong></p>
+            </div>
+            <button type="button" onclick="closeModal('modal-import-guru')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('web.guru.import') }}" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <input type="hidden" name="cabang_id" value="{{ $currentCabang['id'] }}">
+
+            <div class="p-3 bg-blue-50/70 border border-blue-200/70 rounded-xl text-xs text-blue-900 space-y-1">
+                <p class="font-bold">Format Kolom Header Excel:</p>
+                <p class="font-mono text-[11px] bg-white p-1.5 rounded border border-blue-200">
+                    nama, email, no_pegawai, no_telp, tanggal_lahir, alamat, kualifikasi
+                </p>
+                <p class="text-[11px] text-blue-800 mt-1">Kolom kualifikasi dapat diisi dipisahkan koma, contoh: <code>SD,SMP</code>.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Pilih File (.xlsx, .xls, .csv) *</label>
+                <input type="file" name="file" required accept=".xlsx,.xls,.csv"
+                    class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-900 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-xl p-1 bg-slate-50">
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button type="button" onclick="closeModal('modal-import-guru')"
+                    class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold shadow-xs">
+                    Mulai Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    function openEditGuru(data) {
+        document.getElementById('form-edit-guru').action = '/guru/' + data.id;
+        document.getElementById('modal-edit-guru-title').textContent = 'Edit Guru: ' + data.nama;
+        document.getElementById('edit-guru-nama').value = data.nama || '';
+        document.getElementById('edit-guru-telp').value = data.no_telp || '';
+        document.getElementById('edit-guru-alamat').value = data.alamat || '';
+
+        // Checkboxes
+        ['TK', 'SD', 'SMP', 'SMA_SMK'].forEach(function(jj) {
+            const cb = document.getElementById('edit-kualifikasi-' + jj);
+            if (cb) {
+                cb.checked = (data.jenjang_list || []).includes(jj);
+            }
+        });
+
+        openModal('modal-edit-guru');
+    }
     function openAssignModal(guruId, guruNama, guruJenjangStr) {
         document.getElementById('assign-guru-id').value = guruId;
         document.getElementById('modal-assign-title').textContent = 'Tugaskan Siswa ke ' + guruNama;

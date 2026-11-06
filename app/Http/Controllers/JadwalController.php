@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Absensi;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Siswa;
@@ -11,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class JadwalController extends Controller
@@ -22,21 +24,28 @@ class JadwalController extends Controller
     {
         $context = $contextService->getContext($request);
         $cabangId = $context['cabangId'];
+        $user = Auth::user();
+        $isGuru = $user?->role === 'guru';
+        $loggedGuru = $isGuru ? $user->guru : null;
 
         $query = Jadwal::with(['guru', 'siswa', 'cabang']);
 
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->query('cabang_id'));
-        } elseif ($context['viewRole'] !== 'pusat') {
-            $query->where('cabang_id', $cabangId);
+        if ($isGuru && $loggedGuru) {
+            $query->where('guru_id', $loggedGuru->id);
+        } else {
+            if ($request->filled('cabang_id')) {
+                $query->where('cabang_id', $request->query('cabang_id'));
+            } elseif ($context['viewRole'] !== 'pusat') {
+                $query->where('cabang_id', $cabangId);
+            }
+
+            if ($request->filled('guru_id')) {
+                $query->where('guru_id', $request->query('guru_id'));
+            }
         }
 
         if ($request->filled('hari')) {
             $query->where('hari', $request->query('hari'));
-        }
-
-        if ($request->filled('guru_id')) {
-            $query->where('guru_id', $request->query('guru_id'));
         }
 
         $jadwalList = $query->orderByRaw("CASE hari WHEN 'Senin' THEN 1 WHEN 'Selasa' THEN 2 WHEN 'Rabu' THEN 3 WHEN 'Kamis' THEN 4 WHEN 'Jumat' THEN 5 WHEN 'Sabtu' THEN 6 ELSE 7 END")
@@ -48,6 +57,17 @@ class JadwalController extends Controller
         $jadwalPerHari = [];
         foreach ($hariList as $h) {
             $jadwalPerHari[$h] = $jadwalList->where('hari', $h);
+        }
+
+        // Riwayat kehadiran khusus guru (UC-08: Melihat Jadwal dan Riwayat Kehadiran)
+        $riwayatPresensiGuru = collect();
+        if ($isGuru && $loggedGuru) {
+            $riwayatPresensiGuru = Absensi::with('cabang')
+                ->where('guru_id', $loggedGuru->id)
+                ->orderBy('tanggal', 'desc')
+                ->orderBy('jam_datang', 'desc')
+                ->take(30)
+                ->get();
         }
 
         // Daftar Guru & Siswa untuk form tambah jadwal
@@ -73,7 +93,10 @@ class JadwalController extends Controller
             'totalSesi',
             'totalGuruTerjadwal',
             'currentCabang',
-            'context'
+            'context',
+            'isGuru',
+            'loggedGuru',
+            'riwayatPresensiGuru'
         ));
     }
 

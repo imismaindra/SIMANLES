@@ -545,24 +545,11 @@
                     <div class="mt-4 flex items-center gap-4">
                         <!-- Live Dynamic QR Thumbnail (Responsive size) -->
                         <div onclick="openModal('modal-qr-display')"
-                            class="w-18 h-18 sm:w-20 sm:h-20 bg-white rounded-xl p-1.5 flex flex-col items-center justify-center shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform shadow-md border border-blue-200/60"
+                            class="w-18 h-18 sm:w-20 sm:h-20 bg-white rounded-xl p-1 flex flex-col items-center justify-center shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform shadow-md border border-blue-200/60 overflow-hidden"
                             title="Klik untuk perbesar layar QR">
-                            <svg class="w-8 h-8 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                                <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                                <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                                <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                                <rect x="7" y="7" width="3" height="3" rx="0.5" />
-                                <rect x="14" y="7" width="3" height="3" rx="0.5" />
-                                <rect x="7" y="14" width="3" height="3" rx="0.5" />
-                                <path d="M14 14h.01" />
-                                <path d="M17 14v3" />
-                                <path d="M14 17h3" />
-                            </svg>
-                            <span class="text-[9px] text-blue-900 font-bold font-mono mt-0.5 truncate max-w-full">
-                                {{ $qrTokenSession['token'] }}
-                            </span>
+                            <div id="dashboard-thumb-qr" class="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
+                                {!! $qrSvgThumbnail !!}
+                            </div>
                         </div>
 
                         <div class="space-y-1 text-xs min-w-0">
@@ -838,25 +825,25 @@
             <h3 class="text-lg sm:text-xl font-bold text-slate-900">{{ $currentCabang['nama'] }}</h3>
             <p class="text-xs text-slate-500 mt-1">Scan kode QR dinamis di bawah via browser kamera guru.</p>
 
-            <!-- Big Dynamic QR Code Simulation -->
+            <!-- Big Dynamic QR Code Container -->
             <div
-                class="mt-5 mx-auto w-48 h-48 sm:w-56 sm:h-56 bg-slate-50 border-4 border-slate-900 rounded-2xl p-4 flex flex-col items-center justify-center shadow-inner relative">
-                <div
-                    class="w-full h-full border-2 border-slate-300 border-dashed rounded-xl flex flex-col items-center justify-center font-mono text-center">
-                    <div
-                        class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center p-1 mb-1 shadow-2xs">
-                        <img src="{{ asset('logo.png') }}" alt="Logo" class="w-full h-full object-contain">
-                    </div>
-                    <span class="text-[11px] text-slate-400 font-sans">Token Presensi Dinamis</span>
-                    <span class="text-base sm:text-lg font-bold text-blue-900 tracking-wider mt-0.5"
-                        id="big-qr-token">SIROJU-8492</span>
+                class="mt-5 mx-auto w-52 h-52 sm:w-60 sm:h-60 bg-white border-4 border-slate-900 rounded-2xl p-3 flex flex-col items-center justify-center shadow-xl relative">
+                <div id="dashboard-modal-qr"
+                    class="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
+                    {!! $qrSvg !!}
                 </div>
 
                 <!-- Floating countdown badge -->
                 <div
                     class="absolute -bottom-3 px-3 py-0.5 rounded-full bg-slate-900 text-white text-[11px] font-bold shadow-md whitespace-nowrap">
-                    Kadaluarsa: <span id="modal-countdown" class="text-amber-400">18 detik</span>
+                    Kadaluarsa: <span id="modal-countdown" class="text-amber-400">{{ $qrTokenSession['expires_in_seconds'] ?? 25 }} detik</span>
                 </div>
+            </div>
+
+            <div class="mt-4 flex flex-col items-center">
+                <span class="text-xs text-slate-400 font-medium uppercase tracking-wider">Kode Token Presensi:</span>
+                <span class="text-base sm:text-lg font-bold font-mono tracking-widest text-blue-900 mt-0.5 bg-slate-100 px-3 py-1 rounded-lg"
+                    id="big-qr-token">{{ $qrTokenSession['token'] ?? 'SIROJU-8492' }}</span>
             </div>
 
             <div class="mt-7 flex flex-col sm:flex-row items-center justify-center gap-2">
@@ -1011,8 +998,8 @@
 
     @push('scripts')
         <script>
-            let countdown = 18;
-            let currentQrSesi = 'datang';
+            let countdown = {{ $qrTokenSession['expires_in_seconds'] ?? 25 }};
+            let currentQrSesi = '{{ $qrTokenSession['tipe'] ?? 'datang' }}';
 
             setInterval(() => {
                 countdown--;
@@ -1104,6 +1091,12 @@
                         const bigEl = document.getElementById('big-qr-token');
                         if (liveEl) liveEl.textContent = token;
                         if (bigEl) bigEl.textContent = token;
+                        if (data.data.qr_svg) {
+                            const modalQr = document.getElementById('dashboard-modal-qr');
+                            if (modalQr) modalQr.innerHTML = data.data.qr_svg;
+                            const thumbQr = document.getElementById('dashboard-thumb-qr');
+                            if (thumbQr) thumbQr.innerHTML = data.data.qr_svg;
+                        }
                         return;
                     }
                 } catch (e) {
