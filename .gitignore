@@ -16,7 +16,7 @@
 /.zed
 /auth.json
 /node_modules
-/public/hot
+# /public/hot
 /public/fonts-manifest.dev.json
 /storage/*.key
 /storage/pail
