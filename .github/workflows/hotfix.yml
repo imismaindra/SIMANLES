@@ -41,6 +41,30 @@ jobs:
       - name: Build production assets
         run: npm run build
 
+      # --- Bundle project files (excluding dev & runtime files) ---
+      - name: Create deployment bundle
+        run: |
+          tar -czf deploy.tar.gz \
+            --exclude='deploy.tar.gz' \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='vendor' \
+            --exclude='storage' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='tests' \
+            --exclude='phpunit.xml' \
+            --exclude='*.md' \
+            --exclude='AGENTS.md' \
+            --exclude='CLAUDE.md' \
+            --exclude='skills-lock.json' \
+            --exclude='boost.json' \
+            --exclude='opencode.json' \
+            --exclude='.npmrc' \
+            --exclude='.editorconfig' \
+            .
+
       - name: Put app in maintenance mode
         uses: appleboy/ssh-action@v1
         with:
@@ -52,17 +76,16 @@ jobs:
             cd ${{ secrets.APP_PATH }}
             php artisan down --retry=5 || true
 
-      - name: Sync files via SSH (Rsync)
-        uses: easingthemes/ssh-deploy@v5.1.0
+      # --- Upload bundle to server via SCP ---
+      - name: Upload bundle to server
+        uses: appleboy/scp-action@v0.1.7
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
-          REMOTE_PORT: ${{ secrets.SSH_PORT || 45022 }}
-          TARGET: ${{ secrets.APP_PATH }}
-          SOURCE: "./"
-          ARGS: "-rlgoDzvc -i"
-          EXCLUDE: "/.git/, /.github/, /node_modules/, /vendor/, .env, .env.*, /storage/app/, /storage/logs/, /storage/framework/sessions/, /storage/framework/cache/, /tests/, /phpunit.xml, *.md, /AGENTS.md, /CLAUDE.md, /skills-lock.json, /boost.json, /opencode.json, .npmrc, .editorconfig"
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 45022 }}
+          source: "deploy.tar.gz"
+          target: ${{ secrets.APP_PATH }}
 
       - name: Post-deploy commands
         uses: appleboy/ssh-action@v1
@@ -74,6 +97,8 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.APP_PATH }}
+            tar -xzf deploy.tar.gz
+            rm -f deploy.tar.gz
             composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
             ${{ inputs.skip_migrations == 'false' && 'php artisan migrate --force' || 'echo "Skipping migrations"' }}
             php artisan optimize
