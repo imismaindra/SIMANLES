@@ -18,7 +18,6 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('logo.png');
         $response->assertSee('Dashboard Operasional');
         $response->assertSee('Cabang Ponokawan');
-        $response->assertSee('Auto-Assign');
         $response->assertSee('Kapasitas Slot Guru');
         $response->assertSee('Jadwal Sesi Mengajar Hari Ini');
         $response->assertSee('KW/CAB-PNK/2026/10/');

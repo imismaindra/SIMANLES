@@ -841,73 +841,6 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL: HASIL 1-KLIK AUTO-ASSIGN SISWA -->
-    <!-- ========================================================================= -->
-    <div id="modal-auto-assign-result"
-        class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-        <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-xl border border-slate-200"
-            onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-                <div class="flex items-center gap-2">
-                    <div
-                        class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold shrink-0">
-                        ✓
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900">1-Klik Auto-Assign Selesai</h3>
-                        <p class="text-xs text-slate-500">Pasangkan siswa berdasarkan jenjang & sisa slot terendah.</p>
-                    </div>
-                </div>
-                <button type="button" onclick="closeModal('modal-auto-assign-result')"
-                    class="p-2 -mr-1 text-slate-400 hover:text-slate-600 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="mt-4 space-y-3 text-xs">
-                <div id="auto-assign-badge"
-                    class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 leading-relaxed">
-                    <strong>5 Siswa Berhasil Ditugaskan!</strong> Kuota guru pembimbing tetap berada dalam batas aturan
-                    (maksimal 6 siswa aktif).
-                </div>
-
-                <ul id="auto-assign-list"
-                    class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                    <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1 bg-slate-50">
-                        <span class="font-medium text-slate-800">Arkan Naufal (SD Kelas 5)</span>
-                        <strong class="text-blue-900">→ Dian Maharani, S.Pd. (Slot 5/6)</strong>
-                    </li>
-                    <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1">
-                        <span class="font-medium text-slate-800">Clara Michelle (SMP Kelas 8)</span>
-                        <strong class="text-blue-900">→ Sarah Az-Zahra, M.Pd. (Slot 6/6 Penuh)</strong>
-                    </li>
-                    <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1 bg-slate-50">
-                        <span class="font-medium text-slate-800">Dimas Bagus (SD Kelas 3)</span>
-                        <strong class="text-blue-900">→ Dian Maharani, S.Pd. (Slot 6/6 Penuh)</strong>
-                    </li>
-                    <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1">
-                        <span class="font-medium text-slate-800">Fathia Rahma (TK B)</span>
-                        <strong class="text-blue-900">→ Lestari Handayani, S.Pd. (Slot 4/6)</strong>
-                    </li>
-                    <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1 bg-slate-50">
-                        <span class="font-medium text-slate-800">Gilang Ramadhan (SMA Kelas 11)</span>
-                        <strong class="text-blue-900">→ Ahmad Zakaria, M.Sc. (Slot 6/6 Penuh)</strong>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="mt-5 pt-3 border-t border-slate-200 flex items-center justify-end">
-                <button type="button" onclick="closeModal('modal-auto-assign-result'); window.location.reload();"
-                    class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800">
-                    Terapkan & Muat Ulang
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================================================= -->
     <!-- MODAL: PELUNASAN SPP & TERBITKAN KWITANSI RESMI -->
     <!-- ========================================================================= -->
     <div id="modal-bayar-spp"
@@ -1000,42 +933,6 @@
                 const diskon = parseInt(diskonInput.value) || 0;
                 const total = Math.max(0, biaya - diskon);
                 document.getElementById('reg-total-bayar').textContent = 'Rp ' + total.toLocaleString('id-ID');
-            }
-
-            async function runAutoAssign() {
-                try {
-                    const res = await fetch('/api/guru/auto-assign', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ cabang_id: '{{ $currentCabang['id'] }}' })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        const listEl = document.getElementById('auto-assign-list');
-                        const badgeEl = document.getElementById('auto-assign-badge');
-                        if (badgeEl) {
-                            badgeEl.innerHTML = `<strong>${data.data.assigned_count} Siswa Berhasil Ditugaskan!</strong> Kuota guru pembimbing tetap berada dalam batas aturan (maksimal 6 siswa aktif).`;
-                        }
-                        if (listEl && data.data.assignments && data.data.assignments.length) {
-                            listEl.innerHTML = data.data.assignments.map((item, idx) => `
-                                <li class="p-2.5 flex flex-col sm:flex-row sm:justify-between gap-1 ${idx % 2 === 0 ? 'bg-slate-50' : ''}">
-                                    <span class="font-medium text-slate-800">${item.siswa_nama} (${item.jenjang})</span>
-                                    <strong class="text-blue-900">→ ${item.guru_nama} (Slot ${item.slot_terisi}/6)</strong>
-                                </li>
-                            `).join('');
-                        }
-                        openModal('modal-auto-assign-result');
-                    } else {
-                        alert(data.message || 'Auto assign belum menemukan siswa antre.');
-                    }
-                } catch (e) {
-                    console.error(e);
-                    openModal('modal-auto-assign-result');
-                }
             }
 
             async function toggleQrSesi() {

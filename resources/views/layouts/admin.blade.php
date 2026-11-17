@@ -40,7 +40,7 @@
         }
         @media (min-width: 1024px) {
             #admin-sidebar.desktop-collapsed {
-                margin-left: -15rem !important;
+                margin-left: -17.5rem !important;
                 opacity: 0 !important;
                 pointer-events: none !important;
             }
@@ -67,74 +67,49 @@
 
         <!-- Sidebar Navigation (Drawer on Mobile, Fitted Sticky on Desktop, Smooth Collapse) -->
         <aside id="admin-sidebar"
-            class="fixed inset-y-0 left-0 z-50 lg:z-30 w-60 h-screen bg-slate-50 dark:bg-slate-900 border-r border-slate-200/90 dark:border-slate-800 flex flex-col justify-between -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 shadow-2xl lg:shadow-none shrink-0 overflow-hidden">
-            <div class="flex flex-col h-full overflow-y-auto px-3.5 py-4">
+            class="fixed inset-y-0 left-0 z-50 lg:z-30 w-64 h-screen lg:h-[calc(100vh-1.25rem)] lg:my-2.5 lg:ml-2.5 rounded-none lg:rounded-2xl bg-[#031738] border-r lg:border border-slate-800/90 flex flex-col justify-between -translate-x-full lg:translate-x-0 lg:sticky lg:top-2.5 shadow-2xl shrink-0 overflow-hidden text-slate-300">
+            <div class="flex flex-col h-full overflow-y-auto px-4 py-4 select-none scrollbar-none">
                 <!-- Brand Header -->
-                <div class="flex items-center justify-between pb-3 border-b border-slate-200/70 dark:border-slate-800">
-                    <a href="{{ $isGuru ? route('jadwal.index') : route('admin.dashboard') }}" class="flex items-center gap-2.5 group min-w-0">
-                        <!-- Custom Academic Brand Logo -->
-                        <div
-                            class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs flex items-center justify-center p-1 group-hover:border-blue-400 group-hover:shadow-xs transition-all shrink-0">
+                <div class="flex items-center justify-between pb-3.5 border-b border-white/10">
+                    <a href="{{ $isGuru ? route('jadwal.index') : route('admin.dashboard') }}" class="flex items-center gap-3 group min-w-0">
+                        <!-- Custom Brand Logo Box -->
+                        <div class="w-10 h-10 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                             <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah"
                                 class="w-full h-full object-contain">
                         </div>
                         <div class="min-w-0">
-                            <div class="flex items-center gap-1">
-                                <span class="font-bold text-xs sm:text-[13px] tracking-tight text-slate-900 dark:text-white truncate">Sang
-                                    Siroju Lillah</span>
-                                <span
-                                    class="text-[8px] uppercase font-bold tracking-wider px-1 py-0.2 rounded {{ $isPusat ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-300' : ($isCabang ? 'bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-300' : 'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300') }} shrink-0">
-                                    {{ $isPusat ? 'Pusat' : ($isCabang ? 'Cabang' : 'Guru') }}
-                                </span>
-                            </div>
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">LKP Tempat Les & Bimbel</p>
+                            <h2 class="font-bold text-sm text-white tracking-tight leading-tight truncate">
+                                SIMANLES LKP
+                            </h2>
+                            <p class="text-[10px] font-bold tracking-wider uppercase text-blue-300/70 mt-0.5 truncate">
+                                {{ $isPusat ? 'ADMIN PUSAT' : ($isCabang ? 'PIMPINAN CABANG' : 'GURU PENGAJAR') }}
+                            </p>
                         </div>
                     </a>
 
-                    <!-- Sidebar Toggle Actions (Desktop Collapse & Mobile Close) -->
+                    <!-- Sidebar Toggle Actions -->
                     <div class="flex items-center gap-0.5 shrink-0">
                         <!-- Desktop Collapse Button -->
                         <button type="button" onclick="toggleSidebar()"
-                            class="hidden lg:flex p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-md transition-colors"
+                            class="hidden lg:flex p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                             title="Tutup Sidebar">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                             </svg>
                         </button>
                         <!-- Mobile Close button -->
                         <button type="button" onclick="toggleMobileMenu(false)"
-                            class="p-1.5 -mr-1 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg lg:hidden"
+                            class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg lg:hidden"
                             aria-label="Tutup menu">
-                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- Multi-Cabang Context Switcher -->
-                <div class="mt-3 p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 shadow-2xs">
-                    <label class="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                        {{ $isPusat ? 'Lingkup: Pusat (Semua Cabang)' : 'Cabang Bertugas' }}
-                    </label>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-1.5 min-w-0">
-                            <span
-                                class="w-1.5 h-1.5 rounded-full {{ $isPusat ? 'bg-indigo-600' : 'bg-emerald-500' }} shrink-0"></span>
-                            <div class="truncate">
-                                <p class="text-[11px] font-semibold text-slate-900 dark:text-white truncate">
-                                    {{ $currentCabang['nama'] ?? 'Cabang Ponokawan' }}
-                                </p>
-                                <p class="text-[9.5px] text-slate-400 font-mono truncate">
-                                    Kode: {{ $currentCabang['kode'] ?? 'CAB-PNK' }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Navigation Links -->
-                <nav class="mt-3 space-y-1.5 flex-1 text-xs">
+                <nav class="mt-4 space-y-1.5 flex-1 text-xs">
                     @php
                         $catOperasionalActive = request()->routeIs('siswa.*', 'guru.*');
                         $catAkademikActive = request()->routeIs('jadwal.*', 'presensi.*');
@@ -143,53 +118,40 @@
                     @endphp
 
                     @if(! $isGuru)
-                    <!-- Standalone Top Item: Dashboard -->
+                    <!-- Standalone Top Item: Dashboard Utama -->
                     <a href="{{ route('admin.dashboard', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                        class="flex items-center gap-2 px-2.5 py-2 rounded-lg {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'bg-blue-900 text-white font-semibold shadow-xs' : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80 font-medium' }} transition-colors mb-1">
-                        <svg class="w-4 h-4 {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'text-blue-200' : 'text-slate-500 dark:text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <rect width="7" height="9" x="3" y="3" rx="1" />
-                            <rect width="7" height="5" x="14" y="3" rx="1" />
-                            <rect width="7" height="9" x="14" y="12" rx="1" />
-                            <rect width="7" height="5" x="3" y="16" rx="1" />
+                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'bg-blue-600 text-white font-semibold shadow-lg shadow-blue-600/30' : 'text-slate-300 hover:text-white hover:bg-white/5 font-medium' }} transition-all mb-2">
+                        <svg class="w-4 h-4 {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'text-white' : 'text-blue-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
-                        <span class="font-semibold">Dashboard Cabang</span>
+                        <span class="text-xs font-semibold">Dashboard Utama</span>
                     </a>
 
-                    <!-- Dropdown: Operasional Cabang -->
+                    <!-- Dropdown: Operasional Cabang / Data Pengguna -->
                     <details class="group select-none" {{ $catOperasionalActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/70 font-semibold cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
-                                <span class="text-[11px] uppercase tracking-wider font-bold">Operasional Cabang</span>
+                                <span class="font-medium text-xs">Data Pengguna & Cabang</span>
                             </div>
                             <svg class="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform duration-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <ul class="space-y-0.5 mt-1 pl-2 border-l border-slate-200/80 dark:border-slate-800 ml-3.5 py-0.5">
+                        <ul class="space-y-1 mt-1 pl-4 ml-3.5 border-l border-white/10 py-1">
                             <li>
                                 <a href="{{ route('siswa.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('siswa.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 {{ request()->routeIs('siswa.*') ? 'text-blue-200' : 'text-emerald-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <line x1="19" y1="8" x2="19" y2="14" />
-                                        <line x1="22" y1="11" x2="16" y2="11" />
-                                    </svg>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('siswa.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('siswa.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Data & Pendaftaran Siswa</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('guru.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('guru.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 {{ request()->routeIs('guru.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                    </svg>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('guru.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('guru.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Distribusi & Guru</span>
                                 </a>
                             </li>
@@ -197,75 +159,49 @@
                     </details>
                     @endif
 
-                    <!-- Dropdown: Akademik & Jadwal -->
+                    <!-- Dropdown: Akademik -->
                     <details class="group select-none" {{ $catAkademikActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/70 font-semibold cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                                    <line x1="16" x2="16" y1="2" y2="6" />
-                                    <line x1="8" x2="8" y1="2" y2="6" />
-                                    <line x1="3" x2="21" y1="10" y2="10" />
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                                    <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                                 </svg>
-                                <span class="text-[11px] uppercase tracking-wider font-bold">Akademik & Jadwal</span>
+                                <span class="font-medium text-xs">Akademik</span>
                             </div>
                             <svg class="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform duration-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <ul class="space-y-0.5 mt-1 pl-2 border-l border-slate-200/80 dark:border-slate-800 ml-3.5 py-0.5">
+                        <ul class="space-y-1 mt-1 pl-4 ml-3.5 border-l border-white/10 py-1">
                             @if($isGuru)
                             <li>
                                 <a href="{{ route('jadwal.index') }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('jadwal.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 shrink-0 {{ request()->routeIs('jadwal.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                                        <line x1="16" x2="16" y1="2" y2="6" />
-                                        <line x1="8" x2="8" y1="2" y2="6" />
-                                        <line x1="3" x2="21" y1="10" y2="10" />
-                                    </svg>
-                                    <span class="truncate">Jadwal & Riwayat Hadir</span>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('jadwal.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('jadwal.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    <span>Jadwal & Riwayat Hadir</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('presensi.scanner') }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('presensi.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 shrink-0 {{ request()->routeIs('presensi.*') ? 'text-blue-200' : 'text-emerald-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <span class="truncate">Scan Presensi QR</span>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('presensi.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('presensi.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    <span>Scan Presensi QR</span>
                                 </a>
                             </li>
                             @else
                             <li>
                                 <a href="{{ route('jadwal.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('jadwal.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 shrink-0 {{ request()->routeIs('jadwal.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                                        <line x1="16" x2="16" y1="2" y2="6" />
-                                        <line x1="8" x2="8" y1="2" y2="6" />
-                                        <line x1="3" x2="21" y1="10" y2="10" />
-                                    </svg>
-                                    <span class="truncate">Jadwal Mengajar</span>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('jadwal.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('jadwal.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    <span>Jadwal Mengajar</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('presensi.index', 'presensi') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 shrink-0 {{ request()->routeIs('presensi.index', 'presensi') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                                        <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                                        <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                                        <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                                        <rect x="7" y="7" width="3" height="3" rx="0.5" />
-                                        <rect x="14" y="7" width="3" height="3" rx="0.5" />
-                                        <rect x="7" y="14" width="3" height="3" rx="0.5" />
-                                        <path d="M14 14h.01" />
-                                        <path d="M17 14v3" />
-                                        <path d="M14 17h3" />
-                                    </svg>
-                                    <span class="truncate">Layar QR & Presensi</span>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('presensi.index', 'presensi') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('presensi.index', 'presensi') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    <span>Layar QR & Presensi</span>
                                 </a>
                             </li>
                             @endif
@@ -275,36 +211,29 @@
                     @if(! $isGuru)
                     <!-- Dropdown: Keuangan & Kas -->
                     <details class="group select-none" {{ $catKeuanganActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/70 font-semibold cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" x2="12" y1="2" y2="22" />
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                 </svg>
-                                <span class="text-[11px] uppercase tracking-wider font-bold">Keuangan & Kas</span>
+                                <span class="font-medium text-xs">Keuangan & Kas</span>
                             </div>
                             <svg class="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform duration-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <ul class="space-y-0.5 mt-1 pl-2 border-l border-slate-200/80 dark:border-slate-800 ml-3.5 py-0.5">
+                        <ul class="space-y-1 mt-1 pl-4 ml-3.5 border-l border-white/10 py-1">
                             <li>
                                 <a href="{{ route('spp.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('spp.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 {{ request()->routeIs('spp.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <rect width="20" height="14" x="2" y="5" rx="2" />
-                                        <line x1="2" x2="22" y1="10" y2="10" />
-                                    </svg>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('spp.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('spp.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Tagihan & SPP Siswa</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('kas.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('kas.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 {{ request()->routeIs('kas.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <line x1="12" x2="12" y1="2" y2="22" />
-                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                                    </svg>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('kas.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('kas.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Buku Kas & Kwitansi</span>
                                 </a>
                             </li>
@@ -313,37 +242,31 @@
                     @endif
 
                     @if($isPusat)
-                    <!-- Dropdown: Master & Keamanan -->
+                    <!-- Dropdown: Informasi & Keamanan -->
                     <details class="group select-none" {{ $catMasterActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/70 font-semibold cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-colors">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <svg class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span class="text-[11px] uppercase tracking-wider font-bold">Master & Keamanan</span>
+                                <span class="font-medium text-xs">Informasi & Keamanan</span>
                             </div>
                             <svg class="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform duration-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <ul class="space-y-0.5 mt-1 pl-2 border-l border-slate-200/80 dark:border-slate-800 ml-3.5 py-0.5">
+                        <ul class="space-y-1 mt-1 pl-4 ml-3.5 border-l border-white/10 py-1">
                             <li>
                                 <a href="{{ route('pengaturan.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('pengaturan.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 {{ request()->routeIs('pengaturan.*') ? 'text-blue-200' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="3" />
-                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                                    </svg>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('pengaturan.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('pengaturan.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Master Data & Cabang</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('audit.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                                    class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg {{ request()->routeIs('audit.*') ? 'bg-blue-900 text-white font-medium shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 font-medium' }} transition-colors">
-                                    <svg class="w-3.5 h-3.5 {{ request()->routeIs('audit.*') ? 'text-blue-200' : 'text-sky-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('audit.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('audit.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Audit Log & Keamanan</span>
                                 </a>
                             </li>
@@ -352,34 +275,31 @@
                     @endif
                 </nav>
 
-                <!-- Sidebar Footer: Logged in User & Logout -->
-                <div class="pt-3 border-t border-slate-200/80 dark:border-slate-800 mt-auto">
-                    <div class="p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs">
-                        <div class="flex items-center justify-between gap-1.5 min-w-0">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <div
-                                    class="w-7 h-7 rounded-full bg-blue-900 text-white font-semibold flex items-center justify-center text-xs shrink-0">
-                                    {{ strtoupper(substr($authUser?->name ?? $currentCabang['pimpinan'] ?? 'U', 0, 2)) }}
-                                </div>
-                                <div class="truncate">
-                                    <p class="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                                        {{ $authUser?->name ?? $currentCabang['pimpinan'] ?? 'Pimpinan Cabang' }}
-                                    </p>
-                                    <p class="text-[9.5px] text-slate-500 dark:text-slate-400 truncate">
-                                        {{ $isPusat ? 'Pimpinan Pusat' : ($isCabang ? 'Pimpinan Cabang' : 'Guru Pengajar') }}
-                                    </p>
-                                </div>
+                <!-- Sidebar Footer: Logged in User & Logout (matching image) -->
+                <div class="pt-3.5 border-t border-white/10 mt-auto">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md shadow-blue-600/30">
+                                {{ strtoupper(substr($authUser?->name ?? $currentCabang['pimpinan'] ?? 'A', 0, 1)) }}
                             </div>
-                            <form action="{{ route('logout') }}" method="POST" class="shrink-0">
-                                @csrf
-                                <button type="submit" title="Keluar dari sistem"
-                                    class="p-1 rounded-lg text-rose-600 hover:text-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                </button>
-                            </form>
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-white truncate leading-tight">
+                                    {{ $authUser?->name ?? ($isPusat ? 'Administrator' : ($isCabang ? 'Pimpinan Cabang' : 'Guru Pengajar')) }}
+                                </p>
+                                <p class="text-[10px] text-slate-400 truncate mt-0.5">
+                                    {{ $authUser?->email ?? ($isPusat ? 'admin@pusat.com' : ($isCabang ? 'cabang@simanles.com' : 'guru@simanles.com')) }}
+                                </p>
+                            </div>
                         </div>
+                        <form action="{{ route('logout') }}" method="POST" class="shrink-0">
+                            @csrf
+                            <button type="submit" title="Keluar dari sistem"
+                                class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+                                <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

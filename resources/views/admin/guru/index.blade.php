@@ -20,11 +20,11 @@
                     </span>
                 </div>
                 <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Pantau utilisasi slot bimbingan privat, kualifikasi multi-jenjang pengajar, dan jalankan algoritma load-balancing 1-Klik Auto-Assign.
+                    Pantau utilisasi slot bimbingan privat dan kualifikasi multi-jenjang pengajar.
                 </p>
             </div>
 
-            <!-- Action Buttons: Import, Tambah Guru & Auto-Assign -->
+            <!-- Action Buttons: Import & Tambah Guru -->
             <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                 <!-- Trigger Import Excel Guru -->
                 <button type="button" onclick="openModal('modal-import-guru')"
@@ -44,18 +44,6 @@
                     </svg>
                     <span>+ Tambah Guru</span>
                 </button>
-
-                <form method="POST" action="{{ route('web.guru.auto-assign') }}" class="inline">
-                    @csrf
-                    <input type="hidden" name="cabang_id" value="{{ $currentCabang['id'] }}">
-                    <button type="submit" {{ $unassignedStudents->isEmpty() ? 'disabled' : '' }}
-                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl {{ $unassignedStudents->isNotEmpty() ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold' : 'bg-slate-100 text-slate-400 cursor-not-allowed' }} text-xs shadow-xs transition-colors">
-                        <svg class="w-4 h-4 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        <span>1-Klik Auto-Assign ({{ $unassignedStudents->count() }} Antre)</span>
-                    </button>
-                </form>
             </div>
         </div>
 
@@ -126,7 +114,7 @@
                     <h3 class="font-bold text-slate-900 text-sm">Antrean Siswa Belum Memiliki Guru Pembimbing ({{ $unassignedStudents->count() }})</h3>
                 </div>
                 <p class="text-xs text-amber-900">
-                    Klik <strong>1-Klik Auto-Assign</strong> di atas atau pasangkan manual di bawah:
+                    Pasangkan pembimbing guru secara manual di bawah:
                 </p>
             </div>
 
