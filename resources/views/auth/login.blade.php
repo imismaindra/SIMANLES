@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Masuk Sistem — LKP Sang Siroju Lillah</title>
-    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <title>Selamat Datang — Masuk ke Portal SIMANLES LKP Sang Siroju Lillah</title>
+    <link rel="icon" type="image/png" href="{{ asset('logoo.png') }}">
 
     @fonts
 
@@ -15,26 +15,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
         }
         body, input, button, select, textarea {
             font-family: var(--font-sans);
-        }
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-        }
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-        /* Smooth subtle transitions */
-        *, *::before, *::after {
-            transition-property: background-color, border-color, color, fill, stroke;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 150ms;
         }
     </style>
 
@@ -70,223 +57,270 @@
     </script>
 </head>
 
-<body class="min-h-full min-h-dvh m-0 p-0 antialiased bg-[#f6f8fa] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 selection:bg-slate-900 selection:text-white dark:selection:bg-white dark:selection:text-slate-950 flex flex-col justify-between relative">
+<body class="min-h-screen relative flex items-center justify-center p-3 sm:p-6 lg:p-8 antialiased selection:bg-[#0a52be] selection:text-white transition-colors duration-200 lg:bg-gradient-to-br lg:from-[#ffffff] lg:via-[#edf4fd] lg:to-[#dce8f8] dark:lg:from-[#090d16] dark:lg:via-[#0c1424] dark:lg:to-[#090d16] text-slate-800 dark:text-slate-100">
 
-    <!-- Ambient Subtle Glow for Depth (Quiet & Atmospheric) -->
-    <div class="fixed inset-0 pointer-events-none overflow-hidden select-none">
-        <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[42rem] h-[24rem] bg-gradient-to-b from-blue-500/10 dark:from-blue-600/10 via-indigo-500/5 to-transparent blur-3xl rounded-full"></div>
+    <!-- Subtle Ambient Gradient Lighting for Desktop Web -->
+    <div class="hidden lg:block fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
+        <div class="absolute -top-32 left-1/4 w-[38rem] h-[38rem] bg-gradient-to-b from-blue-200/50 via-sky-100/30 to-transparent dark:from-blue-600/10 dark:via-indigo-600/5 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-32 right-1/4 w-[38rem] h-[38rem] bg-gradient-to-t from-blue-300/40 via-blue-100/20 to-transparent dark:from-blue-500/10 dark:via-sky-600/5 rounded-full blur-3xl"></div>
     </div>
 
-    <!-- Top Navigation Utility (Theme Switcher) -->
-    <header class="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 flex items-center justify-between relative z-10">
-        <!-- Academic Pill Indicator -->
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] font-medium text-slate-600 dark:text-slate-400 shadow-2xs">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>T.A. 2026/2027 &bull; Ponokawan, Sidoarjo</span>
-        </div>
+    <!-- Dynamic Animated Topographic Contour Lines Canvas (Mirrors reference image) -->
+    <canvas id="topo-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
-        <!-- Sleek Theme Toggle Pill -->
-        <button type="button" onclick="toggleDarkMode()"
-            class="min-h-[38px] px-3 py-1.5 rounded-full border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all shadow-2xs flex items-center gap-2"
-            aria-label="Ganti tema tampilan">
-            <svg class="theme-icon-sun w-3.5 h-3.5 hidden text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <svg class="theme-icon-moon w-3.5 h-3.5 text-slate-700 dark:text-slate-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-            <span class="text-xs font-semibold">Tema</span>
-        </button>
-    </header>
+    <!-- Mobile Fullscreen Background (belajar.webp with dark blur overlay, < lg only) -->
+    <div class="fixed inset-0 bg-cover bg-center z-0 lg:hidden"
+        style="background-image: url('{{ asset('belajar.webp') }}');">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/80 to-slate-950/95 backdrop-blur-[3px]"></div>
+    </div>
 
-    <!-- Main Workspace: Precision Centered Luxury Auth Card -->
-    <main class="w-full max-w-[430px] mx-auto px-4 py-6 sm:py-8 my-auto relative z-10">
-        
-        <!-- Luxury Authentication Card -->
-        <div class="rounded-3xl bg-white dark:bg-[#101625] border border-slate-200/80 dark:border-slate-800/90 p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04),0_1px_3px_rgb(0,0,0,0.02)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.45)]">
+    <!-- Center Card Container -->
+    <div class="w-full max-w-md lg:max-w-5xl bg-white/95 dark:bg-[#101726]/95 backdrop-blur-md lg:backdrop-blur-none lg:bg-white lg:dark:bg-[#101726] rounded-[28px] sm:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 dark:shadow-black/70 border border-slate-200/80 dark:border-slate-800/80 grid grid-cols-1 lg:grid-cols-2 relative z-10 my-auto">
+
+        <!-- LEFT COLUMN: Form Login -->
+        <div class="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-between z-10">
             
-            <!-- Brand Crest & Header -->
-            <div class="text-center mb-6">
-                <!-- Official Logo Emblem Container -->
-                <div class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700/80 p-2.5 mx-auto mb-3.5 flex items-center justify-center shadow-xs">
-                    <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" class="w-full h-full object-contain filter drop-shadow-xs">
+            <!-- Top Action Row (Theme Switcher at top right like reference image) -->
+            <div class="flex items-center justify-between w-full mb-1">
+                <span class="sr-only">SIMANLES LKP Sang Siroju Lillah</span>
+                <div class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 hidden sm:block tracking-wide">
+                    SIMANLES &bull; Portal Layanan
                 </div>
-                
-                <span class="block text-[11px] font-bold tracking-widest uppercase text-slate-500 dark:text-slate-400">
-                    LKP Sang Siroju Lillah
-                </span>
-                
-                <h1 class="text-2xl sm:text-[26px] font-extrabold tracking-tight text-slate-900 dark:text-white mt-1">
-                    Masuk ke Portal
-                </h1>
-                
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    SIMANLES &bull; Presensi, Jadwal & Administrasi
-                </p>
-            </div>
-
-            <!-- Sleek Native Segmented Control for Evaluator Roles -->
-            <div class="mb-5">
-                <div class="p-1 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-800/60 grid grid-cols-3 gap-1">
-                    <button type="button" onclick="setRole('pusat')" id="btn-role-pusat"
-                        class="role-btn min-h-[36px] py-1.5 px-1 rounded-lg font-bold text-center text-xs transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs flex items-center justify-center">
-                        <span>Admin Pusat</span>
-                    </button>
-                    <button type="button" onclick="setRole('cabang')" id="btn-role-cabang"
-                        class="role-btn min-h-[36px] py-1.5 px-1 rounded-lg font-medium text-center text-xs transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
-                        <span>Pimp. Cabang</span>
-                    </button>
-                    <button type="button" onclick="setRole('guru')" id="btn-role-guru"
-                        class="role-btn min-h-[36px] py-1.5 px-1 rounded-lg font-medium text-center text-xs transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
-                        <span>Guru Pengajar</span>
-                    </button>
-                </div>
-                
-                <!-- Role Scope Dynamic Indicator (Quiet & Informative) -->
-                <p id="role-desc" class="text-[11px] text-slate-500 dark:text-slate-400 text-center mt-2 leading-relaxed font-medium">
-                    Admin Pusat &bull; Akses multi-cabang, tarif master, jadwal & audit.
-                </p>
-            </div>
-
-            <!-- Session Feedback Messages -->
-            @if(session('success'))
-                <div class="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <!-- Sleek Theme Toggle Button at top right (just like in image) -->
+                <button type="button" onclick="toggleDarkMode()"
+                    class="ml-auto w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-slate-50/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/90 active:scale-95 flex items-center justify-center transition-all shadow-2xs"
+                    aria-label="Ganti tema tampilan">
+                    <!-- Moon Icon (Default Light Mode) -->
+                    <svg class="theme-icon-moon w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
-                    <span>{{ session('success') }}</span>
-                </div>
-            @endif
-
-            @if(isset($errors) && $errors->any())
-                <div class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-800/80 text-rose-800 dark:text-rose-300 text-xs">
-                    <div class="flex items-center gap-1.5 font-bold mb-1">
-                        <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Gagal Masuk</span>
-                    </div>
-                    <ul class="list-disc list-inside space-y-0.5 pl-1 text-[11px]">
-                        @foreach($errors->all() as $err)
-                            <li>{{ $err }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <!-- Authentic Login Form -->
-            <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
-                @csrf
-
-                <!-- Identifier Field (Email / NIP) -->
-                <div>
-                    <label for="identifier" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                        Email Dinas atau NIP
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <input type="text" name="identifier" id="identifier" value="{{ old('identifier', 'admin@lespintar.id') }}" required autofocus
-                            autocomplete="username"
-                            autocapitalize="none"
-                            autocorrect="off"
-                            spellcheck="false"
-                            placeholder="nama@lespintar.id atau NIP"
-                            class="w-full h-11 pl-10 pr-3.5 py-2 rounded-xl border border-slate-300/80 dark:border-slate-700/80 bg-white dark:bg-[#0c101c] text-slate-900 dark:text-slate-100 text-base sm:text-sm placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-slate-900 dark:focus:border-white focus:ring-3 focus:ring-slate-900/5 dark:focus:ring-white/5 transition-all shadow-2xs">
-                    </div>
-                </div>
-
-                <!-- Password Field -->
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label for="password" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                            Kata Sandi
-                        </label>
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                            Guru: YYYY-MM-DD
-                        </span>
-                    </div>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input type="password" name="password" id="password" value="admin123" required
-                            autocomplete="current-password"
-                            placeholder="••••••••"
-                            class="w-full h-11 pl-10 pr-11 py-2 rounded-xl border border-slate-300/80 dark:border-slate-700/80 bg-white dark:bg-[#0c101c] text-slate-900 dark:text-slate-100 text-base sm:text-sm placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-slate-900 dark:focus:border-white focus:ring-3 focus:ring-slate-900/5 dark:focus:ring-white/5 transition-all shadow-2xs">
-                        
-                        <!-- Toggle Password Button (Ergonomic Touch Target) -->
-                        <button type="button" onclick="togglePasswordVisibility()"
-                            class="absolute inset-y-0 right-0 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 active:scale-95 transition-all"
-                            aria-label="Tampilkan atau sembunyikan kata sandi">
-                            <svg id="eye-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Remember Me Option -->
-                <div class="pt-0.5">
-                    <label class="inline-flex items-center gap-2.5 cursor-pointer select-none text-xs text-slate-600 dark:text-slate-400">
-                        <input type="checkbox" name="remember" value="1" class="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-slate-900 focus:ring-slate-900 dark:bg-slate-900">
-                        <span>Ingat sesi masuk peramban ini</span>
-                    </label>
-                </div>
-
-                <!-- Submit Button (High-End & Confident) -->
-                <button type="submit"
-                    class="group relative w-full h-11 mt-1 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-black text-white dark:bg-white dark:hover:bg-slate-100 dark:active:bg-slate-200 dark:text-slate-950 font-semibold text-sm transition-all duration-150 shadow-sm active:scale-[0.99] flex items-center justify-center gap-2">
-                    <span>Masuk ke Portal Layanan</span>
-                    <svg class="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    <!-- Sun Icon (Dark Mode Active) -->
+                    <svg class="theme-icon-sun w-3.5 h-3.5 hidden text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                 </button>
-            </form>
+            </div>
 
-            <!-- Quiet Institutional Integrity Seal -->
-            <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/80 text-center">
-                <p class="text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1.5 font-medium">
-                    <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <span>Sesi Terenkripsi &bull; Server Pusat Ponokawan</span>
-                </p>
+            <!-- Form Content -->
+            <div class="my-auto py-1">
+                <!-- Centered Logo: logoo.png -->
+                <div class="flex justify-center mb-3">
+                    <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah"
+                        class="h-12 sm:h-14 w-auto object-contain filter drop-shadow-sm">
+                </div>
+
+                <!-- Centered Heading & Subtitle -->
+                <div class="text-center mb-5">
+                    <h1 class="text-xl sm:text-[22px] font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        Selamat Datang
+                    </h1>
+                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                        Masuk untuk mengakses sistem LKP Sang Siroju Lillah
+                    </p>
+                </div>
+
+                <!-- Feedback Messages -->
+                @if(session('success'))
+                    <div class="mb-3 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if(isset($errors) && $errors->any())
+                    <div class="mb-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-[11px]">
+                        <div class="flex items-center gap-1.5 font-bold mb-1">
+                            <svg class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Gagal Masuk</span>
+                        </div>
+                        <ul class="list-disc list-inside space-y-0.5 pl-1 text-[10px]">
+                            @foreach($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <!-- Form Login (Mirrors reference input style) -->
+                <form action="{{ route('login.post') }}" method="POST" class="space-y-3.5">
+                    @csrf
+
+                    <!-- Field 1: USERNAME -->
+                    <div>
+                        <label for="identifier" class="block text-[10px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mb-1">
+                            USERNAME
+                        </label>
+                        <div class="relative flex items-center bg-[#f0f4f9] dark:bg-slate-800/80 rounded-xl px-3.5 h-10 sm:h-11 border border-slate-200/50 dark:border-slate-700/60 focus-within:border-[#0a52be] focus-within:ring-2 focus-within:ring-[#0a52be]/20 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
+                            <!-- User outline icon -->
+                            <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 mr-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <input type="text" name="identifier" id="identifier" value="{{ old('identifier', 'admin@lespintar.id') }}" required autofocus
+                                autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
+                                placeholder="lppm_user"
+                                class="w-full bg-transparent border-none text-slate-900 dark:text-slate-100 text-xs sm:text-[13px] font-medium focus:outline-none placeholder:text-slate-400">
+                        </div>
+                    </div>
+
+                    <!-- Field 2: PASSWORD -->
+                    <div>
+                        <label for="password" class="block text-[10px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400 mb-1">
+                            PASSWORD
+                        </label>
+                        <div class="relative flex items-center bg-[#f0f4f9] dark:bg-slate-800/80 rounded-xl px-3.5 h-10 sm:h-11 border border-slate-200/50 dark:border-slate-700/60 focus-within:border-[#0a52be] focus-within:ring-2 focus-within:ring-[#0a52be]/20 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
+                            <!-- Lock outline icon -->
+                            <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 mr-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <input type="password" name="password" id="password" value="admin123" required
+                                autocomplete="current-password"
+                                placeholder="••••••••"
+                                class="w-full bg-transparent border-none text-slate-900 dark:text-slate-100 text-xs sm:text-[13px] font-medium focus:outline-none placeholder:text-slate-400 pr-2">
+                            <!-- Eye Toggle Button -->
+                            <button type="button" onclick="togglePasswordVisibility()"
+                                class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 shrink-0 transition-colors"
+                                aria-label="Tampilkan atau sembunyikan kata sandi">
+                                <svg id="eye-icon" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Remember Field -->
+                    <input type="hidden" name="remember" value="1">
+
+                    <!-- Submit Button: "Masuk Sekarang →" -->
+                    <button type="submit"
+                        class="w-full h-10 sm:h-11 mt-4 rounded-xl bg-[#0a52be] hover:bg-[#084299] active:bg-[#07367c] text-white font-semibold text-xs sm:text-[13px] transition-all duration-150 shadow-md shadow-blue-700/20 flex items-center justify-center gap-1.5 group cursor-pointer">
+                        <span>Masuk Sekarang</span>
+                        <span class="text-sm font-bold transition-transform group-hover:translate-x-1">&rarr;</span>
+                    </button>
+                </form>
+
+                <!-- Quick Role Presets Helper -->
+                <div class="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800/80">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[10px] font-medium text-slate-400 dark:text-slate-500">Pilih Akun Cepat:</span>
+                        <span id="role-desc" class="text-[9.5px] text-slate-400 dark:text-slate-500">Admin Pusat</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button type="button" onclick="setRole('pusat')" id="btn-role-pusat"
+                            class="py-1 px-1.5 rounded-lg text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/50 text-[#0a52be] dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/60 hover:bg-blue-100 transition-all text-center">
+                            Admin Pusat
+                        </button>
+                        <button type="button" onclick="setRole('cabang')" id="btn-role-cabang"
+                            class="py-1 px-1.5 rounded-lg text-[11px] font-medium bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 transition-all text-center">
+                            Pimp. Cabang
+                        </button>
+                        <button type="button" onclick="setRole('guru')" id="btn-role-guru"
+                            class="py-1 px-1.5 rounded-lg text-[11px] font-medium bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 transition-all text-center">
+                            Guru Pengajar
+                        </button>
+                    </div>
+                    <div class="sr-only">
+                        Masuk ke Portal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer note -->
+            <div class="text-center pt-2.5 text-[10px] text-slate-400 dark:text-slate-500">
+                &copy; {{ date('Y') }} LKP Sang Siroju Lillah
             </div>
         </div>
-    </main>
 
-    <!-- Bottom Institutional Footer (Mobile Safe) -->
-    <footer class="text-center text-xs text-slate-400 dark:text-slate-500 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] relative z-10">
-        <p class="font-medium">&copy; {{ date('Y') }} LKP Sang Siroju Lillah. Hak cipta dilindungi.</p>
-        <p class="mt-0.5 text-[11px] text-slate-400/80">SIMANLES &bull; Ponokawan, Sidoarjo</p>
-    </footer>
+        <!-- RIGHT COLUMN: Visual Hero Banner (Hidden on Mobile, Displayed on Desktop lg+) -->
+        <div class="hidden lg:flex relative bg-cover bg-center min-h-full flex-col justify-end p-8 sm:p-10 lg:p-12 text-white overflow-hidden"
+            style="background-image: url('{{ asset('belajar.webp') }}');">
+            
+            <!-- Dark Navy Gradient Overlay (matching reference image) -->
+            <div class="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/70 to-[#070e1b] z-0"></div>
+
+            <!-- Content Container -->
+            <div class="relative z-10 w-full">
+                <!-- Title & Blue line accent -->
+                <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                    SIMANLES LKP
+                </h2>
+                <div class="w-7 h-1 bg-[#0a52be] rounded-full my-2.5"></div>
+
+                <!-- Description Paragraph -->
+                <p class="text-[11px] sm:text-xs text-slate-200/90 leading-relaxed max-w-sm mb-5">
+                    Kelola operasional bimbingan belajar, presensi QR cerdas, jadwal guru, dan administrasi keuangan secara real-time dengan linimasa pelacakan alur yang sistematis dan transparan.
+                </p>
+
+                <!-- 3 Feature Badges in a Row (exactly like reference image) -->
+                <div class="grid grid-cols-3 gap-2.5 sm:gap-3 pt-1 text-center">
+                    <!-- Item 1: Rekap & Pelacakan Terintegrasi -->
+                    <div class="flex flex-col items-center justify-start text-center group">
+                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#1c2438]/85 dark:bg-slate-800/85 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg shadow-black/30 mb-2 transition-transform duration-200 group-hover:scale-105">
+                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-[10px] sm:text-[11px] font-semibold text-slate-100 leading-tight">
+                            Rekap & Pelacakan<br>Terintegrasi
+                        </span>
+                    </div>
+
+                    <!-- Item 2: Aman & Terpercaya -->
+                    <div class="flex flex-col items-center justify-start text-center group">
+                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#1c2438]/85 dark:bg-slate-800/85 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg shadow-black/30 mb-2 transition-transform duration-200 group-hover:scale-105">
+                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </div>
+                        <span class="text-[10px] sm:text-[11px] font-semibold text-slate-100 leading-tight">
+                            Aman &<br>Terpercaya
+                        </span>
+                    </div>
+
+                    <!-- Item 3: Transparan & Akuntabel -->
+                    <div class="flex flex-col items-center justify-start text-center group">
+                        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-[#1c2438]/85 dark:bg-slate-800/85 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg shadow-black/30 mb-2 transition-transform duration-200 group-hover:scale-105">
+                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M18 20V10m-6 10V4m-6 10v6" />
+                            </svg>
+                        </div>
+                        <span class="text-[10px] sm:text-[11px] font-semibold text-slate-100 leading-tight">
+                            Transparan &<br>Akuntabel
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Interactive Script for Role Switching & Password Visibility -->
     <script>
         const ROLES = {
             pusat: {
-                desc: 'Admin Pusat &bull; Akses multi-cabang, tarif master, jadwal & audit.',
+                title: 'Admin Pusat',
+                desc: 'Admin Pusat &bull; Akses penuh multi-cabang',
                 identifier: 'admin@lespintar.id',
                 password: 'admin123'
             },
             cabang: {
-                desc: 'Pimpinan Cabang &bull; Kelola siswa, jadwal cabang & mutasi kas.',
+                title: 'Pimp. Cabang',
+                desc: 'Pimpinan Cabang &bull; Kelola cabang & keuangan',
                 identifier: 'cabang.ponokawan@lespintar.id',
                 password: 'cabang123'
             },
             guru: {
-                desc: 'Guru Pengajar &bull; Jadwal mengajar, daftar siswa & presensi QR.',
+                title: 'Guru Pengajar',
+                desc: 'Guru Pengajar &bull; Jadwal & presensi QR',
                 identifier: 'nip3101@lespintar.id',
                 password: '1995-05-14'
             }
@@ -296,17 +330,14 @@
             const r = ROLES[roleKey];
             if (!r) return;
 
-            // Fill form inputs
             const idInput = document.getElementById('identifier');
             const pwdInput = document.getElementById('password');
             if (idInput) idInput.value = r.identifier;
             if (pwdInput) pwdInput.value = r.password;
 
-            // Update scope description
             const descEl = document.getElementById('role-desc');
-            if (descEl) descEl.innerHTML = r.desc;
+            if (descEl) descEl.textContent = r.title;
 
-            // Update button styles (Apple segmented style)
             const roleButtons = {
                 pusat: document.getElementById('btn-role-pusat'),
                 cabang: document.getElementById('btn-role-cabang'),
@@ -316,9 +347,9 @@
             for (const [k, btn] of Object.entries(roleButtons)) {
                 if (!btn) continue;
                 if (k === roleKey) {
-                    btn.className = 'role-btn min-h-[36px] py-1.5 px-1 rounded-lg font-bold text-center text-xs transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs flex items-center justify-center';
+                    btn.className = 'py-1 px-1.5 rounded-lg text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/50 text-[#0a52be] dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/60 hover:bg-blue-100 transition-all text-center';
                 } else {
-                    btn.className = 'role-btn min-h-[36px] py-1.5 px-1 rounded-lg font-medium text-center text-xs transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center';
+                    btn.className = 'py-1 px-1.5 rounded-lg text-[11px] font-medium bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100 transition-all text-center';
                 }
             }
 
@@ -336,6 +367,112 @@
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
             }
         }
+
+        // Dynamic Animated Straight Lines (Garis lurus solid, tidak putus-putus, bergerak dinamis)
+        (function initStraightLinesBackground() {
+            const canvas = document.getElementById('topo-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let animFrame;
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Sudut kemiringan garis lurus (-32 derajat untuk kesan modern dan dinamis)
+            const angle = -32 * (Math.PI / 180);
+            const cosA = Math.cos(angle);
+            const sinA = Math.sin(angle);
+            const uX = -sinA; // Arah sejajar garis lurus
+            const uY = cosA;
+            const nX = cosA;  // Arah tegak lurus untuk pergerakan
+            const nY = sinA;
+
+            // 14 garis lurus solid dengan offset dan kecepatan dinamis
+            const numLines = 14;
+            const lines = [];
+            for (let i = 0; i < numLines; i++) {
+                lines.push({
+                    offset: (i / numLines) * 2 - 1, // Normalized offset [-1, 1]
+                    speed: 0.025 + (i % 4) * 0.012,  // Kecepatan gerak halus
+                    width: (i % 3 === 0) ? 1.5 : 1.1,
+                    isAccent: (i % 3 === 0),
+                    alpha: 0.16 + (i % 4) * 0.06
+                });
+            }
+
+            let lastTime = performance.now();
+
+            function render(now) {
+                if (document.hidden) {
+                    animFrame = requestAnimationFrame(render);
+                    return;
+                }
+
+                const dt = Math.min((now - lastTime) / 1000, 0.1);
+                lastTime = now;
+                ctx.clearRect(0, 0, width, height);
+
+                // Pastikan garis selalu lurus solid dan tidak putus-putus
+                ctx.setLineDash([]);
+
+                const isDark = document.documentElement.classList.contains('dark');
+                const baseColor = isDark ? [148, 163, 184] : [71, 85, 105];   // slate tone
+                const accentColor = isDark ? [96, 165, 250] : [37, 99, 235];  // royal blue accent
+
+                // Rentang jarak tegak lurus layar dari pusat
+                const maxExtent = (width * Math.abs(cosA) + height * Math.abs(sinA)) * 0.6 + 200;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const lineHalfLength = Math.max(width, height) * 1.6;
+
+                lines.forEach(line => {
+                    // Update pergerakan garis
+                    line.offset += line.speed * dt;
+                    if (line.offset > 1.0) {
+                        line.offset -= 2.0; // Loop mulus ke sisi berlawanan
+                    }
+
+                    const currentDist = line.offset * maxExtent;
+                    const px = centerX + currentDist * nX;
+                    const py = centerY + currentDist * nY;
+
+                    const x1 = px - lineHalfLength * uX;
+                    const y1 = py - lineHalfLength * uY;
+                    const x2 = px + lineHalfLength * uX;
+                    const y2 = py + lineHalfLength * uY;
+
+                    // Gradasi lembut di kedua ujung garis agar menyatu dengan latar
+                    const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+                    const rgb = line.isAccent ? accentColor : baseColor;
+                    const a = line.alpha;
+                    grad.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0)`);
+                    grad.addColorStop(0.2, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${a})`);
+                    grad.addColorStop(0.8, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${a})`);
+                    grad.addColorStop(1, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0)`);
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = line.width;
+                    ctx.stroke();
+                });
+
+                animFrame = requestAnimationFrame(render);
+            }
+
+            animFrame = requestAnimationFrame(render);
+        })();
     </script>
 </body>
 
