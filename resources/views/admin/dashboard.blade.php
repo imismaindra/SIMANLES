@@ -159,6 +159,126 @@
 
         </div>
 
+        <!-- Section: Informasi Penting & Rekomendasi Operasional -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            @foreach($operationalInsights as $insight)
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-bold {{ $insight['badge_color'] }}">
+                            {{ $insight['badge'] }}
+                        </span>
+                        @if($insight['icon'] === 'users')
+                        <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        @elseif($insight['icon'] === 'cash')
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        @else
+                        <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                        @endif
+                    </div>
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                        {{ $insight['title'] }}
+                    </h3>
+                    <p class="mt-1 text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {{ $insight['description'] }}
+                    </p>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <a href="{{ $insight['action_url'] }}"
+                        class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                        <span>{{ $insight['action_label'] }}</span>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <!-- Section: Grafik Visual Operasional (Keuangan & Komposisi Jenjang) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
+            <!-- Chart 1: Tren Arus Kas & Keuangan (Col-span 2) -->
+            <div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Tren Arus Kas Cabang</h2>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">6 Bulan Terakhir</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Perbandingan pemasukan SPP/pendaftaran terhadap pengeluaran operasional.</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Pemasukan</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                            <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">Pengeluaran</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <div id="chart-cashflow" class="w-full min-h-[250px]"></div>
+                </div>
+
+                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="p-1.5 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/40">
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Total Masuk (Bulan Ini)</span>
+                        <p class="font-bold text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm mt-0.5">Rp {{ number_format($kpi['buku_kas_bulan_ini']['pemasukan'], 0, ',', '.') }}</p>
+                    </div>
+                    <div class="p-1.5 rounded-lg bg-rose-50/60 dark:bg-rose-950/40">
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Total Keluar (Bulan Ini)</span>
+                        <p class="font-bold text-rose-700 dark:text-rose-400 text-xs sm:text-sm mt-0.5">Rp {{ number_format($kpi['buku_kas_bulan_ini']['pengeluaran'], 0, ',', '.') }}</p>
+                    </div>
+                    <div class="p-1.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/40">
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400">Surplus Kas Bersih</span>
+                        <p class="font-bold text-blue-700 dark:text-blue-400 text-xs sm:text-sm mt-0.5">Rp {{ number_format($kpi['buku_kas_bulan_ini']['saldo_bersih'], 0, ',', '.') }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 2: Komposisi Siswa per Jenjang & Utilisasi Slot Guru (Col-span 1) -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 shadow-2xs flex flex-col justify-between">
+                <div class="pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Demografi Siswa</h2>
+                        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">{{ $kpi['siswa_aktif']['total'] }} Total Siswa</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Komposisi murid aktif per jenjang pendidikan.</p>
+                </div>
+
+                <div class="my-auto py-2">
+                    <div id="chart-jenjang" class="flex justify-center min-h-[220px]"></div>
+                </div>
+
+                <div class="mt-2 pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    <div>
+                        <div class="flex items-center justify-between text-[11px] mb-1">
+                            <span class="text-slate-600 dark:text-slate-300 font-medium">Okupansi Slot Bimbingan</span>
+                            <span class="font-bold text-slate-900 dark:text-white">{{ $kpi['kuota_guru']['slot_terpakai'] }}/{{ $kpi['kuota_guru']['kapasitas_slot_total'] }} Slot ({{ round(($kpi['kuota_guru']['slot_terpakai'] / max(1, $kpi['kuota_guru']['kapasitas_slot_total'])) * 100, 1) }}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: {{ min(100, round(($kpi['kuota_guru']['slot_terpakai'] / max(1, $kpi['kuota_guru']['kapasitas_slot_total'])) * 100, 1)) }}%"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-[10.5px] text-slate-500 dark:text-slate-400">
+                        <span>Guru Penuh (6/6): <strong class="text-slate-800 dark:text-slate-200">{{ $kpi['kuota_guru']['guru_penuh'] }}</strong></span>
+                        <span>Sisa Slot: <strong class="text-emerald-600 font-bold">{{ $kpi['kuota_guru']['slot_tersedia'] }}</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Alert Block: Siswa Baru Belum Memiliki Guru (Mobile Card List + Desktop Table) -->
         @if(count($unassignedStudents) > 0)
             <section class="bg-amber-50/70 border border-amber-200 rounded-xl p-3 sm:p-3.5 shadow-2xs">
@@ -987,6 +1107,159 @@
                 if (liveEl) liveEl.textContent = token;
                 if (bigEl) bigEl.textContent = token;
             }
+
+            // ApexCharts Rendering for Dashboard Analytics
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof ApexCharts === 'undefined') {
+                    console.warn('ApexCharts belum terdefinisi');
+                    return;
+                }
+
+                const isDark = document.documentElement.classList.contains('dark');
+
+                // 1. Chart Arus Kas Masuk vs Kas Keluar
+                const elCashflow = document.querySelector("#chart-cashflow");
+                if (elCashflow) {
+                    const cashflowOptions = {
+                        series: [{
+                            name: 'Kas Masuk',
+                            data: @json($chartKasMasuk)
+                        }, {
+                            name: 'Kas Keluar',
+                            data: @json($chartKasKeluar)
+                        }],
+                        chart: {
+                            type: 'area',
+                            height: 250,
+                            toolbar: { show: false },
+                            fontFamily: 'inherit',
+                            background: 'transparent',
+                        },
+                        colors: ['#10b981', '#f43f5e'],
+                        dataLabels: { enabled: false },
+                        stroke: { curve: 'smooth', width: 2.5 },
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.35,
+                                opacityTo: 0.05,
+                                stops: [0, 95, 100]
+                            }
+                        },
+                        xaxis: {
+                            categories: @json($chartMonths),
+                            labels: {
+                                style: {
+                                    colors: isDark ? '#94a3b8' : '#64748b',
+                                    fontSize: '11px',
+                                    fontWeight: 500
+                                }
+                            },
+                            axisBorder: { show: false },
+                            axisTicks: { show: false }
+                        },
+                        yaxis: {
+                            labels: {
+                                style: {
+                                    colors: isDark ? '#94a3b8' : '#64748b',
+                                    fontSize: '10.5px'
+                                },
+                                formatter: function(val) {
+                                    return 'Rp ' + (val / 1000000).toFixed(1) + 'jt';
+                                }
+                            }
+                        },
+                        grid: {
+                            borderColor: isDark ? '#1e293b' : '#f1f5f9',
+                            strokeDashArray: 4,
+                        },
+                        tooltip: {
+                            theme: isDark ? 'dark' : 'light',
+                            y: {
+                                formatter: function(val) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(val);
+                                }
+                            }
+                        },
+                        legend: { show: false }
+                    };
+
+                    const chartCashflow = new ApexCharts(elCashflow, cashflowOptions);
+                    chartCashflow.render();
+                }
+
+                // 2. Chart Demografi Jenjang Siswa
+                const elJenjang = document.querySelector("#chart-jenjang");
+                if (elJenjang) {
+                    const jenjangOptions = {
+                        series: @json($chartJenjangSeries),
+                        labels: @json($chartJenjangLabels),
+                        chart: {
+                            type: 'donut',
+                            height: 230,
+                            fontFamily: 'inherit',
+                            background: 'transparent',
+                        },
+                        colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function(val) {
+                                return Math.round(val) + '%';
+                            },
+                            style: { fontSize: '10.5px', fontWeight: 600 }
+                        },
+                        plotOptions: {
+                            pie: {
+                                donut: {
+                                    size: '65%',
+                                    labels: {
+                                        show: true,
+                                        total: {
+                                            show: true,
+                                            label: 'Total Siswa',
+                                            fontSize: '11px',
+                                            fontWeight: 500,
+                                            color: isDark ? '#94a3b8' : '#64748b',
+                                            formatter: function() {
+                                                return '{{ $kpi['siswa_aktif']['total'] }}';
+                                            }
+                                        },
+                                        value: {
+                                            fontSize: '18px',
+                                            fontWeight: 700,
+                                            color: isDark ? '#f8fafc' : '#0f172a',
+                                            offsetY: -2
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'bottom',
+                            fontSize: '11px',
+                            labels: { colors: isDark ? '#cbd5e1' : '#475569' },
+                            markers: { radius: 12 },
+                            itemMargin: { horizontal: 6, vertical: 2 }
+                        },
+                        tooltip: {
+                            theme: isDark ? 'dark' : 'light',
+                            y: {
+                                formatter: function(val) {
+                                    return val + ' Siswa';
+                                }
+                            }
+                        },
+                        stroke: {
+                            colors: isDark ? ['#0f172a'] : ['#ffffff'],
+                            width: 2
+                        }
+                    };
+
+                    const chartJenjang = new ApexCharts(elJenjang, jenjangOptions);
+                    chartJenjang.render();
+                }
+            });
         </script>
     @endpush
 @endsection

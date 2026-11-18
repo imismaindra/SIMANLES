@@ -33,15 +33,23 @@
 
     <style>
         #admin-sidebar {
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: margin-left, transform;
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                        margin 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: width, margin, opacity;
         }
         @media (min-width: 1024px) {
             #admin-sidebar.desktop-collapsed {
-                margin-left: -17.5rem !important;
+                width: 0 !important;
+                min-width: 0 !important;
+                max-width: 0 !important;
+                margin: 0 !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                border-width: 0 !important;
+                border-color: transparent !important;
                 opacity: 0 !important;
+                overflow: hidden !important;
                 pointer-events: none !important;
             }
         }
@@ -87,19 +95,11 @@
                         </div>
                     </a>
 
-                    <!-- Sidebar Toggle Actions -->
-                    <div class="flex items-center gap-0.5 shrink-0">
-                        <!-- Desktop Collapse Button -->
-                        <button type="button" onclick="toggleSidebar()"
-                            class="hidden lg:flex p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                            title="Tutup Sidebar">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                            </svg>
-                        </button>
+                    <!-- Sidebar Mobile Close Action -->
+                    <div class="flex items-center gap-0.5 shrink-0 lg:hidden">
                         <!-- Mobile Close button -->
                         <button type="button" onclick="toggleMobileMenu(false)"
-                            class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg lg:hidden"
+                            class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg"
                             aria-label="Tutup menu">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -120,7 +120,7 @@
                     @if(! $isGuru)
                     <!-- Standalone Top Item: Dashboard Utama -->
                     <a href="{{ route('admin.dashboard', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'bg-blue-600 text-white font-semibold shadow-lg shadow-blue-600/30' : 'text-slate-300 hover:text-white hover:bg-white/5 font-medium' }} transition-all mb-2">
+                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'bg-blue-600 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5 font-medium' }} transition-all mb-2">
                         <svg class="w-4 h-4 {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'text-white' : 'text-blue-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
@@ -129,7 +129,7 @@
 
                     <!-- Dropdown: Operasional Cabang / Data Pengguna -->
                     <details class="group select-none" {{ $catOperasionalActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
                             <div class="flex items-center gap-3 min-w-0">
                                 <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -161,7 +161,7 @@
 
                     <!-- Dropdown: Akademik -->
                     <details class="group select-none" {{ $catAkademikActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
                             <div class="flex items-center gap-3 min-w-0">
                                 <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path d="M12 14l9-5-9-5-9 5 9 5z" />
@@ -211,7 +211,7 @@
                     @if(! $isGuru)
                     <!-- Dropdown: Keuangan & Kas -->
                     <details class="group select-none" {{ $catKeuanganActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
                             <div class="flex items-center gap-3 min-w-0">
                                 <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -244,7 +244,7 @@
                     @if($isPusat)
                     <!-- Dropdown: Informasi & Keamanan -->
                     <details class="group select-none" {{ $catMasterActive ? 'open' : '' }}>
-                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
+                        <summary class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden transition-all text-xs">
                             <div class="flex items-center gap-3 min-w-0">
                                 <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -415,18 +415,41 @@
             </header>
 
             <!-- Main Canvas Body (Fluid with compact padding) -->
-            <main class="flex-1 p-3 sm:p-4 lg:p-6 max-w-7xl w-full mx-auto">
-                {{-- Global Flash Messages --}}
+            <main class="flex-1 p-3 sm:p-4 lg:p-6 w-full max-w-[1600px] mx-auto">
+                {{-- Global Flash Messages: Floating Top-Right Toast for Welcome/Success --}}
                 @if(session('success'))
-                    <div class="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm flex items-center justify-between gap-3 shadow-2xs">
-                        <div class="flex items-center gap-2.5">
-                            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span class="font-medium">{{ session('success') }}</span>
+                    <div id="toast-welcome"
+                        class="fixed top-4 right-4 z-50 max-w-sm sm:max-w-md w-[calc(100%-2rem)] bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700/80 rounded-xl p-3.5 shadow-xl flex items-center justify-between gap-3 transition-all duration-300">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-slate-900 dark:text-white">Pemberitahuan</p>
+                                <p class="text-xs text-slate-600 dark:text-slate-300 font-medium truncate sm:whitespace-normal">{{ session('success') }}</p>
+                            </div>
                         </div>
-                        <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900 font-bold p-1">&times;</button>
+                        <button type="button" onclick="closeToastWelcome()"
+                            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+                            aria-label="Tutup notifikasi">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
+                    <script>
+                        function closeToastWelcome() {
+                            const toast = document.getElementById('toast-welcome');
+                            if (toast) {
+                                toast.style.opacity = '0';
+                                toast.style.transform = 'translateY(-10px)';
+                                setTimeout(() => toast.remove(), 300);
+                            }
+                        }
+                        setTimeout(closeToastWelcome, 5000);
+                    </script>
                 @endif
 
                 @if(session('error') || $errors->any())
