@@ -450,7 +450,8 @@
                     </div>
                 </section>
 
-                <!-- Panel 2: Jadwal Mengajar Hari Ini & Deteksi Bentrok Lintas Cabang -->
+                <!-- Panel 2: Jadwal Mengajar Hari Ini & Deteksi Bentrok Lintas Cabang (Disembunyikan untuk role Pimpinan Cabang) -->
+                @if((auth()->user()?->role ?? $viewRole ?? '') !== 'cabang')
                 <section id="jadwal" class="bg-white border border-slate-200/90 rounded-xl overflow-hidden shadow-2xs">
                     <div class="p-3 sm:p-3.5 border-b border-slate-200/70 flex items-center justify-between gap-3">
                         <div>
@@ -579,6 +580,7 @@
                         </table>
                     </div>
                 </section>
+                @endif
 
             </div>
 
