@@ -157,9 +157,29 @@
 
     <!-- Teacher Capacity Grid -->
     <div class="space-y-4">
-        <div class="flex items-center justify-between">
-            <h2 class="font-bold text-base text-slate-900">Daftar Guru & Siswa Bimbingan</h2>
-            <span class="text-xs text-slate-500">Menampilkan {{ $guruList->count() }} pengajar</span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h2 class="font-bold text-base text-slate-900">Daftar Guru & Siswa Bimbingan</h2>
+                <span class="text-xs text-slate-500" id="guru-counter-text">Menampilkan {{ $guruList->count() }} pengajar</span>
+            </div>
+
+            <!-- Search Input Nama Guru -->
+            <div class="relative w-full sm:w-72">
+                <input type="text" id="search-guru-input" onkeyup="filterGuruCards()" placeholder="Cari nama guru..."
+                    class="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-white border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-2xs placeholder:text-slate-400">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <button type="button" id="clear-search-guru" onclick="clearGuruSearch()" class="hidden absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="no-guru-found" class="hidden py-12 text-center text-slate-400 text-sm bg-white rounded-2xl border border-slate-200">
+            Tidak ditemukan guru dengan nama tersebut.
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -169,7 +189,7 @@
                     $isFull = $assignedCount >= 6;
                     $percent = round(($assignedCount / 6) * 100);
                 @endphp
-                <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between space-y-4">
+                <div data-guru-name="{{ strtolower($guru->nama) }}" class="guru-card-item bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between space-y-4">
                     <!-- Top: Avatar & Info -->
                     <div>
                         <div class="flex items-start justify-between gap-3">
@@ -183,9 +203,9 @@
                                 </div>
                             </div>
 
-                            <!-- Actions & Status Badges -->
+                            <!-- Actions & Status Badges (Full = Hijau, Belum Full = Orange) -->
                             <div class="flex items-center gap-1 shrink-0">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold {{ $isFull ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200' }}">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold {{ $isFull ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
                                     {{ $isFull ? '6/6 PENUH' : 'Tersisa ' . (6 - $assignedCount) . ' Slot' }}
                                 </span>
                                 <!-- Edit Guru -->
@@ -218,42 +238,34 @@
                             @endforeach
                         </div>
 
-                        <!-- Kuota Progress Bar -->
+                        <!-- Kuota Progress Bar (Full = Hijau, Belum Full = Orange) -->
                         <div class="mt-3.5 space-y-1">
                             <div class="flex justify-between text-xs">
                                 <span class="text-slate-500 font-medium">Beban Bimbingan:</span>
-                                <span class="font-bold text-slate-900 num-tabular">{{ $assignedCount }} / 6 Siswa</span>
+                                <span class="font-bold {{ $isFull ? 'text-emerald-700' : 'text-amber-800' }} num-tabular">{{ $assignedCount }} / 6 Siswa</span>
                             </div>
                             <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div class="h-full rounded-full transition-all {{ $isFull ? 'bg-amber-500' : 'bg-blue-600' }}"
+                                <div class="h-full rounded-full transition-all {{ $isFull ? 'bg-emerald-500' : 'bg-amber-500' }}"
                                     style="width: {{ $percent }}%"></div>
                             </div>
                         </div>
 
-                        <!-- Siswa Bimbingan List -->
-                        <div class="mt-4 pt-3 border-t border-slate-100">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Siswa Bimbingan ({{ $assignedCount }}):</p>
-                            @if($guru->siswa->isEmpty())
-                                <p class="text-xs text-slate-400 italic py-2">Belum ada siswa yang dibimbing.</p>
-                            @else
-                                <ul class="space-y-1.5">
-                                    @foreach($guru->siswa as $bSiswa)
-                                        <li class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100/80 text-xs transition-colors">
-                                            <div class="min-w-0">
-                                                <span class="font-semibold text-slate-800 truncate block">{{ $bSiswa->nama }}</span>
-                                                <span class="text-[10px] text-slate-400">{{ $bSiswa->jenjang }} (Kls {{ $bSiswa->kelas }})</span>
-                                            </div>
-                                            <!-- Lepas Siswa Form -->
-                                            <form method="POST" action="{{ route('web.guru.unassign', $bSiswa->id) }}" onsubmit="return confirm('Lepas siswa {{ $bSiswa->nama }} dari guru {{ $guru->nama }}?');" class="shrink-0">
-                                                @csrf
-                                                <button type="submit" class="text-[10px] text-slate-400 hover:text-rose-600 px-1.5 py-0.5 rounded hover:bg-rose-50 font-semibold" title="Lepas dari guru ini">
-                                                    Lepas &times;
-                                                </button>
-                                            </form>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
+                        <!-- Tombol Detail Siswa Bimbingan -->
+                        <div class="mt-3.5 pt-3 border-t border-slate-100">
+                            <button type="button" onclick="openDetailSiswaGuru('{{ $guru->id }}')"
+                                class="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 hover:bg-blue-50/80 border border-slate-200/80 hover:border-blue-200 text-xs font-semibold text-slate-700 hover:text-blue-900 transition-all group">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 flex items-center justify-center shrink-0">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                    </span>
+                                    <span class="truncate">Siswa Bimbingan ({{ $assignedCount }})</span>
+                                </div>
+                                <span class="text-[11px] font-bold text-blue-700 group-hover:text-blue-800 flex items-center gap-1 shrink-0">
+                                    Lihat Detail &rarr;
+                                </span>
+                            </button>
                         </div>
                     </div>
 
@@ -269,8 +281,8 @@
                                 <span>+ Tambah Siswa Bimbingan</span>
                             </button>
                         @else
-                            <div class="text-center py-1.5 text-xs text-rose-700 font-semibold bg-rose-50/60 rounded-xl">
-                                Kapasitas Penuh (Maksimal 6)
+                            <div class="text-center py-1.5 text-xs text-emerald-800 font-semibold bg-emerald-50/80 border border-emerald-200/80 rounded-xl">
+                                &check; Kapasitas Penuh (Maksimal 6)
                             </div>
                         @endif
                     </div>
@@ -520,7 +532,156 @@
     </div>
 </div>
 
+<!-- Modal 5: Detail Siswa Bimbingan Guru -->
+<div id="modal-detail-siswa-guru" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden my-8">
+        <!-- Header -->
+        <div class="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center gap-3 min-w-0">
+                <div id="modal-detail-guru-avatar" class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold text-sm flex items-center justify-center shrink-0">
+                    GU
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="font-bold text-base text-slate-900 truncate" id="modal-detail-guru-nama">Detail Guru</h3>
+                        <span id="modal-detail-guru-badge" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold"></span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-mono" id="modal-detail-guru-nip">NIP-3100</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModal('modal-detail-siswa-guru')" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-5 space-y-4">
+            <!-- Kualifikasi -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kualifikasi:</span>
+                <div id="modal-detail-guru-kualifikasi" class="flex items-center gap-1.5 flex-wrap"></div>
+            </div>
+
+            <!-- List Siswa -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-700">Daftar Siswa Bimbingan Aktif:</p>
+                    <span id="modal-detail-guru-counter" class="text-xs text-slate-500 font-medium"></span>
+                </div>
+                <div id="modal-detail-siswa-list" class="max-h-[360px] overflow-y-auto space-y-2 pr-1">
+                    <!-- Dinamis via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-5 py-3.5 bg-slate-50/70 border-t border-slate-200/80 flex items-center justify-between gap-2.5">
+            <button type="button" id="modal-detail-add-btn"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-xs shadow-xs transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>+ Tambah Siswa</span>
+            </button>
+            <button type="button" onclick="closeModal('modal-detail-siswa-guru')"
+                class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 text-xs font-semibold ml-auto transition-colors">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    const guruDataMap = @json($guruList->keyBy('id'));
+
+    function openDetailSiswaGuru(guruId) {
+        const guru = guruDataMap[guruId];
+        if (!guru) return;
+
+        document.getElementById('modal-detail-guru-avatar').textContent = (guru.nama || 'GU').substring(0, 2).toUpperCase();
+        document.getElementById('modal-detail-guru-nama').textContent = guru.nama;
+        document.getElementById('modal-detail-guru-nip').textContent = guru.no_pegawai || 'NIP-3100';
+
+        // Kualifikasi badges
+        const kualifikasiContainer = document.getElementById('modal-detail-guru-kualifikasi');
+        kualifikasiContainer.innerHTML = '';
+        (guru.jenjang_list || []).forEach(function(jj) {
+            const span = document.createElement('span');
+            span.className = 'px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200/60';
+            span.textContent = jj;
+            kualifikasiContainer.appendChild(span);
+        });
+
+        // Kapasitas Badge (Full = Hijau, Belum Full = Orange)
+        const count = (guru.siswa || []).length;
+        const isFull = count >= 6;
+        const badge = document.getElementById('modal-detail-guru-badge');
+        badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ' +
+            (isFull ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200');
+        badge.textContent = isFull ? '6/6 PENUH' : 'Tersisa ' + (6 - count) + ' Slot';
+
+        document.getElementById('modal-detail-guru-counter').textContent = count + ' / 6 Siswa';
+
+        // Siswa list
+        const listContainer = document.getElementById('modal-detail-siswa-list');
+        listContainer.innerHTML = '';
+
+        if (!guru.siswa || guru.siswa.length === 0) {
+            listContainer.innerHTML = '<div class="py-6 text-center text-slate-400 text-xs italic bg-slate-50 rounded-xl border border-dashed border-slate-200">Belum ada siswa yang dibimbing oleh guru ini.</div>';
+        } else {
+            const ul = document.createElement('ul');
+            ul.className = 'space-y-2';
+
+            guru.siswa.forEach(function(s, idx) {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100/70 transition-colors';
+
+                const unassignRoute = '/guru/unassign/' + s.id;
+                const csrfToken = '{{ csrf_token() }}';
+
+                li.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-900 font-bold text-xs flex items-center justify-center shrink-0">
+                            ${idx + 1}
+                        </span>
+                        <div class="min-w-0">
+                            <p class="font-bold text-xs text-slate-900 truncate">${s.nama}</p>
+                            <p class="text-[11px] text-slate-500">
+                                <span class="font-semibold text-blue-900">${s.jenjang}</span> · Kelas ${s.kelas}
+                            </p>
+                        </div>
+                    </div>
+                    <form method="POST" action="${unassignRoute}" onsubmit="return confirm('Lepas siswa ' + ${JSON.stringify(s.nama)} + ' dari guru ' + ${JSON.stringify(guru.nama)} + '?');" class="shrink-0">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <button type="submit" class="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 px-2 py-1 rounded-lg font-semibold transition-colors" title="Lepas dari guru ini">
+                            <span>Lepas</span>
+                            <span>&times;</span>
+                        </button>
+                    </form>
+                `;
+                ul.appendChild(li);
+            });
+            listContainer.appendChild(ul);
+        }
+
+        // Add button logic
+        const addBtn = document.getElementById('modal-detail-add-btn');
+        if (!isFull) {
+            addBtn.style.display = 'inline-flex';
+            addBtn.onclick = function() {
+                closeModal('modal-detail-siswa-guru');
+                openAssignModal(guru.id, guru.nama, (guru.jenjang_list || []).join(','));
+            };
+        } else {
+            addBtn.style.display = 'none';
+        }
+
+        openModal('modal-detail-siswa-guru');
+    }
+
     function openEditGuru(data) {
         document.getElementById('form-edit-guru').action = '/guru/' + data.id;
         document.getElementById('modal-edit-guru-title').textContent = 'Edit Guru: ' + data.nama;
@@ -560,6 +721,50 @@
         }
 
         openModal('modal-assign-guru');
+    }
+
+    function filterGuruCards() {
+        const query = (document.getElementById('search-guru-input').value || '').toLowerCase().trim();
+        const cards = document.querySelectorAll('.guru-card-item');
+        const clearBtn = document.getElementById('clear-search-guru');
+        let visibleCount = 0;
+
+        if (clearBtn) {
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+        }
+
+        cards.forEach(function(card) {
+            const name = (card.getAttribute('data-guru-name') || '').toLowerCase();
+            if (name.includes(query)) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const noResult = document.getElementById('no-guru-found');
+        if (noResult) {
+            noResult.classList.toggle('hidden', visibleCount > 0);
+        }
+
+        const counter = document.getElementById('guru-counter-text');
+        if (counter) {
+            counter.textContent = 'Menampilkan ' + visibleCount + ' pengajar' + (query ? ' (difilter)' : '');
+        }
+    }
+
+    function clearGuruSearch() {
+        const input = document.getElementById('search-guru-input');
+        if (input) {
+            input.value = '';
+            filterGuruCards();
+            input.focus();
+        }
     }
 </script>
 @endsection

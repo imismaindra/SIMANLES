@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:pusat,cabang')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/dashboard/pusat', [AdminDashboardController::class, 'pusat'])->name('admin.dashboard.pusat');
         Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.home');
     });
 
@@ -72,6 +73,7 @@ Route::middleware('auth')->group(function () {
     // 5. Presensi Guru & Layar QR (Akses: Guru, Cabang, Pusat)
     Route::prefix('presensi')->group(function () {
         Route::get('/', [PresensiController::class, 'index'])->name('presensi.index');
+        Route::get('/riwayat', [PresensiController::class, 'riwayat'])->name('presensi.riwayat');
         Route::get('/live-data', [PresensiController::class, 'liveData'])->name('web.presensi.live-data');
         Route::get('/scan', [PresensiController::class, 'scannerPage'])->name('presensi.scanner');
         Route::post('/qr', [PresensiController::class, 'generateQr'])->name('web.presensi.qr')->middleware('role:pusat,cabang');

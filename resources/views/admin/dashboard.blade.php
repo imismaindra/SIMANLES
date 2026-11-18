@@ -159,50 +159,6 @@
 
         </div>
 
-        <!-- Section: Informasi Penting & Rekomendasi Operasional -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            @foreach($operationalInsights as $insight)
-            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-3.5 shadow-2xs flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-bold {{ $insight['badge_color'] }}">
-                            {{ $insight['badge'] }}
-                        </span>
-                        @if($insight['icon'] === 'users')
-                        <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        @elseif($insight['icon'] === 'cash')
-                        <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        @else
-                        <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                        </svg>
-                        @endif
-                    </div>
-                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
-                        {{ $insight['title'] }}
-                    </h3>
-                    <p class="mt-1 text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                        {{ $insight['description'] }}
-                    </p>
-                </div>
-                <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <a href="{{ $insight['action_url'] }}"
-                        class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-                        <span>{{ $insight['action_label'] }}</span>
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-            @endforeach
-        </div>
-
         <!-- Section: Grafik Visual Operasional (Keuangan & Komposisi Jenjang) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
             <!-- Chart 1: Tren Arus Kas & Keuangan (Col-span 2) -->
@@ -1258,6 +1214,36 @@
 
                     const chartJenjang = new ApexCharts(elJenjang, jenjangOptions);
                     chartJenjang.render();
+
+                    window.addEventListener('theme-changed', function(e) {
+                        const dark = e.detail.isDark;
+                        if (chartCashflow) {
+                            chartCashflow.updateOptions({
+                                theme: { mode: dark ? 'dark' : 'light' },
+                                xaxis: { labels: { style: { colors: dark ? '#94a3b8' : '#64748b' } } },
+                                yaxis: { labels: { style: { colors: dark ? '#94a3b8' : '#64748b' } } },
+                                grid: { borderColor: dark ? '#1e293b' : '#f1f5f9' },
+                                tooltip: { theme: dark ? 'dark' : 'light' }
+                            });
+                        }
+                        if (chartJenjang) {
+                            chartJenjang.updateOptions({
+                                theme: { mode: dark ? 'dark' : 'light' },
+                                stroke: { colors: dark ? ['#0f172a'] : ['#ffffff'] },
+                                legend: { labels: { colors: dark ? '#cbd5e1' : '#475569' } },
+                                plotOptions: {
+                                    pie: {
+                                        donut: {
+                                            labels: {
+                                                total: { color: dark ? '#94a3b8' : '#64748b' },
+                                                value: { color: dark ? '#f8fafc' : '#0f172a' }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
                 }
             });
         </script>

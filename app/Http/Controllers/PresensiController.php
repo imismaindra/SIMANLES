@@ -373,6 +373,79 @@ class PresensiController extends Controller
     }
 
     /**
+     * Halaman Riwayat Kehadiran Presensi Guru (Akses terpisah untuk Guru dan Manajemen).
+     */
+    public function riwayat(Request $request, CabangContextService $contextService): View
+    {
+        $context = $contextService->getContext($request);
+        $cabangId = $context['cabangId'];
+        $user = Auth::user();
+        $isGuru = $user?->role === 'guru';
+        $loggedGuru = $isGuru ? $user->guru : null;
+
+        $query = Absensi::with(['guru', 'cabang']);
+
+        if ($isGuru && $loggedGuru) {
+            $query->where('guru_id', $loggedGuru->id);
+        } else {
+            if ($request->filled('cabang_id')) {
+                $query->where('cabang_id', $request->query('cabang_id'));
+            } elseif ($context['viewRole'] !== 'pusat') {
+                $query->where('cabang_id', $cabangId);
+            }
+
+            if ($request->filled('guru_id')) {
+                $query->where('guru_id', $request->query('guru_id'));
+            }
+        }
+
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal', $request->query('bulan'));
+        }
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal', $request->query('tahun'));
+        }
+
+        $riwayatPresensi = $query->orderBy('tanggal', 'desc')
+            ->orderBy('jam_datang', 'desc')
+            ->paginate(25)
+            ->withQueryString();
+
+        $totalHadir = (clone $query)->count();
+        $totalSelesai = (clone $query)->whereNotNull('jam_pulang')->count();
+        $totalAktifMengajar = (clone $query)->whereNotNull('jam_datang')->whereNull('jam_pulang')->count();
+
+        // Hitung rata-rata durasi mengajar dalam menit
+        $durasiList = (clone $query)->whereNotNull('jam_datang')->whereNotNull('jam_pulang')->get();
+        $totalMenit = 0;
+        foreach ($durasiList as $log) {
+            if ($log->jam_datang && $log->jam_pulang) {
+                $totalMenit += $log->jam_datang->diffInMinutes($log->jam_pulang);
+            }
+        }
+        $avgDurasi = $durasiList->count() > 0 ? round($totalMenit / $durasiList->count()) : 0;
+
+        $daftarGuru = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        $currentCabang = $context['currentCabang'];
+
+        return view('admin.presensi.riwayat', compact(
+            'riwayatPresensi',
+            'totalHadir',
+            'totalSelesai',
+            'totalAktifMengajar',
+            'avgDurasi',
+            'daftarGuru',
+            'currentCabang',
+            'context',
+            'isGuru',
+            'loggedGuru'
+        ));
+    }
+
+    /**
      * Helper render SVG QR Code.
      */
     private function renderQrSvg(string $content, int $size = 220): string

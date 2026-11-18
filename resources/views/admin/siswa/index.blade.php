@@ -22,7 +22,7 @@
             </div>
 
             <!-- Header Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex flex-wrap items-center justify-end gap-2.5 w-full lg:w-auto">
                 <!-- Trigger Import Excel Siswa -->
                 <button type="button" onclick="openModal('modal-import-siswa')"
                     class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 font-semibold text-xs border border-emerald-200/80 transition-colors">
@@ -48,7 +48,7 @@
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    <span>+ Daftarkan Siswa Baru</span>
+                    <span>Daftarkan Siswa Baru</span>
                 </button>
             </div>
         </div>
@@ -204,8 +204,8 @@
                                 <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ $s->nama }}</span>
                             </td>
                             <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200/80">
-                                    {{ $s->kelas > 0 ? 'Kelas '.$s->kelas : 'Kelas 0' }}
+                                <span class="inline-flex items-center justify-center min-w-[26px] px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200/80">
+                                    {{ $s->kelas }}
                                 </span>
                             </td>
                             <td class="py-3 px-4">

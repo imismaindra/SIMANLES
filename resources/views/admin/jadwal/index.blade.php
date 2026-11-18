@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Jadwal Mengajar — LKP Sang Siroju Lillah')
+@section('title', 'Jadwal Mengajar & Siswa Bimbingan — LKP Sang Siroju Lillah')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 pb-6 lg:pb-0">
 
     <!-- Header & Action Row -->
     <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-2xs">
@@ -11,349 +11,199 @@
             <div>
                 <div class="flex items-center gap-2.5 flex-wrap">
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-                        {{ $isGuru ? 'Jadwal Mengajar & Riwayat Kehadiran' : 'Jadwal Mengajar' }}
+                        Jadwal Mengajar & Siswa Bimbingan
                     </h1>
                     @if($isGuru)
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/70">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                             {{ $loggedGuru->nama ?? auth()->user()->name }} (Pengajar)
                         </span>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                            UC-08
-                        </span>
                     @else
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200/70">
                             <span class="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
                             {{ $currentCabang['nama'] }}
                         </span>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                            Proteksi Anti-Bentrok Lintas Cabang Aktif
-                        </span>
                     @endif
                 </div>
                 <p class="mt-1 text-xs sm:text-sm text-slate-500">
                     {{ $isGuru 
-                        ? 'Portal Pengajar: Pantau jadwal bimbingan privat mingguan Anda dan periksa log riwayat kehadiran presensi datang/pulang.' 
-                        : 'Atur jadwal sesi privat mingguan (Senin s/d Sabtu). Sistem secara otomatis mendeteksi dan mencegah bentrok jam mengajar guru meskipun berada di cabang yang berbeda.' }}
+                        ? 'Daftar nama anak yang Anda bimbing beserta kelas, kontak WhatsApp orang tua, dan alamat lengkap.' 
+                        : 'Daftar sesi mengajar seluruh pengajar beserta rincian nama murid, kelas, kontak WhatsApp orang tua, dan alamat.' }}
                 </p>
             </div>
 
-            <!-- Action Button -->
-            @if($isGuru)
-                <a href="{{ route('presensi.scanner') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors shrink-0">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            @if(! $isGuru)
+            <!-- Action Cluster -->
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <!-- Search Input -->
+                <div class="relative w-full sm:w-64">
+                    <input type="text" id="search-jadwal-input" onkeyup="filterJadwalCards()" placeholder="Cari guru atau nama siswa..."
+                        class="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600 shadow-2xs placeholder:text-slate-400">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <span>Scan Presensi QR (UC-09)</span>
-                </a>
-            @else
+                </div>
+
                 <button type="button" onclick="openModal('modal-tambah-jadwal')"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold text-xs shadow-xs transition-colors shrink-0">
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 active:bg-blue-950 text-white font-semibold text-xs shadow-xs transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
                     <span>+ Buat Sesi Jadwal</span>
                 </button>
+            </div>
             @endif
         </div>
 
-        <!-- Filter Toolbar -->
+        <!-- Stat Siswa Terbimbing -->
         <div class="mt-4">
-            <form method="GET" action="{{ route('jadwal.index') }}" class="grid grid-cols-1 {{ $isGuru ? 'sm:grid-cols-2' : 'sm:grid-cols-3' }} gap-3">
-                <input type="hidden" name="cabang_id" value="{{ request('cabang_id', $currentCabang['id']) }}">
-
+            <div class="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/60 flex items-center justify-between">
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Hari</label>
-                    <select name="hari" onchange="this.form.submit()"
-                        class="w-full py-2 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                        <option value="">Semua Hari (Senin - Sabtu)</option>
-                        @foreach($hariList as $h)
-                            <option value="{{ $h }}" {{ request('hari') === $h ? 'selected' : '' }}>{{ $h }}</option>
-                        @endforeach
-                    </select>
+                    <p class="text-[11px] font-semibold text-blue-900 uppercase tracking-wider">Siswa Terbimbing</p>
+                    <div class="mt-0.5 flex items-baseline gap-1.5">
+                        <span class="text-xl sm:text-2xl font-bold text-blue-950 num-tabular">{{ $totalSiswaTerjadwal }}</span>
+                        <span class="text-xs text-blue-700">anak bimbingan privat intensif</span>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Aktif
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Grid: Setiap Guru & List Siswa yang Diajar -->
+    @php
+        $isSingleGuru = $isGuru || $jadwalPerGuru->count() === 1;
+    @endphp
+
+    <div id="jadwal-grid-container" class="{{ $isSingleGuru ? 'w-full' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5' }}">
+        @forelse($jadwalPerGuru as $j)
+            @php
+                $guru = $j->guru;
+                $muridList = $guru ? $guru->siswa : collect();
+                if ($muridList->isEmpty() && $j->siswa) {
+                    $muridList = collect([$j->siswa]);
+                }
+            @endphp
+            <div data-search-target="{{ strtolower(($guru->nama ?? '').' '.$muridList->pluck('nama')->implode(' ')) }}"
+                class="jadwal-card-item w-full bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-2xs flex flex-col justify-between space-y-4">
+                
+                <div>
+                    <!-- Top: Teacher Header & Jam Sesi -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-900 font-bold text-base flex items-center justify-center shrink-0">
+                                {{ strtoupper(substr($guru->nama ?? 'GU', 0, 2)) }}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="font-bold text-slate-900 text-base sm:text-lg truncate">{{ $guru->nama ?? 'Guru Pengajar' }}</h3>
+                                    <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 font-bold">
+                                        {{ $guru->no_pegawai ?: 'NIP-3101' }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-0.5">Pengajar Bimbingan Belajar & Privat · {{ $j->cabang->nama ?? $currentCabang['nama'] }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Jam Sesi & Status Badge -->
+                        <div class="flex items-center gap-2 sm:self-center shrink-0">
+                            <span class="font-mono text-xs font-bold text-blue-900 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/80 px-3 py-1.5 rounded-xl border border-blue-200/60 dark:border-blue-900 num-tabular">
+                                {{ substr($j->jam_mulai, 0, 5) }} - {{ substr($j->jam_selesai, 0, 5) }} WIB
+                            </span>
+                            <span class="text-xs font-bold px-2.5 py-1.5 rounded-xl {{ $muridList->count() >= 6 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
+                                {{ $muridList->count() }}/6 Siswa
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- List Siswa yang Diajar: Nama, Kelas, No WA Ortu, Alamat -->
+                    <div class="mt-4 space-y-3">
+                        <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <span>Daftar Siswa Bimbingan ({{ $muridList->count() }} Anak)</span>
+                            <span class="text-[11px] font-medium text-slate-400 lowercase font-sans">Kapasitas bimbingan privat maksimal 6 anak</span>
+                        </div>
+
+                        <div class="{{ $isSingleGuru ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5' : 'space-y-2' }}">
+                            @forelse($muridList as $sw)
+                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-2 transition-all hover:border-blue-300 hover:shadow-xs">
+                                    <!-- Nama Siswa & Kelas -->
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="font-bold text-slate-900 dark:text-white text-sm truncate">
+                                            {{ $sw->nama }}
+                                        </div>
+                                        <span class="shrink-0 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                            Kelas {{ $sw->kelas }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Kontak WA Orang Tua -->
+                                    <div class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824z" />
+                                        </svg>
+                                        @if($sw->no_telp_ortu)
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $sw->no_telp_ortu) }}" target="_blank"
+                                                class="font-mono text-emerald-700 dark:text-emerald-400 font-semibold hover:underline truncate"
+                                                title="Hubungi Orang Tua via WhatsApp">
+                                                {{ $sw->no_telp_ortu }}
+                                            </a>
+                                            @if($sw->nama_ibu)
+                                                <span class="text-[11px] text-slate-400">({{ $sw->nama_ibu }})</span>
+                                            @endif
+                                        @else
+                                            <span class="font-mono text-slate-400">-</span>
+                                        @endif
+                                    </div>
+
+                                    <!-- Alamat Lengkap -->
+                                    <div class="flex items-start gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span class="line-clamp-2 leading-relaxed" title="{{ $sw->alamat }}">
+                                            {{ $sw->alamat ?: 'Alamat belum diisi' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-span-full py-8 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 text-xs italic">
+                                    Belum ada siswa bimbingan dialokasikan untuk pengajar ini.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
 
                 @if(! $isGuru)
-                <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Guru</label>
-                    <select name="guru_id" onchange="this.form.submit()"
-                        class="w-full py-2 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                        <option value="">Semua Guru Pengajar</option>
-                        @foreach($daftarGuru as $g)
-                            <option value="{{ $g->id }}" {{ request('guru_id') === $g->id ? 'selected' : '' }}>{{ $g->nama }}</option>
-                        @endforeach
-                    </select>
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                    <span>{{ $j->cabang->nama ?? $currentCabang['nama'] }}</span>
+                    <form method="POST" action="{{ route('web.jadwal.destroy', $j->id) }}" onsubmit="return confirm('Hapus sesi jadwal {{ $guru->nama ?? 'Guru' }}?');" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-rose-500 hover:text-rose-700 font-semibold text-[11px] transition-colors" title="Hapus Jadwal Guru Ini">
+                            Hapus Sesi
+                        </button>
+                    </form>
                 </div>
                 @endif
-
-                <div class="flex items-end gap-2">
-                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 w-full flex items-center justify-between text-xs">
-                        <span class="text-slate-500">Total Sesi:</span>
-                        <span class="font-bold text-slate-900 num-tabular">{{ $totalSesi }} Sesi {{ $isGuru ? 'Mengajar Anda' : "($totalGuruTerjadwal Guru)" }}</span>
-                    </div>
-                    @if(request()->hasAny(['hari', 'guru_id']))
-                        <a href="{{ route('jadwal.index', ['cabang_id' => request('cabang_id', $currentCabang['id'])]) }}"
-                            class="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-xs font-semibold shrink-0">
-                            Reset
-                        </a>
-                    @endif
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Weekly Matrix: 6 Columns / Days -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
-        @foreach($hariList as $hari)
-            @php
-                $sesiHari = $jadwalPerHari[$hari] ?? collect();
-            @endphp
-            <div class="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs flex flex-col h-full">
-                <!-- Day Header -->
-                <div class="px-3.5 py-3 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
-                    <div class="flex items-center gap-1.5">
-                        <span class="font-bold text-xs text-slate-900">{{ $hari }}</span>
-                    </div>
-                    <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700 num-tabular">
-                        {{ $sesiHari->count() }}
-                    </span>
-                </div>
-
-                <!-- Sessions List -->
-                <div class="p-2.5 space-y-2 flex-1 overflow-y-auto max-h-[500px]">
-                    @forelse($sesiHari as $j)
-                        <div class="p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-white hover:shadow-xs transition-all text-xs group relative">
-                            <!-- Time Badge -->
-                            <div class="flex items-center justify-between mb-1.5">
-                                <span class="font-mono text-[11px] font-bold text-blue-900 bg-blue-50 px-1.5 py-0.5 rounded num-tabular">
-                                    {{ substr($j->jam_mulai, 0, 5) }} - {{ substr($j->jam_selesai, 0, 5) }}
-                                </span>
-
-                                @if(! $isGuru)
-                                <!-- Delete Action Form -->
-                                <form method="POST" action="{{ route('web.jadwal.destroy', $j->id) }}" onsubmit="return confirm('Hapus sesi jadwal ini?');" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-rose-600 hover:text-rose-800 text-[10px] font-bold" title="Hapus Jadwal">
-                                        &times;
-                                    </button>
-                                </form>
-                                @endif
-                            </div>
-
-                            <!-- Teacher Name -->
-                            <div class="font-bold text-slate-900 truncate" title="{{ $j->guru->nama ?? 'Guru' }}">
-                                {{ $j->guru->nama ?? 'Guru' }}
-                            </div>
-
-                            <!-- Student Info -->
-                            <div class="text-[11px] text-slate-500 truncate mt-0.5">
-                                @if($j->siswa)
-                                    <span>{{ $j->siswa->nama }}</span> ({{ $j->siswa->jenjang }})
-                                @else
-                                    <span class="italic text-slate-400">Sesi Privat Bebas</span>
-                                @endif
-                            </div>
-
-                            <!-- Branch Tag if crosses -->
-                            @if($j->cabang && $j->cabang_id !== $currentCabang['id'])
-                                <div class="mt-1 text-[9px] font-bold text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded inline-block">
-                                    {{ $j->cabang->nama }}
-                                </div>
-                            @endif
-                        </div>
-                    @empty
-                        <div class="py-8 text-center text-slate-400 text-xs italic">
-                            Tidak ada jadwal
-                        </div>
-                    @endforelse
-                </div>
             </div>
-        @endforeach
-    </div>
-
-    <!-- Complete Table View -->
-    <div class="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
-        <div class="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
-            <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700">Tabel Rincian Sesi Mengajar</h3>
-            <span class="text-xs text-slate-500 num-tabular">{{ $jadwalList->count() }} total sesi aktif</span>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs sm:text-sm text-slate-600 border-collapse">
-                <thead class="bg-slate-50 text-slate-700 text-[11px] uppercase tracking-wider font-bold border-b border-slate-200/80">
-                    <tr>
-                        <th class="py-3 px-4 w-12 text-center">#</th>
-                        <th class="py-3 px-4">Hari & Jam</th>
-                        <th class="py-3 px-4">Guru Pengajar</th>
-                        <th class="py-3 px-4">Siswa Bimbingan</th>
-                        <th class="py-3 px-4">Cabang</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200/70">
-                    @forelse($jadwalList as $idx => $jd)
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="py-3 px-4 text-center text-xs text-slate-400 num-tabular">{{ $idx + 1 }}</td>
-                            <td class="py-3 px-4">
-                                <span class="font-bold text-slate-900">{{ $jd->hari }}</span>
-                                <div class="text-[11px] font-mono font-semibold text-blue-900 num-tabular">
-                                    {{ substr($jd->jam_mulai, 0, 5) }} - {{ substr($jd->jam_selesai, 0, 5) }} WIB
-                                </div>
-                            </td>
-                            <td class="py-3 px-4">
-                                <div class="font-bold text-slate-900">{{ $jd->guru->nama ?? '-' }}</div>
-                                <div class="text-[10px] text-slate-400 font-mono">{{ $jd->guru->no_pegawai ?? 'NIP' }}</div>
-                            </td>
-                            <td class="py-3 px-4">
-                                @if($jd->siswa)
-                                    <div class="font-semibold text-slate-800">{{ $jd->siswa->nama }}</div>
-                                    <div class="text-[10px] text-slate-400">{{ $jd->siswa->jenjang }} · Kelas {{ $jd->siswa->kelas }}</div>
-                                @else
-                                    <span class="text-xs text-slate-400 italic">Sesi Umum / Bebas</span>
-                                @endif
-                            </td>
-                            <td class="py-3 px-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
-                                    {{ $jd->cabang->nama ?? $currentCabang['nama'] }}
-                                </span>
-                            </td>
-                            @if(! $isGuru)
-                            <td class="py-3 px-4 text-right">
-                                <form method="POST" action="{{ route('web.jadwal.destroy', $jd->id) }}" onsubmit="return confirm('Hapus sesi jadwal {{ $jd->hari }} pukul {{ $jd->jam_mulai }}?');" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 rounded" title="Hapus Jadwal">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </form>
-                            </td>
-                            @endif
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="{{ $isGuru ? '5' : '6' }}" class="py-10 text-center text-slate-400 text-sm">
-                                Tidak ada jadwal mengajar pada kriteria ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    @if($isGuru)
-    <!-- Riwayat Log Presensi & Kehadiran Guru (UC-08) -->
-    <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-2xs space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/70">
-            <div>
-                <div class="flex items-center gap-2">
-                    <h2 class="text-base sm:text-lg font-bold text-slate-900">Riwayat Log Kehadiran Saya</h2>
-                    <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold border border-blue-200">
-                        UC-08
-                    </span>
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5">
-                    Log riwayat scan presensi datang dan pulang mandiri Anda yang tercatat oleh sistem SIMANLES.
-                </p>
-            </div>
-            <a href="{{ route('presensi.scanner') }}"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition-colors shrink-0">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                </svg>
-                <span>Buka Scanner Kamera (UC-09)</span>
-            </a>
-        </div>
-
-        @if(isset($riwayatPresensiGuru) && $riwayatPresensiGuru->isNotEmpty())
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50/60">
-                            <th class="py-2.5 px-3">Tanggal</th>
-                            <th class="py-2.5 px-3">Cabang</th>
-                            <th class="py-2.5 px-3">Jam Datang</th>
-                            <th class="py-2.5 px-3">Jam Pulang</th>
-                            <th class="py-2.5 px-3">Durasi</th>
-                            <th class="py-2.5 px-3 text-right">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach($riwayatPresensiGuru as $abs)
-                            @php
-                                $durasi = null;
-                                if ($abs->jam_datang && $abs->jam_pulang) {
-                                    $durasi = (int) $abs->jam_datang->diffInMinutes($abs->jam_pulang);
-                                }
-                            @endphp
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">
-                                    {{ $abs->tanggal ? $abs->tanggal->isoFormat('dddd, D MMMM Y') : '-' }}
-                                </td>
-                                <td class="py-3 px-3 text-slate-600 whitespace-nowrap">
-                                    {{ $abs->cabang->nama ?? 'Cabang' }}
-                                </td>
-                                <td class="py-3 px-3 font-mono font-medium text-emerald-600 whitespace-nowrap">
-                                    {{ $abs->jam_datang ? $abs->jam_datang->format('H:i:s') . ' WIB' : '-' }}
-                                </td>
-                                <td class="py-3 px-3 font-mono font-medium text-slate-600 whitespace-nowrap">
-                                    {{ $abs->jam_pulang ? $abs->jam_pulang->format('H:i:s') . ' WIB' : '-' }}
-                                </td>
-                                <td class="py-3 px-3 text-slate-600 whitespace-nowrap">
-                                    @if($durasi !== null)
-                                        <span class="font-semibold text-slate-800">{{ $durasi }} menit</span>
-                                    @elseif($abs->jam_datang)
-                                        <span class="text-amber-600 font-medium">Sedang berlangsung</span>
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td class="py-3 px-3 text-right whitespace-nowrap">
-                                    @if($abs->jam_pulang)
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            Selesai Mengajar
-                                        </span>
-                                    @elseif($abs->jam_datang)
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Sedang Mengajar
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
-                                            Tercatat
-                                        </span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="py-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-                <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        @empty
+            <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200">
+                <div class="w-12 h-12 mx-auto rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                 </div>
-                <p class="text-xs font-semibold text-slate-700">Belum Ada Catatan Presensi</p>
-                <p class="text-[11px] text-slate-400 mt-0.5 max-w-sm mx-auto">
-                    Anda belum melakukan scan QR presensi. Buka kamera pemindai di cabang untuk mencatat jam datang.
-                </p>
+                <h3 class="font-bold text-slate-900 text-sm">Belum Ada Jadwal Mengajar</h3>
+                <p class="text-xs text-slate-400 mt-1">Tambahkan sesi jadwal mengajar untuk guru pengajar.</p>
             </div>
-        @endif
+        @endforelse
     </div>
-    @endif
 
 </div>
 
@@ -376,6 +226,7 @@
         <form method="POST" action="{{ route('web.jadwal.store') }}" class="p-5 space-y-4">
             @csrf
             <input type="hidden" name="cabang_id" value="{{ $currentCabang['id'] }}">
+            <input type="hidden" name="hari" value="Senin">
 
             <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Guru Pengajar *</label>
@@ -388,43 +239,22 @@
                 </select>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Siswa Bimbingan (Opsional)</label>
-                <select name="siswa_id"
-                    class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                    <option value="">-- Sesi Bebas / Mandiri --</option>
-                    @foreach($daftarSiswa as $sw)
-                        <option value="{{ $sw->id }}">{{ $sw->nama }} ({{ $sw->jenjang }} - Kelas {{ $sw->kelas }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Hari *</label>
-                    <select name="hari" required
-                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                        @foreach($hariList as $h)
-                            <option value="{{ $h }}">{{ $h }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Mulai *</label>
-                    <input type="time" name="jam_mulai" required value="15:00"
+                    <input type="time" name="jam_mulai" required value="13:00"
                         class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Selesai *</label>
-                    <input type="time" name="jam_selesai" required value="16:30"
+                    <input type="time" name="jam_selesai" required value="14:30"
                         class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
                 </div>
             </div>
 
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500">
-                <p><strong>Aturan Anti-Bentrok:</strong> Guru tidak dapat memiliki dua sesi jadwal yang bersinggungan waktu pada hari yang sama di cabang ini maupun cabang lainnya.</p>
+                <p><strong>Info Sesi:</strong> Jadwal mengajar berlaku konsisten untuk 5 hari kerja (Senin s/d Jumat). Siswa bimbingan otomatis terhubung dari data alokasi guru.</p>
             </div>
 
             <div class="flex items-center justify-end gap-2.5 pt-2">
@@ -440,6 +270,23 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function filterJadwalCards() {
+        const query = (document.getElementById('search-jadwal-input')?.value || '').toLowerCase().trim();
+        const cards = document.querySelectorAll('.jadwal-card-item');
+
+        cards.forEach(card => {
+            const target = card.getAttribute('data-search-target') || '';
+            if (!query || target.includes(query)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+@endpush
 @endif
 @endsection
-

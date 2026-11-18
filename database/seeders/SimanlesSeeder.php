@@ -1481,26 +1481,36 @@ class SimanlesSeeder extends Seeder
             );
         }
 
-        // 9. Jadwal Mengajar Hari Ini (jadwal)
-        $jadwalData = [
-            ['guru_id' => $guruMap['Bu Divani'], 'hari' => 'Jumat', 'jam_mulai' => '13:00:00', 'jam_selesai' => '14:30:00'],
-            ['guru_id' => $guruMap['Bu Nida'], 'hari' => 'Jumat', 'jam_mulai' => '14:00:00', 'jam_selesai' => '15:30:00'],
-            ['guru_id' => $guruMap['Bu Annisa'], 'hari' => 'Jumat', 'jam_mulai' => '14:30:00', 'jam_selesai' => '16:00:00'],
-            ['guru_id' => $guruMap['Bu Ruli'], 'hari' => 'Jumat', 'jam_mulai' => '15:00:00', 'jam_selesai' => '16:30:00'],
-            ['guru_id' => $guruMap['Bu Salina'], 'hari' => 'Jumat', 'jam_mulai' => '15:30:00', 'jam_selesai' => '17:00:00'],
-            ['guru_id' => $guruMap['Bu Vita'], 'hari' => 'Jumat', 'jam_mulai' => '16:00:00', 'jam_selesai' => '17:30:00'],
-            ['guru_id' => $guruMap['Bu Dina'], 'hari' => 'Jumat', 'jam_mulai' => '18:30:00', 'jam_selesai' => '20:00:00'],
+        // 9. Jadwal Mengajar 5 Hari Kerja (Senin - Jumat) untuk seluruh pengajar
+        $hariKerja = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        $slotPengajar = [
+            'Bu Divani' => ['jam_mulai' => '13:00:00', 'jam_selesai' => '14:30:00'],
+            'Bu Ruli' => ['jam_mulai' => '13:30:00', 'jam_selesai' => '15:00:00'],
+            'Bu Nida' => ['jam_mulai' => '14:00:00', 'jam_selesai' => '15:30:00'],
+            'Bu Annisa' => ['jam_mulai' => '14:30:00', 'jam_selesai' => '16:00:00'],
+            'Bu Salina' => ['jam_mulai' => '15:00:00', 'jam_selesai' => '16:30:00'],
+            'Bu Vita' => ['jam_mulai' => '15:30:00', 'jam_selesai' => '17:00:00'],
+            'Bu Sofy' => ['jam_mulai' => '16:00:00', 'jam_selesai' => '17:30:00'],
+            'Bu Yessi' => ['jam_mulai' => '16:30:00', 'jam_selesai' => '18:00:00'],
+            'Bu Ria' => ['jam_mulai' => '17:00:00', 'jam_selesai' => '18:30:00'],
+            'Bu Dina' => ['jam_mulai' => '18:00:00', 'jam_selesai' => '19:30:00'],
+            'Bu Erika' => ['jam_mulai' => '18:30:00', 'jam_selesai' => '20:00:00'],
+            'Bu Sasa' => ['jam_mulai' => '19:00:00', 'jam_selesai' => '20:30:00'],
         ];
 
-        foreach ($jadwalData as $jd) {
-            Jadwal::firstOrCreate([
-                'guru_id' => $jd['guru_id'],
-                'cabang_id' => $cabangPonokawan->id,
-                'hari' => $jd['hari'],
-                'jam_mulai' => $jd['jam_mulai'],
-            ], [
-                'jam_selesai' => $jd['jam_selesai'],
-            ]);
+        foreach ($hariKerja as $hari) {
+            foreach ($slotPengajar as $namaGuru => $slot) {
+                if (isset($guruMap[$namaGuru])) {
+                    Jadwal::firstOrCreate([
+                        'guru_id' => $guruMap[$namaGuru],
+                        'cabang_id' => $cabangPonokawan->id,
+                        'hari' => $hari,
+                    ], [
+                        'jam_mulai' => $slot['jam_mulai'],
+                        'jam_selesai' => $slot['jam_selesai'],
+                    ]);
+                }
+            }
         }
 
         // 10. QR Token Aktif Cabang Ponokawan (qr_token)

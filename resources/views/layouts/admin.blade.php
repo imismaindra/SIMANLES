@@ -28,6 +28,7 @@
         function toggleDarkMode() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            window.dispatchEvent(new CustomEvent('theme-changed', { detail: { isDark } }));
         }
     </script>
 
@@ -118,13 +119,24 @@
                     @endphp
 
                     @if(! $isGuru)
-                    <!-- Standalone Top Item: Dashboard Utama -->
+                    @if($isPusat)
+                    <!-- Standalone Top Item: Dashboard Pusat (Semua Cabang) -->
+                    <a href="{{ route('admin.dashboard.pusat') }}"
+                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg {{ request()->routeIs('admin.dashboard.pusat') ? 'bg-blue-600 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5 font-medium' }} transition-all mb-1.5">
+                        <svg class="w-4 h-4 {{ request()->routeIs('admin.dashboard.pusat') ? 'text-white' : 'text-amber-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span class="text-xs font-semibold truncate">Dashboard Seluruh Cabang</span>
+                    </a>
+                    @endif
+
+                    <!-- Standalone Top Item: Dashboard Cabang -->
                     <a href="{{ route('admin.dashboard', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
                         class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'bg-blue-600 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5 font-medium' }} transition-all mb-2">
                         <svg class="w-4 h-4 {{ request()->routeIs('admin.dashboard', 'dashboard', 'admin.home') ? 'text-white' : 'text-blue-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
-                        <span class="text-xs font-semibold">Dashboard Utama</span>
+                        <span class="text-xs font-semibold">Dashboard Cabang</span>
                     </a>
 
                     <!-- Dropdown: Operasional Cabang / Data Pengguna -->
@@ -179,13 +191,20 @@
                                 <a href="{{ route('jadwal.index') }}"
                                     class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('jadwal.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
                                     <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('jadwal.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
-                                    <span>Jadwal & Riwayat Hadir</span>
+                                    <span>Jadwal Mengajar</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('presensi.riwayat') }}"
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('presensi.riwayat') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('presensi.riwayat') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    <span>Riwayat Kehadiran</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('presensi.scanner') }}"
-                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('presensi.*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('presensi.*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('presensi.scanner') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('presensi.scanner') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Scan Presensi QR</span>
                                 </a>
                             </li>
@@ -202,6 +221,13 @@
                                     class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('presensi.index', 'presensi') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
                                     <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('presensi.index', 'presensi') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
                                     <span>Layar QR & Presensi</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('presensi.riwayat', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('presensi.riwayat') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('presensi.riwayat') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    <span>Riwayat Kehadiran Guru</span>
                                 </a>
                             </li>
                             @endif
@@ -311,6 +337,7 @@
             <header
                 class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border-b border-slate-200/80 dark:border-slate-800 px-3 sm:px-5 lg:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3">
                 <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                    @if(! $isGuru)
                     <!-- Sidebar Toggle (Mobile Drawer & Desktop Collapse) -->
                     <button type="button" onclick="toggleSidebar()"
                         class="p-2 -ml-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex items-center justify-center shrink-0 transition-colors"
@@ -320,6 +347,7 @@
                                 d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
+                    @endif
 
                     <!-- Mobile Brand Logo -->
                     <a href="{{ $isGuru ? route('jadwal.index') : route('admin.dashboard') }}" class="flex items-center gap-1.5 lg:hidden shrink-0"
@@ -367,16 +395,15 @@
                     </button>
 
                     @if($isGuru)
-                    <!-- Shortcut Scan Presensi Guru -->
-                    <a href="{{ route('presensi.scanner') }}"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition-colors"
-                        title="Buka scanner presensi kamera">
+                    <!-- Tombol Logout Guru dengan Konfirmasi -->
+                    <button type="button" onclick="openModal('modal-confirm-logout')"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900 transition-colors shadow-2xs"
+                        title="Keluar dari akun">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        <span>Scan Presensi</span>
-                    </a>
+                        <span>Keluar</span>
+                    </button>
                     @else
                     <!-- Live QR Presensi Shortcut (Khusus Admin Cabang / Pusat untuk ditunjukkan ke Guru) -->
                     <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
@@ -414,8 +441,8 @@
                 </div>
             </header>
 
-            <!-- Main Canvas Body (Fluid with compact padding) -->
-            <main class="flex-1 p-3 sm:p-4 lg:p-6 w-full max-w-[1600px] mx-auto">
+            <!-- Main Canvas Body (Fluid with bottom padding for mobile navbar clearance) -->
+            <main class="flex-1 p-3 sm:p-4 lg:p-6 pb-24 sm:pb-28 lg:pb-6 w-full max-w-[1600px] mx-auto">
                 {{-- Global Flash Messages: Floating Top-Right Toast for Welcome/Success --}}
                 @if(session('success'))
                     <div id="toast-welcome"
@@ -496,7 +523,41 @@
     <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/90 dark:border-slate-800 z-40 px-2 py-1.5 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]"
         aria-label="Navigasi Bawah">
         <div class="flex items-center justify-around max-w-md mx-auto">
-            @if(! $isGuru)
+            @if($isGuru)
+            <!-- 1. Jadwal Mengajar (Kiri) -->
+            <a href="{{ route('jadwal.index') }}"
+                class="flex flex-col items-center justify-center py-1.5 px-3 {{ request()->routeIs('jadwal.*') ? 'text-blue-900 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white font-medium' }} min-w-[70px] text-[10px] transition-colors">
+                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" x2="21" y1="10" y2="10" />
+                </svg>
+                <span>Jadwal</span>
+            </a>
+
+            <!-- 2. Presensi (Menonjol Bulat di Tengah) -->
+            <div class="flex flex-col items-center -mt-5">
+                <a href="{{ route('presensi.scanner') }}"
+                    class="w-13 h-13 rounded-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white shadow-lg shadow-emerald-600/40 flex items-center justify-center ring-4 ring-white dark:ring-slate-900 transition-all duration-200"
+                    title="Scan Presensi Guru">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <circle cx="12" cy="13" r="3" />
+                    </svg>
+                </a>
+                <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">Presensi</span>
+            </div>
+
+            <!-- 3. Riwayat Kehadiran (Kanan) -->
+            <a href="{{ route('presensi.riwayat') }}"
+                class="flex flex-col items-center justify-center py-1.5 px-3 {{ request()->routeIs('presensi.riwayat') ? 'text-blue-900 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white font-medium' }} min-w-[70px] text-[10px] transition-colors">
+                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Riwayat</span>
+            </a>
+            @else
             <!-- 1. Home / Dashboard -->
             <a href="{{ route('admin.dashboard') }}"
                 class="flex flex-col items-center justify-center p-2 {{ request()->routeIs('admin.dashboard') ? 'text-blue-900 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }} min-w-[56px] text-[10px]">
@@ -518,19 +579,6 @@
                 </svg>
                 <span>Siswa</span>
             </a>
-            @else
-            <!-- Guru Home / Jadwal -->
-            <a href="{{ route('jadwal.index') }}"
-                class="flex flex-col items-center justify-center p-2 {{ request()->routeIs('jadwal.*') ? 'text-blue-900 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }} min-w-[56px] text-[10px]">
-                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" x2="21" y1="10" y2="10" />
-                </svg>
-                <span>Jadwal</span>
-            </a>
-            @endif
 
             <!-- 3. Primary Center: QR Absen (Floating Target) -->
             <a href="{{ route('presensi.index') }}"
@@ -550,7 +598,6 @@
                 </svg>
             </a>
 
-            @if(! $isGuru)
             <!-- 4. Keuangan & SPP -->
             <a href="{{ route('spp.index') }}"
                 class="flex flex-col items-center justify-center p-2 {{ request()->routeIs('spp.*') ? 'text-blue-900 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }} min-w-[56px] text-[10px]">
@@ -560,17 +607,6 @@
                 </svg>
                 <span>SPP</span>
             </a>
-            @else
-            <!-- Scanner Presensi untuk Guru -->
-            <a href="{{ route('presensi.scanner') }}"
-                class="flex flex-col items-center justify-center p-2 {{ request()->routeIs('presensi.scanner') ? 'text-blue-900 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }} min-w-[56px] text-[10px]">
-                <svg class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <circle cx="12" cy="13" r="3" />
-                </svg>
-                <span>Scan</span>
-            </a>
-            @endif
 
             <!-- 5. Menu Drawer -->
             <button type="button" onclick="toggleMobileMenu()"
@@ -580,8 +616,42 @@
                 </svg>
                 <span>Menu</span>
             </button>
+            @endif
         </div>
     </nav>
+
+    <!-- Modal Konfirmasi Logout Guru -->
+    <div id="modal-confirm-logout" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onclick="closeModal('modal-confirm-logout')"></div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4">
+                <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Konfirmasi Keluar</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                        Apakah Anda yakin ingin keluar dari Portal Pengajar SIMANLES?
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button type="button" onclick="closeModal('modal-confirm-logout')"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-xs transition-colors">
+                        Batal
+                    </button>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            class="w-full px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition-colors shadow-xs">
+                            Ya, Keluar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Global Helpers & Scripts -->
     <script>
