@@ -22,14 +22,6 @@
                             {{ $currentCabang['kode'] }}
                         </span>
                     </div>
-                    <p class="mt-1 text-xs text-slate-600 leading-relaxed max-w-3xl">
-                        Terdapat <strong class="text-slate-900">{{ $kpi['siswa_aktif']['total'] }} siswa aktif</strong>
-                        terdaftar di cabang ini. <span
-                            class="text-amber-800 font-semibold underline underline-offset-2">{{ $kpi['siswa_aktif']['belum_ada_guru'] }}
-                            siswa baru belum memiliki guru</span>. Rasio guru saat ini <strong
-                            class="text-slate-900">{{ $kpi['kuota_guru']['guru_penuh'] }}/{{ $kpi['kuota_guru']['total_guru'] }}
-                            penuh (6/6)</strong> dengan sisa 15 slot bimbingan.
-                    </p>
                 </div>
 
                 <!-- Quick Action Buttons (Stacked on mobile, row on tablet/desktop) -->
@@ -169,7 +161,6 @@
                             <h2 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Tren Arus Kas Cabang</h2>
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">6 Bulan Terakhir</span>
                         </div>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Perbandingan pemasukan SPP/pendaftaran terhadap pengeluaran operasional.</p>
                     </div>
                     <div class="flex items-center gap-3 text-xs">
                         <div class="flex items-center gap-1.5">
@@ -210,7 +201,6 @@
                         <h2 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Demografi Siswa</h2>
                         <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">{{ $kpi['siswa_aktif']['total'] }} Total Siswa</span>
                     </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Komposisi murid aktif per jenjang pendidikan.</p>
                 </div>
 
                 <div class="my-auto py-2">
@@ -250,10 +240,6 @@
                         <div>
                             <h2 class="text-xs sm:text-sm font-bold text-slate-900">Antrean Siswa Belum Mendapatkan Guru
                                 ({{ count($unassignedStudents) }} Siswa)</h2>
-                            <p class="text-[11px] sm:text-xs text-slate-600 mt-0.5 leading-relaxed">
-                                Siswa berikut telah menyelesaikan pendaftaran namun belum memiliki guru pembimbing aktif
-                                (maksimal 6 siswa per guru).
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -370,9 +356,6 @@
                                     Max 6 Siswa/Guru
                                 </span>
                             </div>
-                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
-                                Memastikan rasio pengajaran privat ketat dengan validasi kualifikasi jenjang guru.
-                            </p>
                         </div>
 
                         <div class="flex items-center gap-2.5 text-[11px] font-medium text-slate-500 pt-1 sm:pt-0">
@@ -462,8 +445,6 @@
                                     Bebas Bentrok
                                 </span>
                             </div>
-                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Pemeriksaan irisan waktu guru otomatis lintas seluruh
-                                cabang.</p>
                         </div>
 
                         <span class="text-xs text-slate-500 font-medium shrink-0">Hari: <strong>Jumat</strong></span>
@@ -638,7 +619,6 @@
                     <div class="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
                         <div>
                             <h2 class="text-xs sm:text-sm font-bold text-slate-900">Pembayaran SPP & Kwitansi</h2>
-                            <p class="text-[11px] text-slate-500 mt-0.5">Format baku resmi & integrasi WhatsApp ortu.</p>
                         </div>
                         <button type="button" onclick="openModal('modal-bayar-spp')"
                             class="px-2 py-0.5 text-xs font-bold rounded-lg bg-blue-50 text-blue-900 hover:bg-blue-100 active:bg-blue-200 transition-colors shrink-0">
@@ -697,7 +677,6 @@
                     <div class="flex items-center justify-between pb-2.5 border-b border-slate-200/70">
                         <div>
                             <h2 class="text-xs sm:text-sm font-bold text-slate-900">Master Tarif SPP Global</h2>
-                            <p class="text-[11px] text-slate-500 mt-0.5">Ditetapkan oleh Pimpinan Pusat</p>
                         </div>
                         <span class="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 shrink-0">Tgl 1
                             00:05</span>

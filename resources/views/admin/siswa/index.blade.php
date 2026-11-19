@@ -16,9 +16,6 @@
                         {{ $currentCabang['nama'] }}
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Kelola data siswa privat dan bimbel, status aktif/cuti, kenaikan kelas akhir semester, dan registrasi siswa baru.
-                </p>
             </div>
 
             <!-- Header Action Buttons -->

@@ -10,7 +10,7 @@
         <div>
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-800 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/40 mb-2">
                 <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
-                Security & System Audit (KF-30 / KNF-01)
+                Security & System Audit
             </div>
             <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
                 <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -18,9 +18,6 @@
                 </svg>
                 Audit Log & Keamanan Akses
             </h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Catatan riwayat aktivitas penting sistem (Otentikasi login, CRUD siswa & guru, pembayaran SPP, perubahan cabang & tarif).
-            </p>
         </div>
 
         <div class="flex items-center gap-2">

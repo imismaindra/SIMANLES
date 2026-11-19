@@ -19,9 +19,6 @@
                         Batas Ketat: Max 6 Siswa / Guru
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Pantau utilisasi slot bimbingan privat dan kualifikasi multi-jenjang pengajar.
-                </p>
             </div>
 
             <!-- Action Buttons: Import & Tambah Guru -->

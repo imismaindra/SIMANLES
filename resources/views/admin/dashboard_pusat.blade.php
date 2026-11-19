@@ -19,9 +19,6 @@
                         {{ $totalCabangAktif }} Cabang Aktif
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Laporan eksekutif konsolidasi seluruh cabang: rekap siswa, utilisasi kapasitas guru, arus kas gabungan, dan performa cabang.
-                </p>
             </div>
 
             <!-- Tombol Aksi Header -->

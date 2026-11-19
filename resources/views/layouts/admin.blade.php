@@ -333,14 +333,14 @@
 
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col min-w-0 w-full">
-            <!-- Top Bar Header (Compact & Mobile-Optimized) -->
+            <!-- Top Bar Header (Compact & Mobile-Optimized, Lebih Tinggi) -->
             <header
-                class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border-b border-slate-200/80 dark:border-slate-800 px-3 sm:px-5 lg:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3">
+                class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border-b border-slate-200/80 dark:border-slate-800 px-3 sm:px-5 lg:px-6 py-3.5 sm:py-4 min-h-[60px] sm:min-h-[68px] flex items-center justify-between gap-2 sm:gap-3 shadow-2xs">
                 <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
                     @if(! $isGuru)
-                    <!-- Sidebar Toggle (Mobile Drawer & Desktop Collapse) -->
+                    <!-- Sidebar Toggle (Mobile Drawer & Desktop Collapse, disembunyikan di mobile cabang & pusat) -->
                     <button type="button" onclick="toggleSidebar()"
-                        class="p-2 -ml-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex items-center justify-center shrink-0 transition-colors"
+                        class="{{ ($isCabang || $isPusat) ? 'hidden lg:flex' : 'flex' }} p-2 -ml-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg items-center justify-center shrink-0 transition-colors"
                         aria-label="Buka/Tutup menu navigasi" title="Buka/Tutup Sidebar">
                         <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -353,7 +353,7 @@
                     <a href="{{ $isGuru ? route('jadwal.index') : route('admin.dashboard') }}" class="flex items-center gap-1.5 lg:hidden shrink-0"
                         title="LKP Sang Siroju Lillah">
                         <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah"
-                            class="w-7 h-7 object-contain rounded-md border border-slate-200 dark:border-slate-700 bg-white p-0.5">
+                            class="w-8 h-8 object-contain rounded-md border border-slate-200 dark:border-slate-700 bg-white p-0.5">
                     </a>
 
                     @if(! $isGuru)
@@ -394,20 +394,20 @@
                         </svg>
                     </button>
 
-                    @if($isGuru)
-                    <!-- Tombol Logout Guru dengan Konfirmasi -->
+                    <!-- Tombol Logout Mobile (Semua Role) -->
                     <button type="button" onclick="openModal('modal-confirm-logout')"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900 transition-colors shadow-2xs"
+                        class="{{ $isGuru ? 'inline-flex' : 'sm:hidden inline-flex' }} items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900 transition-colors shadow-2xs"
                         title="Keluar dari akun">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         <span>Keluar</span>
                     </button>
-                    @else
-                    <!-- Live QR Presensi Shortcut (Khusus Admin Cabang / Pusat untuk ditunjukkan ke Guru) -->
+
+                    @if(! $isGuru)
+                    <!-- Live QR Presensi Shortcut (Disembunyikan di mobile cabang & pusat) -->
                     <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                        class="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 border border-blue-200/70 dark:border-blue-900 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                        class="{{ ($isCabang || $isPusat) ? 'hidden sm:inline-flex' : 'inline-flex' }} items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 border border-blue-200/70 dark:border-blue-900 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
                         title="Buka Layar QR Code Presensi Cabang">
                         <svg class="w-3.5 h-3.5 text-blue-900 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -427,9 +427,9 @@
                     @endif
 
                     @if(! $isGuru)
-                    <!-- Primary Action: + Pendaftaran Siswa Baru -->
+                    <!-- Primary Action: + Pendaftaran Siswa Baru (Disembunyikan di mobile cabang & pusat) -->
                     <button type="button" onclick="openModal('modal-pendaftaran')"
-                        class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs sm:text-sm font-semibold active:bg-blue-950 transition-all shadow-xs">
+                        class="{{ ($isCabang || $isPusat) ? 'hidden sm:inline-flex' : 'inline-flex' }} items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs sm:text-sm font-semibold active:bg-blue-950 transition-all shadow-xs">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
@@ -536,18 +536,23 @@
                 <span>Jadwal</span>
             </a>
 
-            <!-- 2. Presensi (Menonjol Bulat di Tengah) -->
-            <div class="flex flex-col items-center -mt-5">
-                <a href="{{ route('presensi.scanner') }}"
-                    class="w-13 h-13 rounded-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white shadow-lg shadow-emerald-600/40 flex items-center justify-center ring-4 ring-white dark:ring-slate-900 transition-all duration-200"
-                    title="Scan Presensi Guru">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <circle cx="12" cy="13" r="3" />
-                    </svg>
-                </a>
-                <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">Presensi</span>
-            </div>
+            <!-- 2. Presensi (Menonjol Bulat di Tengah, Sama Persis Seperti Role Cabang) -->
+            <a href="{{ route('presensi.scanner') }}"
+                class="flex flex-col items-center justify-center -mt-4 bg-blue-900 text-white rounded-full w-12 h-12 shadow-lg hover:bg-blue-800 active:scale-95 transition-transform shrink-0"
+                title="Presensi Mandiri Guru">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                    <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                    <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                    <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                    <path d="M14 14h.01" />
+                    <path d="M17 14v3" />
+                    <path d="M14 17h3" />
+                </svg>
+            </a>
 
             <!-- 3. Riwayat Kehadiran (Kanan) -->
             <a href="{{ route('presensi.riwayat') }}"
@@ -620,31 +625,32 @@
         </div>
     </nav>
 
-    <!-- Modal Konfirmasi Logout Guru -->
+    <!-- Modal Konfirmasi Logout -->
     <div id="modal-confirm-logout" class="fixed inset-0 z-50 hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onclick="closeModal('modal-confirm-logout')"></div>
-        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4">
-                <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center">
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4 pointer-events-auto max-h-[90vh] overflow-y-auto">
+                <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center shadow-xs">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                 </div>
                 <div>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Konfirmasi Keluar</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
-                        Apakah Anda yakin ingin keluar dari Portal Pengajar SIMANLES?
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                        Apakah Anda yakin ingin keluar dari {{ $isGuru ? 'Portal Pengajar' : ($isPusat ? 'Admin Pusat' : 'Pimpinan Cabang') }} SIMANLES?
                     </p>
                 </div>
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <button type="button" onclick="closeModal('modal-confirm-logout')"
-                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-xs transition-colors">
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-xs transition-colors cursor-pointer">
                         Batal
                     </button>
-                    <form action="{{ route('logout') }}" method="POST">
+                    <form action="{{ route('logout') }}" method="POST" class="w-full m-0 p-0 block">
                         @csrf
                         <button type="submit"
-                            class="w-full px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition-colors shadow-xs">
+                            style="background-color: #dc2626 !important; color: #ffffff !important;"
+                            class="w-full px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-colors shadow-xs block text-center cursor-pointer">
                             Ya, Keluar
                         </button>
                     </form>

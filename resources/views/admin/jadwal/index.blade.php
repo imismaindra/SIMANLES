@@ -25,11 +25,7 @@
                         </span>
                     @endif
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    {{ $isGuru 
-                        ? 'Daftar nama anak yang Anda bimbing beserta kelas, kontak WhatsApp orang tua, dan alamat lengkap.' 
-                        : 'Daftar sesi mengajar seluruh pengajar beserta rincian nama murid, kelas, kontak WhatsApp orang tua, dan alamat.' }}
-                </p>
+
             </div>
 
             @if(! $isGuru)
@@ -63,7 +59,7 @@
                     <p class="text-[11px] font-semibold text-blue-900 uppercase tracking-wider">Siswa Terbimbing</p>
                     <div class="mt-0.5 flex items-baseline gap-1.5">
                         <span class="text-xl sm:text-2xl font-bold text-blue-950 num-tabular">{{ $totalSiswaTerjadwal }}</span>
-                        <span class="text-xs text-blue-700">anak bimbingan privat intensif</span>
+                        <span class="text-xs text-blue-700">anak</span>
                     </div>
                 </div>
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
@@ -105,7 +101,6 @@
                                         {{ $guru->no_pegawai ?: 'NIP-3101' }}
                                     </span>
                                 </div>
-                                <p class="text-xs text-slate-400 mt-0.5">Pengajar Bimbingan Belajar & Privat · {{ $j->cabang->nama ?? $currentCabang['nama'] }}</p>
                             </div>
                         </div>
 
@@ -122,11 +117,6 @@
 
                     <!-- List Siswa yang Diajar: Nama, Kelas, No WA Ortu, Alamat -->
                     <div class="mt-4 space-y-3">
-                        <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
-                            <span>Daftar Siswa Bimbingan ({{ $muridList->count() }} Anak)</span>
-                            <span class="text-[11px] font-medium text-slate-400 lowercase font-sans">Kapasitas bimbingan privat maksimal 6 anak</span>
-                        </div>
-
                         <div class="{{ $isSingleGuru ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5' : 'space-y-2' }}">
                             @forelse($muridList as $sw)
                                 <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-2 transition-all hover:border-blue-300 hover:shadow-xs">

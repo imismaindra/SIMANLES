@@ -25,11 +25,6 @@
                         </span>
                     @endif
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    {{ $isGuru
-                        ? 'Catatan lengkap riwayat scan presensi datang dan pulang sesi mengajar Anda yang terekam otomatis oleh sistem SIMANLES.'
-                        : 'Rekapitulasi dan log audit kehadiran seluruh guru pengajar: jam datang, jam pulang, dan durasi bimbingan privat per sesi.' }}
-                </p>
             </div>
 
             <!-- Action Buttons -->
