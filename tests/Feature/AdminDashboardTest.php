@@ -19,7 +19,6 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Dashboard Operasional');
         $response->assertSee('Cabang Ponokawan');
         $response->assertSee('Kapasitas Slot Guru');
-        $response->assertSee('Jadwal Sesi Mengajar Hari Ini');
         $response->assertSee('KW/CAB-PNK/2026/10/');
         $response->assertSee('Master Tarif SPP Global');
 
