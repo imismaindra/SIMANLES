@@ -2,10 +2,20 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\SimanlesSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminDashboardTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(SimanlesSeeder::class);
+    }
+
     /**
      * Test admin dashboard renders successfully on home route with concept specs.
      */
