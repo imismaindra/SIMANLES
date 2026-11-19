@@ -21,6 +21,7 @@ echo "▶ [2/7] Running migrations..."
 $PHP artisan migrate --force
 
 echo "▶ [3/7] Clearing caches..."
+rm -f public/hot public/fonts-manifest.dev.json
 $PHP artisan config:clear
 $PHP artisan route:clear
 $PHP artisan view:clear
