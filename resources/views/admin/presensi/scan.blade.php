@@ -49,7 +49,7 @@
         <div class="max-w-md mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center p-1.5 shadow-xs">
-                    <img src="{{ asset('logoo.png') }}" alt="Logo" loading="lazy" decoding="async" class="w-full h-full object-contain">
+                    <img src="{{ asset('logoo.png') }}" alt="Logo" loading="lazy" decoding="async" class="w-full h-full object-contain img-skeleton" onload="this.classList.add('img-loaded')">
                 </div>
                 <div>
                     <h1 class="font-bold text-sm text-white flex items-center gap-2">

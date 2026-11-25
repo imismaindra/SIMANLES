@@ -13,7 +13,10 @@
                     $headerAvatarUrl = $guru?->foto_url ?? $user->foto_url;
                 @endphp
                 @if($headerAvatarUrl)
-                    <img src="{{ $headerAvatarUrl }}" alt="{{ $guru->nama ?? $user->name }}" loading="lazy" decoding="async" class="w-12 h-12 rounded-2xl object-cover shrink-0 shadow-md shadow-blue-950/20 border border-slate-200 dark:border-slate-700">
+                    <div class="relative overflow-hidden w-12 h-12 rounded-2xl shrink-0 shadow-md shadow-blue-950/20 border border-slate-200 dark:border-slate-700 bg-slate-200 dark:bg-slate-800">
+                        <div class="skeleton-shimmer absolute inset-0"></div>
+                        <img src="{{ $headerAvatarUrl }}" alt="{{ $guru->nama ?? $user->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                    </div>
                 @else
                     <div class="w-12 h-12 rounded-2xl bg-blue-900 text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-md shadow-blue-950/20">
                         {{ strtoupper(substr($guru->nama ?? $user->name, 0, 2)) }}
@@ -102,17 +105,15 @@
                         </label>
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div class="relative shrink-0">
-                                @if($profilFotoUrl)
-                                    <img id="avatar-preview-img" src="{{ $profilFotoUrl }}" alt="Foto Profil" loading="lazy" decoding="async" class="w-20 h-20 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shadow-xs">
-                                    <div id="avatar-preview-placeholder" class="hidden w-20 h-20 rounded-2xl bg-blue-900 text-white font-bold text-2xl flex items-center justify-center shadow-xs">
-                                        {{ strtoupper(substr($guru->nama ?? $user->name, 0, 2)) }}
-                                    </div>
-                                @else
-                                    <img id="avatar-preview-img" src="" alt="Foto Profil" loading="lazy" decoding="async" class="hidden w-20 h-20 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shadow-xs">
-                                    <div id="avatar-preview-placeholder" class="w-20 h-20 rounded-2xl bg-blue-900 text-white font-bold text-2xl flex items-center justify-center shadow-xs">
-                                        {{ strtoupper(substr($guru->nama ?? $user->name, 0, 2)) }}
-                                    </div>
-                                @endif
+                                <div id="avatar-preview-container" class="{{ $profilFotoUrl ? '' : 'hidden' }} relative overflow-hidden w-20 h-20 rounded-2xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs bg-slate-200 dark:bg-slate-800">
+                                    @if($profilFotoUrl)
+                                        <div class="skeleton-shimmer absolute inset-0"></div>
+                                    @endif
+                                    <img id="avatar-preview-img" src="{{ $profilFotoUrl ?? '' }}" alt="Foto Profil" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 {{ $profilFotoUrl ? 'opacity-0' : '' }} transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                </div>
+                                <div id="avatar-preview-placeholder" class="{{ $profilFotoUrl ? 'hidden' : '' }} w-20 h-20 rounded-2xl bg-blue-900 text-white font-bold text-2xl flex items-center justify-center shadow-xs">
+                                    {{ strtoupper(substr($guru->nama ?? $user->name, 0, 2)) }}
+                                </div>
                             </div>
 
                             <div class="space-y-2 flex-1">
@@ -349,15 +350,22 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
+                const container = document.getElementById('avatar-preview-container');
                 const img = document.getElementById('avatar-preview-img');
                 const placeholder = document.getElementById('avatar-preview-placeholder');
                 const btnHapus = document.getElementById('btn-hapus-foto');
                 const hapusInput = document.getElementById('hapus-foto-input');
                 const filenameText = document.getElementById('foto-filename');
 
+                if (container) {
+                    const shimmer = container.querySelector('.skeleton-shimmer');
+                    if (shimmer) shimmer.remove();
+                    container.classList.remove('hidden');
+                }
                 if (img) {
                     img.src = e.target.result;
                     img.classList.remove('hidden');
+                    img.classList.remove('opacity-0');
                 }
                 if (placeholder) placeholder.classList.add('hidden');
                 if (btnHapus) btnHapus.classList.remove('hidden');
@@ -371,6 +379,7 @@
     function removeAvatar() {
         const fileInput = document.getElementById('foto-input');
         const hapusInput = document.getElementById('hapus-foto-input');
+        const container = document.getElementById('avatar-preview-container');
         const img = document.getElementById('avatar-preview-img');
         const placeholder = document.getElementById('avatar-preview-placeholder');
         const btnHapus = document.getElementById('btn-hapus-foto');
@@ -382,6 +391,7 @@
             img.src = '';
             img.classList.add('hidden');
         }
+        if (container) container.classList.add('hidden');
         if (placeholder) placeholder.classList.remove('hidden');
         if (btnHapus) btnHapus.classList.add('hidden');
         if (filenameText) filenameText.textContent = 'Foto akan dihapus saat disimpan';

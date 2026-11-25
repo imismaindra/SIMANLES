@@ -84,7 +84,7 @@
                         <!-- Custom Brand Logo Box -->
                         <div class="w-10 h-10 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                             <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async"
-                                class="w-full h-full object-contain">
+                                class="w-full h-full object-contain img-skeleton" onload="this.classList.add('img-loaded')">
                         </div>
                         <div class="min-w-0">
                             <h2 class="font-bold text-sm text-white tracking-tight leading-tight truncate">
@@ -314,7 +314,10 @@
                         @if($isGuru)
                         <a href="{{ route('guru.profil') }}" class="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity" title="Klik untuk Edit Profil Pengajar">
                             @if($authUser?->foto_url)
-                                <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-9 h-9 rounded-full object-cover shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform border border-white/20">
+                                <div class="relative overflow-hidden w-9 h-9 rounded-full shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform border border-white/20 bg-slate-700">
+                                    <div class="skeleton-shimmer absolute inset-0"></div>
+                                    <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                </div>
                             @else
                                 <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform">
                                     {{ strtoupper(substr($authUser?->name ?? 'G', 0, 1)) }}
@@ -385,7 +388,7 @@
                     <a href="{{ $isGuru ? route('jadwal.index') : route('admin.dashboard') }}" class="flex items-center gap-1.5 lg:hidden shrink-0"
                         title="LKP Sang Siroju Lillah">
                         <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async"
-                            class="w-8 h-8 object-contain rounded-md border border-slate-200 dark:border-slate-700 bg-white p-0.5">
+                            class="w-8 h-8 object-contain rounded-md border border-slate-200 dark:border-slate-700 bg-white p-0.5 img-skeleton" onload="this.classList.add('img-loaded')">
                     </a>
 
                     @if(! $isGuru)
@@ -419,7 +422,10 @@
                                 class="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer select-none"
                                 title="Menu Profil & Tema" aria-expanded="false" aria-haspopup="true">
                                 @if($authUser?->foto_url)
-                                    <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg object-cover shrink-0 shadow-xs">
+                                    <div class="relative overflow-hidden w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg shrink-0 shadow-xs bg-slate-200 dark:bg-slate-800">
+                                        <div class="skeleton-shimmer absolute inset-0"></div>
+                                        <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                    </div>
                                 @else
                                     <div class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
                                         {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}
@@ -444,7 +450,10 @@
                                 <!-- Info Pengguna -->
                                 <div class="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
                                     @if($authUser?->foto_url)
-                                        <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-9 h-9 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs">
+                                        <div class="relative overflow-hidden w-9 h-9 rounded-xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs bg-slate-200 dark:bg-slate-800">
+                                            <div class="skeleton-shimmer absolute inset-0"></div>
+                                            <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                        </div>
                                     @else
                                         <div class="w-9 h-9 rounded-xl bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
                                             {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}

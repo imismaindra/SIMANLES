@@ -209,7 +209,10 @@
                                 @if($s->guru)
                                     <div class="flex items-center gap-2">
                                         @if($s->guru->foto_url)
-                                            <img src="{{ $s->guru->foto_url }}" alt="{{ $s->guru->nama }}" loading="lazy" decoding="async" class="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200">
+                                            <div class="relative overflow-hidden w-6 h-6 rounded-full shrink-0 border border-slate-200 bg-slate-200 dark:bg-slate-800">
+                                                <div class="skeleton-shimmer absolute inset-0"></div>
+                                                <img src="{{ $s->guru->foto_url }}" alt="{{ $s->guru->nama }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                            </div>
                                         @else
                                             <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-900 font-bold text-[10px] flex items-center justify-center shrink-0">
                                                 {{ strtoupper(substr($s->guru->nama, 0, 2)) }}
