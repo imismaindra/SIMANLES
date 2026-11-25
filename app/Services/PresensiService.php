@@ -313,8 +313,8 @@ class PresensiService
             ->all();
         $totalGuruTerjadwal = count($guruTerjadwalIds);
 
-        // 2. Total seluruh guru yang teralokasi di cabang ini
-        $totalGuruCabang = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))->count();
+        // 2. Total seluruh guru aktif yang teralokasi di cabang ini
+        $totalGuruCabang = Guru::where('is_active', true)->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))->count();
 
         // Jika ada jadwal terdaftar hari ini, gunakan total jadwal sebagai acuan target hadir
         // Jika belum ada jadwal yang disetting sama sekali, fallback ke total guru cabang

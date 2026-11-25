@@ -248,6 +248,10 @@ class GuruService
                 'alamat' => $data['alamat'] ?? $guru->alamat,
             ];
 
+            if (isset($data['tanggal_lahir'])) {
+                $payload['tanggal_lahir'] = $data['tanggal_lahir'];
+            }
+
             if (isset($data['is_active'])) {
                 $payload['is_active'] = (bool) $data['is_active'];
             }
@@ -259,10 +263,14 @@ class GuruService
             $guru->update($payload);
 
             if ($guru->user) {
-                $guru->user->update([
+                $userUpdates = [
                     'name' => $payload['nama'],
                     'is_active' => $payload['is_active'] ?? $guru->user->is_active,
-                ]);
+                ];
+                if (isset($data['tanggal_lahir'])) {
+                    $userUpdates['tanggal_lahir'] = $data['tanggal_lahir'];
+                }
+                $guru->user->update($userUpdates);
             }
 
             if (! empty($data['kualifikasi'])) {

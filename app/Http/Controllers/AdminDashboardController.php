@@ -115,7 +115,7 @@ class AdminDashboardController extends Controller
         $smpCount = Siswa::where('cabang_id', $cabangId)->where('status', 'aktif')->where('jenjang', 'SMP')->count();
         $smaCount = Siswa::where('cabang_id', $cabangId)->where('status', 'aktif')->where('jenjang', 'SMA_SMK')->count();
 
-        $branchGurus = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))->get();
+        $branchGurus = Guru::where('is_active', true)->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))->get();
         $totalGuru = $branchGurus->count();
         $kapasitasSlotTotal = $totalGuru * 6;
         $slotTerpakai = Siswa::whereIn('guru_id', $branchGurus->pluck('id'))->where('status', 'aktif')->count();

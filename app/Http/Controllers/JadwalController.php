@@ -49,7 +49,8 @@ class JadwalController extends Controller
         $jadwalPerGuru = $allJadwal->unique('guru_id')->values();
 
         // Daftar Guru & Siswa untuk form tambah jadwal
-        $daftarGuru = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+        $daftarGuru = Guru::where('is_active', true)
+            ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
             ->get();
 

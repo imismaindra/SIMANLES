@@ -213,15 +213,12 @@
                                     </svg>
                                 </button>
                                 <!-- Hapus / Nonaktifkan Guru -->
-                                <form method="POST" action="{{ route('web.guru.destroy', $guru->id) }}" onsubmit="return confirm('Nonaktifkan guru {{ $guru->nama }}? Seluruh siswa bimbingan akan dilepas ke antrean.');" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Nonaktifkan Guru">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button type="button" onclick="confirmDeleteGuru('{{ $guru->id }}', '{{ addslashes($guru->nama) }}')"
+                                    class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Hapus Guru">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
@@ -443,9 +440,15 @@
                         class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
                 </div>
 
-                <div class="sm:col-span-2">
+                <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp / HP</label>
                     <input type="text" name="no_telp" id="edit-guru-telp" placeholder="08xxxxxxxxxx"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Lahir</label>
+                    <input type="date" name="tanggal_lahir" id="edit-guru-tanggal-lahir"
                         class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
                 </div>
 
@@ -574,19 +577,42 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-5 py-3.5 bg-slate-50/70 border-t border-slate-200/80 flex items-center justify-between gap-2.5">
-            <button type="button" id="modal-detail-add-btn"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-xs shadow-xs transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>+ Tambah Siswa</span>
-            </button>
+        <div class="px-5 py-3.5 bg-slate-50/70 border-t border-slate-200/80 flex items-center justify-end">
             <button type="button" onclick="closeModal('modal-detail-siswa-guru')"
-                class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 text-xs font-semibold ml-auto transition-colors">
+                class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 text-xs font-semibold transition-colors">
                 Tutup
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 6: Konfirmasi Hapus Guru -->
+<div id="modal-confirm-delete-guru" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-slate-200 text-center space-y-4">
+        <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 mx-auto flex items-center justify-center shadow-xs">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        </div>
+        <div>
+            <h3 class="text-base font-bold text-slate-900">Hapus Data Guru?</h3>
+            <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Apakah Anda yakin ingin menghapus data pengajar <strong id="delete-guru-name" class="text-slate-800"></strong>? Seluruh siswa bimbingan akan otomatis dilepas ke antrean.
+            </p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 pt-2">
+            <button type="button" onclick="closeModal('modal-confirm-delete-guru')"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer">
+                Batal
+            </button>
+            <form id="form-delete-guru" method="POST" action="" class="w-full m-0 p-0 block">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                    class="w-full px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors shadow-xs block text-center cursor-pointer">
+                    Ya, Hapus
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -664,18 +690,6 @@
             listContainer.appendChild(ul);
         }
 
-        // Add button logic
-        const addBtn = document.getElementById('modal-detail-add-btn');
-        if (!isFull) {
-            addBtn.style.display = 'inline-flex';
-            addBtn.onclick = function() {
-                closeModal('modal-detail-siswa-guru');
-                openAssignModal(guru.id, guru.nama, (guru.jenjang_list || []).join(','));
-            };
-        } else {
-            addBtn.style.display = 'none';
-        }
-
         openModal('modal-detail-siswa-guru');
     }
 
@@ -684,6 +698,7 @@
         document.getElementById('modal-edit-guru-title').textContent = 'Edit Guru: ' + data.nama;
         document.getElementById('edit-guru-nama').value = data.nama || '';
         document.getElementById('edit-guru-telp').value = data.no_telp || '';
+        document.getElementById('edit-guru-tanggal-lahir').value = data.tanggal_lahir ? data.tanggal_lahir.substring(0, 10) : '';
         document.getElementById('edit-guru-alamat').value = data.alamat || '';
 
         // Checkboxes
@@ -696,6 +711,13 @@
 
         openModal('modal-edit-guru');
     }
+
+    function confirmDeleteGuru(guruId, guruNama) {
+        document.getElementById('form-delete-guru').action = '/guru/' + guruId;
+        document.getElementById('delete-guru-name').textContent = guruNama;
+        openModal('modal-confirm-delete-guru');
+    }
+
     function openAssignModal(guruId, guruNama, guruJenjangStr) {
         document.getElementById('assign-guru-id').value = guruId;
         document.getElementById('modal-assign-title').textContent = 'Tugaskan Siswa ke ' + guruNama;
