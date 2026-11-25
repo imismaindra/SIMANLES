@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -62,5 +63,56 @@ class LoginTest extends TestCase
         $response->assertRedirect('/login');
         $response->assertSessionHasErrors('identifier');
         $this->assertGuest();
+    }
+
+    public function test_guru_login_ignores_admin_intended_url_and_avoids_403(): void
+    {
+        $this->get('/dashboard')->assertRedirect('/login');
+
+        $response = $this->followingRedirects()->post('/login', [
+            'identifier' => 'nip3101@lespintar.id',
+            'password' => '1995-05-14',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertAuthenticated();
+        $this->assertSame(route('jadwal.index'), url()->current());
+    }
+
+    public function test_cabang_login_ignores_pusat_only_intended_url_and_avoids_403(): void
+    {
+        $this->get('/pengaturan')->assertRedirect('/login');
+
+        $response = $this->followingRedirects()->post('/login', [
+            'identifier' => 'cabang.ponokawan@lespintar.id',
+            'password' => 'cabang123',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertAuthenticated();
+        $this->assertSame(route('admin.dashboard'), url()->current());
+    }
+
+    public function test_same_role_intended_url_is_preserved_after_login(): void
+    {
+        $this->get('/presensi/scan')->assertRedirect('/login');
+
+        $response = $this->post('/login', [
+            'identifier' => 'nip3101@lespintar.id',
+            'password' => '1995-05-14',
+        ]);
+
+        $response->assertRedirect(url('/presensi/scan'));
+        $this->assertAuthenticated();
+    }
+
+    public function test_authenticated_guru_visiting_login_redirects_to_jadwal_without_403(): void
+    {
+        $guru = User::where('role', 'guru')->firstOrFail();
+
+        $response = $this->actingAs($guru)->followingRedirects()->get('/login');
+
+        $response->assertStatus(200);
+        $this->assertSame(route('jadwal.index'), url()->current());
     }
 }
