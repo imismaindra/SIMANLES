@@ -316,7 +316,10 @@
                             @if($authUser?->foto_url)
                                 <div class="relative overflow-hidden w-9 h-9 rounded-full shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform border border-white/20 bg-slate-700">
                                     <div class="skeleton-shimmer absolute inset-0"></div>
-                                    <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                    <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling?.classList.remove('hidden');">
+                                </div>
+                                <div class="hidden w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform">
+                                    {{ strtoupper(substr($authUser?->name ?? 'G', 0, 1)) }}
                                 </div>
                             @else
                                 <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform">
@@ -424,7 +427,10 @@
                                 @if($authUser?->foto_url)
                                     <div class="relative overflow-hidden w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg shrink-0 shadow-xs bg-slate-200 dark:bg-slate-800">
                                         <div class="skeleton-shimmer absolute inset-0"></div>
-                                        <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                        <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling?.classList.remove('hidden');">
+                                    </div>
+                                    <div class="hidden w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                                        {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}
                                     </div>
                                 @else
                                     <div class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
@@ -452,7 +458,10 @@
                                     @if($authUser?->foto_url)
                                         <div class="relative overflow-hidden w-9 h-9 rounded-xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs bg-slate-200 dark:bg-slate-800">
                                             <div class="skeleton-shimmer absolute inset-0"></div>
-                                            <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                            <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling?.classList.remove('hidden');">
+                                        </div>
+                                        <div class="hidden w-9 h-9 rounded-xl bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                                            {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}
                                         </div>
                                     @else
                                         <div class="w-9 h-9 rounded-xl bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">

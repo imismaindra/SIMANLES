@@ -194,7 +194,10 @@
                                 @if($guru->foto_url)
                                     <div class="relative overflow-hidden w-10 h-10 rounded-xl shrink-0 border border-slate-200 shadow-xs bg-slate-200 dark:bg-slate-800">
                                         <div class="skeleton-shimmer absolute inset-0"></div>
-                                        <img src="{{ $guru->foto_url }}" alt="{{ $guru->nama }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                        <img src="{{ $guru->foto_url }}" alt="{{ $guru->nama }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling?.classList.remove('hidden');">
+                                    </div>
+                                    <div class="hidden w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold text-sm flex items-center justify-center shrink-0">
+                                        {{ strtoupper(substr($guru->nama, 0, 2)) }}
                                     </div>
                                 @else
                                     <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold text-sm flex items-center justify-center shrink-0">
