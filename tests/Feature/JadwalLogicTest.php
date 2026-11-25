@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Cabang;
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\Siswa;
+use App\Models\User;
 use App\Services\JadwalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -96,5 +98,57 @@ class JadwalLogicTest extends TestCase
             'jam_mulai' => '15:00',
             'jam_selesai' => '16:30',
         ]);
+    }
+
+    /**
+     * Test guru dapat melihat siswa bimbingan pada halaman jadwal meskipun jadwal belum dibuat manual.
+     */
+    public function test_guru_can_view_assigned_students_on_jadwal_page_even_without_manual_schedule(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CAB_JADWAL_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang Jadwal Siswa',
+            'alamat' => 'Alamat Cabang',
+            'status' => 'aktif',
+        ]);
+
+        $user = User::create([
+            'name' => 'Guru Bimbingan Test',
+            'email' => 'guru.bimbingan.'.uniqid().'@test.com',
+            'password' => bcrypt('password'),
+            'role' => 'guru',
+            'cabang_id' => $cabang->id,
+            'is_active' => true,
+        ]);
+
+        $guru = Guru::create([
+            'user_id' => $user->id,
+            'nama' => 'Guru Bimbingan Test',
+            'email' => $user->email,
+            'no_telp' => '081234567890',
+            'jenjang' => 'SD',
+            'is_active' => true,
+        ]);
+
+        $siswa = Siswa::create([
+            'cabang_id' => $cabang->id,
+            'nama' => 'Siswa Bimbingan Unik',
+            'tempat_lahir' => 'Sidoarjo',
+            'tanggal_lahir' => '2015-01-01',
+            'nama_ibu' => 'Ibu Siswa',
+            'no_telp_ortu' => '081234567890',
+            'alamat' => 'Alamat Siswa',
+            'jenjang' => 'SD',
+            'kelas' => 4,
+            'guru_id' => $guru->id,
+            'status' => 'aktif',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jadwal.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Siswa Bimbingan Unik');
+        $response->assertSee('Guru Bimbingan Test');
+        $response->assertSee('1/6 Siswa');
     }
 }

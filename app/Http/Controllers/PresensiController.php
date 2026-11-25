@@ -56,7 +56,8 @@ class PresensiController extends Controller
         $qrSvg = $this->renderQrSvg($scanUrl, 220);
 
         // Daftar Guru di Cabang ini
-        $guruCabang = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+        $guruCabang = Guru::where('is_active', true)
+            ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
             ->get();
 
@@ -135,7 +136,8 @@ class PresensiController extends Controller
         $token = $request->query('token');
         $loggedGuru = Auth::user()?->guru;
 
-        $guruList = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+        $guruList = Guru::where('is_active', true)
+            ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
             ->get();
 
@@ -425,7 +427,8 @@ class PresensiController extends Controller
         }
         $avgDurasi = $durasiList->count() > 0 ? round($totalMenit / $durasiList->count()) : 0;
 
-        $daftarGuru = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
+        $daftarGuru = Guru::where('is_active', true)
+            ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
             ->get();
 

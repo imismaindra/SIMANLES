@@ -78,8 +78,10 @@
     <div id="jadwal-grid-container" class="{{ $isSingleGuru ? 'w-full' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5' }}">
         @forelse($jadwalPerGuru as $j)
             @php
-                $guru = $j->guru;
-                $muridList = $guru ? $guru->siswa : collect();
+                $guru = $isGuru ? ($loggedGuru ?? $j->guru) : $j->guru;
+                $muridList = ($isGuru && isset($assignedStudents))
+                    ? $assignedStudents
+                    : ($guru ? $guru->siswa->where('status', 'aktif') : collect());
                 if ($muridList->isEmpty() && $j->siswa) {
                     $muridList = collect([$j->siswa]);
                 }

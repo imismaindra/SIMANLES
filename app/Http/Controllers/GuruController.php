@@ -30,6 +30,7 @@ class GuruController extends Controller
             'siswa' => fn ($q) => $q->where('status', 'aktif')->orderBy('nama', 'asc'),
             'cabang',
         ])
+            ->where('is_active', true)
             ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
             ->get();
@@ -202,6 +203,7 @@ class GuruController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'no_telp' => 'nullable|string|max:30',
+            'tanggal_lahir' => 'nullable|date',
             'alamat' => 'nullable|string',
             'jenjang' => 'nullable|in:TK,SD,SMP,SMA_SMK',
             'kualifikasi' => 'nullable|array',
@@ -235,7 +237,7 @@ class GuruController extends Controller
             "Menonaktifkan guru {$nama} dan melepas seluruh siswa bimbingannya."
         );
 
-        return back()->with('success', "Guru {$nama} berhasil dinonaktifkan.");
+        return back()->with('success', "Guru {$nama} berhasil dihapus dari daftar cabang.");
     }
 
     /**
