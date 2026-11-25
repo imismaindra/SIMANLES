@@ -98,7 +98,10 @@
                             @if($cardFotoUrl)
                                 <div class="relative overflow-hidden w-11 h-11 rounded-xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs bg-slate-200 dark:bg-slate-800">
                                     <div class="skeleton-shimmer absolute inset-0"></div>
-                                    <img src="{{ $cardFotoUrl }}" alt="{{ $guru->nama ?? 'Guru Pengajar' }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                    <img src="{{ $cardFotoUrl }}" alt="{{ $guru->nama ?? 'Guru Pengajar' }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling?.classList.remove('hidden');">
+                                </div>
+                                <div class="hidden w-11 h-11 rounded-xl bg-blue-100 text-blue-900 font-bold text-base flex items-center justify-center shrink-0">
+                                    {{ strtoupper(substr($guru->nama ?? 'GU', 0, 2)) }}
                                 </div>
                             @else
                                 <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-900 font-bold text-base flex items-center justify-center shrink-0">
