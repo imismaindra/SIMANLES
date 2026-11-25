@@ -33,13 +33,13 @@
     <div class="bg-white border-2 border-blue-900/30 rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-xl relative overflow-hidden print-border">
         <!-- Watermark -->
         <div class="absolute inset-0 flex items-center justify-center opacity-4 pointer-events-none">
-            <img src="{{ asset('logoo.png') }}" class="w-80 h-80 object-contain">
+            <img src="{{ asset('logoo.png') }}" alt="Watermark Logo" loading="lazy" decoding="async" class="w-80 h-80 object-contain">
         </div>
 
         <!-- Kwitansi Header -->
         <div class="flex items-start justify-between pb-4 border-b-2 border-blue-900 gap-4">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('logoo.png') }}" alt="Logo LKP" class="w-12 h-12 object-contain rounded-xl border border-slate-200 p-1">
+                <img src="{{ asset('logoo.png') }}" alt="Logo LKP" loading="lazy" decoding="async" class="w-12 h-12 object-contain rounded-xl border border-slate-200 p-1">
                 <div>
                     <h1 class="text-base sm:text-lg font-black tracking-tight text-blue-950 uppercase">LKP Sang Siroju Lillah</h1>
                     <p class="text-xs text-slate-600 font-medium">Lembaga Kursus & Bimbingan Belajar Privat</p>

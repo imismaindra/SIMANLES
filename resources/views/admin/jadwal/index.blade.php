@@ -25,7 +25,6 @@
                         </span>
                     @endif
                 </div>
-
             </div>
 
             @if(! $isGuru)
@@ -93,9 +92,19 @@
                     <!-- Top: Teacher Header & Jam Sesi -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-3.5 min-w-0">
-                            <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-900 font-bold text-base flex items-center justify-center shrink-0">
-                                {{ strtoupper(substr($guru->nama ?? 'GU', 0, 2)) }}
-                            </div>
+                            @php
+                                $cardFotoUrl = $guru?->foto_url ?? ($guru?->user?->foto_url ?? ($isGuru ? auth()->user()?->foto_url : null));
+                            @endphp
+                            @if($cardFotoUrl)
+                                <div class="relative overflow-hidden w-11 h-11 rounded-xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs bg-slate-200 dark:bg-slate-800">
+                                    <div class="skeleton-shimmer absolute inset-0"></div>
+                                    <img src="{{ $cardFotoUrl }}" alt="{{ $guru->nama ?? 'Guru Pengajar' }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                </div>
+                            @else
+                                <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-900 font-bold text-base flex items-center justify-center shrink-0">
+                                    {{ strtoupper(substr($guru->nama ?? 'GU', 0, 2)) }}
+                                </div>
+                            @endif
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
                                     <h3 class="font-bold text-slate-900 text-base sm:text-lg truncate">{{ $guru->nama ?? 'Guru Pengajar' }}</h3>

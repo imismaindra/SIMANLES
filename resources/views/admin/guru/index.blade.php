@@ -191,9 +191,16 @@
                     <div>
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold text-sm flex items-center justify-center shrink-0">
-                                    {{ strtoupper(substr($guru->nama, 0, 2)) }}
-                                </div>
+                                @if($guru->foto_url)
+                                    <div class="relative overflow-hidden w-10 h-10 rounded-xl shrink-0 border border-slate-200 shadow-xs bg-slate-200 dark:bg-slate-800">
+                                        <div class="skeleton-shimmer absolute inset-0"></div>
+                                        <img src="{{ $guru->foto_url }}" alt="{{ $guru->nama }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();">
+                                    </div>
+                                @else
+                                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold text-sm flex items-center justify-center shrink-0">
+                                        {{ strtoupper(substr($guru->nama, 0, 2)) }}
+                                    </div>
+                                @endif
                                 <div class="min-w-0">
                                     <h3 class="font-bold text-slate-900 text-sm truncate">{{ $guru->nama }}</h3>
                                     <p class="text-[11px] text-slate-400 font-mono">{{ $guru->no_pegawai ?: 'NIP-3100' }}</p>

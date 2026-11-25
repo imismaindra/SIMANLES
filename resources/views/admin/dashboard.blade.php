@@ -849,7 +849,7 @@
             </button>
 
             <div class="flex items-center justify-center gap-2 mb-2">
-                <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" class="w-7 h-7 object-contain">
+                <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async" class="w-7 h-7 object-contain img-skeleton" onload="this.classList.add('img-loaded')">
                 <span class="text-xs font-bold text-slate-800">LKP Sang Siroju Lillah</span>
             </div>
 
@@ -906,8 +906,8 @@
             onclick="event.stopPropagation()">
             <div class="flex items-center justify-between pb-3 border-b border-slate-200">
                 <div class="flex items-center gap-2.5">
-                    <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah"
-                        class="w-8 h-8 object-contain rounded-lg border border-slate-200 bg-white p-0.5 shrink-0">
+                    <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async"
+                        class="w-8 h-8 object-contain rounded-lg border border-slate-200 bg-white p-0.5 shrink-0 img-skeleton" onload="this.classList.add('img-loaded')">
                     <div>
                         <h3 class="text-base font-bold text-slate-900">Catat Pelunasan SPP</h3>
                         <p class="text-xs text-slate-500 mt-0.5">LKP Sang Siroju Lillah · Kwitansi resmi</p>

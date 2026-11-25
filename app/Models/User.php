@@ -28,6 +28,7 @@ class User extends Authenticatable
         'cabang_id',
         'no_pegawai',
         'tanggal_lahir',
+        'foto',
         'is_active',
     ];
 
@@ -54,6 +55,30 @@ class User extends Authenticatable
             'tanggal_lahir' => 'date',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * URL Foto Profil pengguna.
+     */
+    public function getFotoUrlAttribute(): ?string
+    {
+        if (! empty($this->foto)) {
+            return asset('storage/'.$this->foto);
+        }
+
+        $guru = $this->guru;
+        if (! $guru && ($this->no_pegawai || $this->email)) {
+            $guru = Guru::where('user_id', $this->id)
+                ->orWhere('no_pegawai', $this->no_pegawai)
+                ->orWhere('email', $this->email)
+                ->first();
+        }
+
+        if ($guru && ! empty($guru->foto)) {
+            return asset('storage/'.$guru->foto);
+        }
+
+        return null;
     }
 
     /**

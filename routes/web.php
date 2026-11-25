@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuruController;
+use App\Http\Controllers\GuruProfilController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\KasController;
 use App\Http\Controllers\PengaturanController;
@@ -79,6 +80,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/qr', [PresensiController::class, 'generateQr'])->name('web.presensi.qr')->middleware('role:pusat,cabang');
         Route::post('/scan', [PresensiController::class, 'scanWeb'])->name('web.presensi.scan');
         Route::post('/manual', [PresensiController::class, 'storeManual'])->name('web.presensi.manual')->middleware('role:pusat,cabang');
+    });
+
+    // 5.5. Profil Guru & Keamanan Akun (Akses: Guru)
+    Route::middleware('role:guru')->prefix('profil')->group(function () {
+        Route::get('/', [GuruProfilController::class, 'index'])->name('guru.profil');
+        Route::put('/', [GuruProfilController::class, 'update'])->name('guru.profil.update');
+        Route::put('/password', [GuruProfilController::class, 'updatePassword'])->name('guru.profil.password');
     });
 
     // 6. Keuangan & Tagihan SPP Siswa (Pusat & Cabang)

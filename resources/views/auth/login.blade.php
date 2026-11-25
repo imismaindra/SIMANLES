@@ -107,8 +107,8 @@
             <div class="my-auto py-1">
                 <!-- Centered Logo: logoo.png -->
                 <div class="flex justify-center mb-3">
-                    <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah"
-                        class="h-12 sm:h-14 w-auto object-contain filter drop-shadow-sm">
+                    <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async"
+                        class="h-12 sm:h-14 w-auto object-contain filter drop-shadow-sm img-skeleton" onload="this.classList.add('img-loaded')">
                 </div>
 
                 <!-- Centered Heading & Subtitle -->
