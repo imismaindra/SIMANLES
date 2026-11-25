@@ -191,9 +191,13 @@
                     <div>
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold text-sm flex items-center justify-center shrink-0">
-                                    {{ strtoupper(substr($guru->nama, 0, 2)) }}
-                                </div>
+                                @if($guru->foto_url)
+                                    <img src="{{ $guru->foto_url }}" alt="{{ $guru->nama }}" loading="lazy" decoding="async" class="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200 shadow-xs">
+                                @else
+                                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold text-sm flex items-center justify-center shrink-0">
+                                        {{ strtoupper(substr($guru->nama, 0, 2)) }}
+                                    </div>
+                                @endif
                                 <div class="min-w-0">
                                     <h3 class="font-bold text-slate-900 text-sm truncate">{{ $guru->nama }}</h3>
                                     <p class="text-[11px] text-slate-400 font-mono">{{ $guru->no_pegawai ?: 'NIP-3100' }}</p>

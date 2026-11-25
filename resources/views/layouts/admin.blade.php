@@ -83,7 +83,7 @@
                     <a href="{{ $isGuru ? route('jadwal.index') : route('admin.dashboard') }}" class="flex items-center gap-3 group min-w-0">
                         <!-- Custom Brand Logo Box -->
                         <div class="w-10 h-10 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                            <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah"
+                            <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async"
                                 class="w-full h-full object-contain">
                         </div>
                         <div class="min-w-0">
@@ -208,6 +208,13 @@
                                     <span>Scan Presensi QR</span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ route('guru.profil') }}"
+                                    class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('guru.profil*') ? 'bg-blue-600/30 text-blue-200 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/5 font-medium' }} transition-colors text-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('guru.profil*') ? 'bg-blue-400' : 'bg-slate-500' }}"></span>
+                                    <span>Edit Profil Guru</span>
+                                </a>
+                            </li>
                             @else
                             <li>
                                 <a href="{{ route('jadwal.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
@@ -304,10 +311,34 @@
                 <!-- Sidebar Footer: Logged in User & Logout (matching image) -->
                 <div class="pt-3.5 border-t border-white/10 mt-auto">
                     <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md shadow-blue-600/30">
-                                {{ strtoupper(substr($authUser?->name ?? $currentCabang['pimpinan'] ?? 'A', 0, 1)) }}
+                        @if($isGuru)
+                        <a href="{{ route('guru.profil') }}" class="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity" title="Klik untuk Edit Profil Pengajar">
+                            @if($authUser?->foto_url)
+                                <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-9 h-9 rounded-full object-cover shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform border border-white/20">
+                            @else
+                                <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md shadow-blue-600/30 group-hover:scale-105 transition-transform">
+                                    {{ strtoupper(substr($authUser?->name ?? 'G', 0, 1)) }}
+                                </div>
+                            @endif
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-white truncate leading-tight group-hover:text-blue-200 transition-colors">
+                                    {{ $authUser?->name ?? 'Guru Pengajar' }}
+                                </p>
+                                <p class="text-[10px] text-blue-300/80 truncate mt-0.5 flex items-center gap-1">
+                                    <span>Edit Profil</span>
+                                    <span>&rarr;</span>
+                                </p>
                             </div>
+                        </a>
+                        @else
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            @if($authUser?->foto_url)
+                                <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-9 h-9 rounded-full object-cover shrink-0 shadow-md shadow-blue-600/30 border border-white/20">
+                            @else
+                                <div class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-md shadow-blue-600/30">
+                                    {{ strtoupper(substr($authUser?->name ?? $currentCabang['pimpinan'] ?? 'A', 0, 1)) }}
+                                </div>
+                            @endif
                             <div class="truncate">
                                 <p class="text-xs font-bold text-white truncate leading-tight">
                                     {{ $authUser?->name ?? ($isPusat ? 'Administrator' : ($isCabang ? 'Pimpinan Cabang' : 'Guru Pengajar')) }}
@@ -317,6 +348,7 @@
                                 </p>
                             </div>
                         </div>
+                        @endif
                         <form action="{{ route('logout') }}" method="POST" class="shrink-0">
                             @csrf
                             <button type="submit" title="Keluar dari sistem"
@@ -352,7 +384,7 @@
                     <!-- Mobile Brand Logo -->
                     <a href="{{ $isGuru ? route('jadwal.index') : route('admin.dashboard') }}" class="flex items-center gap-1.5 lg:hidden shrink-0"
                         title="LKP Sang Siroju Lillah">
-                        <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah"
+                        <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async"
                             class="w-8 h-8 object-contain rounded-md border border-slate-200 dark:border-slate-700 bg-white p-0.5">
                     </a>
 
@@ -380,63 +412,148 @@
 
                 <!-- Right Action Cluster -->
                 <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                    <!-- Dark Mode Toggle Button -->
-                    <button type="button" onclick="toggleDarkMode()"
-                        class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
-                        title="Ganti Tema (Gelap/Terang)">
-                        <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        <svg class="w-4 h-4 block dark:hidden text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                    </button>
+                    @if($isGuru)
+                        <!-- User Profile Button with Dropdown (Khusus Guru) -->
+                        <div class="relative">
+                            <button type="button" id="user-profile-menu-button" onclick="toggleProfileDropdown()"
+                                class="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer select-none"
+                                title="Menu Profil & Tema" aria-expanded="false" aria-haspopup="true">
+                                @if($authUser?->foto_url)
+                                    <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg object-cover shrink-0 shadow-xs">
+                                @else
+                                    <div class="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-lg bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                                        {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}
+                                    </div>
+                                @endif
+                                <div class="hidden sm:block text-left min-w-0 max-w-[130px]">
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate leading-tight">
+                                        {{ $authUser?->name ?? 'Pengguna' }}
+                                    </p>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
+                                        Guru Pengajar
+                                    </p>
+                                </div>
+                                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0 transition-transform duration-200" id="user-profile-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
 
-                    <!-- Tombol Logout Mobile (Semua Role) -->
-                    <button type="button" onclick="openModal('modal-confirm-logout')"
-                        class="{{ $isGuru ? 'inline-flex' : 'sm:hidden inline-flex' }} items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900 transition-colors shadow-2xs"
-                        title="Keluar dari akun">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        <span>Keluar</span>
-                    </button>
+                            <!-- Dropdown Menu (Khusus Guru) -->
+                            <div id="user-profile-dropdown"
+                                class="hidden absolute right-0 mt-2 w-60 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xl z-50 py-1.5 text-xs animate-in fade-in duration-150">
+                                <!-- Info Pengguna -->
+                                <div class="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                                    @if($authUser?->foto_url)
+                                        <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-9 h-9 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs">
+                                    @else
+                                        <div class="w-9 h-9 rounded-xl bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                                            {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-bold text-slate-900 dark:text-white truncate leading-tight">{{ $authUser?->name }}</p>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ $authUser?->email }}</p>
+                                        <span class="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900">
+                                            Guru Pengajar
+                                        </span>
+                                    </div>
+                                </div>
 
-                    @if(! $isGuru)
-                    <!-- Live QR Presensi Shortcut (Disembunyikan di mobile cabang & pusat) -->
-                    <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
-                        class="{{ ($isCabang || $isPusat) ? 'hidden sm:inline-flex' : 'inline-flex' }} items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 border border-blue-200/70 dark:border-blue-900 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
-                        title="Buka Layar QR Code Presensi Cabang">
-                        <svg class="w-3.5 h-3.5 text-blue-900 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                            <rect x="7" y="7" width="3" height="3" rx="0.5" />
-                            <rect x="14" y="7" width="3" height="3" rx="0.5" />
-                            <rect x="7" y="14" width="3" height="3" rx="0.5" />
-                            <path d="M14 14h.01" />
-                            <path d="M17 14v3" />
-                            <path d="M14 17h3" />
-                        </svg>
-                        <span class="hidden sm:inline">Layar QR</span>
-                    </a>
-                    @endif
+                                <!-- Menu Edit Profil (Guru) -->
+                                <a href="{{ route('guru.profil') }}"
+                                    class="flex items-center gap-2.5 px-3.5 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <span>Edit Profil Guru</span>
+                                </a>
 
-                    @if(! $isGuru)
-                    <!-- Primary Action: + Pendaftaran Siswa Baru (Disembunyikan di mobile cabang & pusat) -->
-                    <button type="button" onclick="openModal('modal-pendaftaran')"
-                        class="{{ ($isCabang || $isPusat) ? 'hidden sm:inline-flex' : 'inline-flex' }} items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs sm:text-sm font-semibold active:bg-blue-950 transition-all shadow-xs">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <line x1="12" y1="5" x2="12" y2="19" />
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                        <span class="hidden xs:inline sm:inline">Daftar Siswa</span>
-                        <span class="xs:hidden sm:hidden">+ Siswa</span>
-                    </button>
+                                <!-- Slide Toggle: Mode Gelap / Terang -->
+                                <div onclick="toggleDarkMode()"
+                                    class="px-3.5 py-2 flex items-center justify-between text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-lg transition-colors cursor-pointer select-none"
+                                    title="Klik untuk beralih mode gelap / terang">
+                                    <div class="flex items-center gap-2.5">
+                                        <svg class="w-4 h-4 text-amber-400 hidden dark:block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                        </svg>
+                                        <svg class="w-4 h-4 text-slate-500 block dark:hidden shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                        <span class="font-medium text-xs">Mode Gelap</span>
+                                    </div>
+                                    <!-- Sliding Switch Control -->
+                                    <div class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-slate-300 dark:bg-blue-600 pointer-events-none">
+                                        <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out translate-x-0 dark:translate-x-4"></span>
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+
+                                <!-- Logout Button -->
+                                <button type="button" onclick="closeProfileDropdown(); openModal('modal-confirm-logout')"
+                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-medium transition-colors text-left cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span>Keluar dari Akun</span>
+                                </button>
+                            </div>
+                        </div>
+                    @else
+                        <!-- Dark Mode Toggle Button (Admin Cabang & Admin Pusat) -->
+                        <button type="button" onclick="toggleDarkMode()"
+                            class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
+                            title="Ganti Tema (Gelap/Terang)">
+                            <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <svg class="w-4 h-4 block dark:hidden text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            </svg>
+                        </button>
+
+                        <!-- Tombol Logout Mobile (Admin Cabang & Admin Pusat) -->
+                        <button type="button" onclick="openModal('modal-confirm-logout')"
+                            class="sm:hidden inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900 transition-colors shadow-2xs"
+                            title="Keluar dari akun">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span>Keluar</span>
+                        </button>
+
+                        <!-- Live QR Presensi Shortcut (Disembunyikan di mobile cabang & pusat) -->
+                        <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id'] ?? 'cab-ponokawan']) }}"
+                            class="{{ ($isCabang || $isPusat) ? 'hidden sm:inline-flex' : 'inline-flex' }} items-center gap-1 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 border border-blue-200/70 dark:border-blue-900 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                            title="Buka Layar QR Code Presensi Cabang">
+                            <svg class="w-3.5 h-3.5 text-blue-900 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                                <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                                <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                                <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                                <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                                <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                                <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                                <path d="M14 14h.01" />
+                                <path d="M17 14v3" />
+                                <path d="M14 17h3" />
+                            </svg>
+                            <span class="hidden sm:inline">Layar QR</span>
+                        </a>
+
+                        <!-- Primary Action: + Pendaftaran Siswa Baru (Disembunyikan di mobile cabang & pusat) -->
+                        <button type="button" onclick="openModal('modal-pendaftaran')"
+                            class="{{ ($isCabang || $isPusat) ? 'hidden sm:inline-flex' : 'inline-flex' }} items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg bg-blue-900 hover:bg-blue-800 text-white text-xs sm:text-sm font-semibold active:bg-blue-950 transition-all shadow-xs">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            <span class="hidden xs:inline sm:inline">Daftar Siswa</span>
+                            <span class="xs:hidden sm:hidden">+ Siswa</span>
+                        </button>
                     @endif
                 </div>
             </header>
@@ -726,6 +843,34 @@
                 document.body.classList.remove('overflow-hidden');
             }
         }
+
+        function toggleProfileDropdown() {
+            const dd = document.getElementById('user-profile-dropdown');
+            const chevron = document.getElementById('user-profile-chevron');
+            if (dd) {
+                const isHidden = dd.classList.toggle('hidden');
+                if (chevron) {
+                    chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+                }
+            }
+        }
+
+        function closeProfileDropdown() {
+            const dd = document.getElementById('user-profile-dropdown');
+            const chevron = document.getElementById('user-profile-chevron');
+            if (dd) {
+                dd.classList.add('hidden');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const btn = document.getElementById('user-profile-menu-button');
+            const dd = document.getElementById('user-profile-dropdown');
+            if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+                closeProfileDropdown();
+            }
+        });
     </script>
 
     @stack('scripts')

@@ -151,4 +151,42 @@ class JadwalLogicTest extends TestCase
         $response->assertSee('Guru Bimbingan Test');
         $response->assertSee('1/6 Siswa');
     }
+
+    public function test_jadwal_page_displays_guru_profile_photo_when_logged_in_as_guru(): void
+    {
+        $cabang = Cabang::firstOrCreate(['kode' => 'CAB_JADWAL_PRF'], [
+            'nama' => 'Cabang Jadwal Profil',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $photoPath = 'profil/test_jadwal_guru.webp';
+
+        $user = User::create([
+            'name' => 'Bu Guru Jadwal Foto',
+            'email' => 'guru.jadwal.foto@test.com',
+            'password' => bcrypt('password'),
+            'role' => 'guru',
+            'no_pegawai' => 'NIP-JADWAL-01',
+            'cabang_id' => $cabang->id,
+            'foto' => $photoPath,
+            'is_active' => true,
+        ]);
+
+        $guru = Guru::create([
+            'user_id' => $user->id,
+            'nama' => 'Bu Guru Jadwal Foto',
+            'email' => 'guru.jadwal.foto@test.com',
+            'no_pegawai' => 'NIP-JADWAL-01',
+            'no_telp' => '081234567890',
+            'jenjang' => 'SMP',
+            'foto' => $photoPath,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('jadwal.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('storage/'.$photoPath);
+    }
 }

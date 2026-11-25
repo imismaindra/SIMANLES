@@ -25,6 +25,7 @@ class Guru extends Model
         'tanggal_lahir',
         'alamat',
         'jenjang',
+        'foto',
         'is_active',
     ];
 
@@ -39,6 +40,30 @@ class Guru extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * URL Foto Profil Guru.
+     */
+    public function getFotoUrlAttribute(): ?string
+    {
+        if (! empty($this->foto)) {
+            return asset('storage/'.$this->foto);
+        }
+
+        $user = $this->user;
+        if (! $user && ($this->no_pegawai || $this->email)) {
+            $user = User::where('id', $this->user_id)
+                ->orWhere('no_pegawai', $this->no_pegawai)
+                ->orWhere('email', $this->email)
+                ->first();
+        }
+
+        if ($user && ! empty($user->foto)) {
+            return asset('storage/'.$user->foto);
+        }
+
+        return null;
     }
 
     public function cabang(): BelongsToMany

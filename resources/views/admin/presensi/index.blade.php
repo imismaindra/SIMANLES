@@ -567,7 +567,7 @@
     <div class="flex flex-col gap-4 border-b border-slate-800 pb-4 sm:flex-row sm:items-center sm:justify-between sm:pb-5">
         <div class="flex items-center gap-3 min-w-0">
             <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center p-1.5 shadow-md shrink-0">
-                <img src="{{ asset('logoo.png') }}" alt="Logo" class="w-full h-full object-contain">
+                <img src="{{ asset('logoo.png') }}" alt="Logo" loading="lazy" decoding="async" class="w-full h-full object-contain">
             </div>
             <div class="min-w-0">
                 <h2 class="text-lg sm:text-2xl font-bold tracking-tight text-white flex flex-wrap items-center gap-2">
