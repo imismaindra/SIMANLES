@@ -89,9 +89,9 @@
                 class="jadwal-card-item w-full bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-2xs flex flex-col justify-between space-y-4">
                 
                 <div>
-                    <!-- Top: Teacher Header & Jam Sesi -->
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                        <div class="flex items-center gap-3.5 min-w-0">
+                    <!-- Top: Teacher Header (Avatar, Name, NIP & Status Kuota) -->
+                    <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center gap-3 min-w-0">
                             @php
                                 $cardFotoUrl = $guru?->foto_url ?? ($guru?->user?->foto_url ?? ($isGuru ? auth()->user()?->foto_url : null));
                             @endphp
@@ -109,78 +109,36 @@
                                 </div>
                             @endif
                             <div class="min-w-0">
-                                <div class="flex items-center gap-2">
-                                    <h3 class="font-bold text-slate-900 text-base sm:text-lg truncate">{{ $guru->nama ?? 'Guru Pengajar' }}</h3>
-                                    <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 font-bold">
-                                        {{ $guru->no_pegawai ?: 'NIP-3101' }}
-                                    </span>
-                                </div>
+                                <h3 class="font-bold text-slate-900 text-sm sm:text-base truncate">{{ $guru->nama ?? 'Guru Pengajar' }}</h3>
+                                <span class="text-[10.5px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 font-bold">
+                                    {{ $guru->no_pegawai ?: 'NIP-3101' }}
+                                </span>
                             </div>
                         </div>
 
-                        <!-- Jam Sesi & Status Badge -->
-                        <div class="flex items-center gap-2 sm:self-center shrink-0">
-                            <span class="font-mono text-xs font-bold text-blue-900 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/80 px-3 py-1.5 rounded-xl border border-blue-200/60 dark:border-blue-900 num-tabular">
-                                {{ substr($j->jam_mulai, 0, 5) }} - {{ substr($j->jam_selesai, 0, 5) }} WIB
-                            </span>
-                            <span class="text-xs font-bold px-2.5 py-1.5 rounded-xl {{ $muridList->count() >= 6 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
-                                {{ $muridList->count() }}/6 Siswa
-                            </span>
-                        </div>
+                        <!-- Status Badge (Tanpa Jam Sesi) -->
+                        <span class="text-xs font-bold px-2.5 py-1.5 rounded-xl shrink-0 {{ $muridList->count() >= 6 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
+                            {{ $muridList->count() }}/6 Siswa
+                        </span>
                     </div>
 
-                    <!-- List Siswa yang Diajar: Nama, Kelas, No WA Ortu, Alamat -->
-                    <div class="mt-4 space-y-3">
-                        <div class="{{ $isSingleGuru ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5' : 'space-y-2' }}">
-                            @forelse($muridList as $sw)
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-2 transition-all hover:border-blue-300 hover:shadow-xs">
-                                    <!-- Nama Siswa & Kelas -->
-                                    <div class="flex items-center justify-between gap-2">
-                                        <div class="font-bold text-slate-900 dark:text-white text-sm truncate">
-                                            {{ $sw->nama }}
-                                        </div>
-                                        <span class="shrink-0 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                            Kelas {{ $sw->kelas }}
-                                        </span>
-                                    </div>
-
-                                    <!-- Kontak WA Orang Tua -->
-                                    <div class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
-                                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824z" />
-                                        </svg>
-                                        @if($sw->no_telp_ortu)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $sw->no_telp_ortu) }}" target="_blank"
-                                                class="font-mono text-emerald-700 dark:text-emerald-400 font-semibold hover:underline truncate"
-                                                title="Hubungi Orang Tua via WhatsApp">
-                                                {{ $sw->no_telp_ortu }}
-                                            </a>
-                                            @if($sw->nama_ibu)
-                                                <span class="text-[11px] text-slate-400">({{ $sw->nama_ibu }})</span>
-                                            @endif
-                                        @else
-                                            <span class="font-mono text-slate-400">-</span>
-                                        @endif
-                                    </div>
-
-                                    <!-- Alamat Lengkap -->
-                                    <div class="flex items-start gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <span class="line-clamp-2 leading-relaxed" title="{{ $sw->alamat }}">
-                                            {{ $sw->alamat ?: 'Alamat belum diisi' }}
-                                        </span>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="col-span-full py-8 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 text-xs italic">
-                                    Belum ada siswa bimbingan dialokasikan untuk pengajar ini.
-                                </div>
-                            @endforelse
-                        </div>
-                    </div>
+                    <!-- Trigger Popup Modal List Siswa -->
+                    <button type="button" 
+                        onclick="openModal('modal-siswa-{{ $j->id }}')" 
+                        class="w-full mt-3 flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-blue-50/90 active:bg-blue-100 text-slate-700 hover:text-blue-900 border border-slate-200/90 font-semibold text-xs transition-all shadow-2xs group cursor-pointer">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-blue-900 group-hover:scale-110 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span>List Siswa ({{ $muridList->count() }})</span>
+                        </span>
+                        <span class="flex items-center gap-1 text-[11px] font-semibold text-blue-700 group-hover:underline">
+                            <span>Lihat List</span>
+                            <svg class="w-3.5 h-3.5 text-blue-600 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                    </button>
                 </div>
 
                 @if(! $isGuru)
@@ -195,6 +153,87 @@
                     </form>
                 </div>
                 @endif
+            </div>
+
+            <!-- Popup Modal List Siswa -->
+            <div id="modal-siswa-{{ $j->id }}" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in duration-150" onclick="event.stopPropagation()">
+                    <!-- Modal Header -->
+                    <div class="px-5 py-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/50 shrink-0">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                                <span>Daftar Siswa Bimbingan</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-300 font-bold">
+                                    {{ $muridList->count() }} Siswa
+                                </span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ $guru->nama ?? 'Guru Pengajar' }} ({{ $guru->no_pegawai ?: 'NIP-3101' }})</p>
+                        </div>
+                        <button type="button" onclick="closeModal('modal-siswa-{{ $j->id }}')" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body (Scrollable List Siswa) -->
+                    <div class="p-4 sm:p-5 overflow-y-auto space-y-2.5 flex-1">
+                        @forelse($muridList as $sw)
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 space-y-2 transition-all hover:border-blue-300 hover:shadow-xs">
+                                <!-- Nama Siswa & Kelas -->
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="font-bold text-slate-900 dark:text-white text-sm truncate">
+                                        {{ $sw->nama }}
+                                    </div>
+                                    <span class="shrink-0 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                        Kelas {{ $sw->kelas }}
+                                    </span>
+                                </div>
+
+                                <!-- Kontak WA Orang Tua -->
+                                <div class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                    <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824z" />
+                                    </svg>
+                                    @if($sw->no_telp_ortu)
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $sw->no_telp_ortu) }}" target="_blank"
+                                            class="font-mono text-emerald-700 dark:text-emerald-400 font-semibold hover:underline truncate"
+                                            title="Hubungi Orang Tua via WhatsApp">
+                                            {{ $sw->no_telp_ortu }}
+                                        </a>
+                                        @if($sw->nama_ibu)
+                                            <span class="text-[11px] text-slate-400">({{ $sw->nama_ibu }})</span>
+                                        @endif
+                                    @else
+                                        <span class="font-mono text-slate-400">-</span>
+                                    @endif
+                                </div>
+
+                                <!-- Alamat Lengkap -->
+                                <div class="flex items-start gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                    <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span class="line-clamp-2 leading-relaxed" title="{{ $sw->alamat }}">
+                                        {{ $sw->alamat ?: 'Alamat belum diisi' }}
+                                    </span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="py-8 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 text-xs italic">
+                                Belum ada siswa bimbingan dialokasikan untuk pengajar ini.
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="px-5 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50/50 dark:bg-slate-800/30 shrink-0">
+                        <button type="button" onclick="closeModal('modal-siswa-{{ $j->id }}')" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
             </div>
         @empty
             <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200">
@@ -275,6 +314,8 @@
     </div>
 </div>
 
+@endif
+
 @push('scripts')
 <script>
     function filterJadwalCards() {
@@ -292,5 +333,4 @@
     }
 </script>
 @endpush
-@endif
 @endsection
