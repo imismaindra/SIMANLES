@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\Siswa;
 use App\Models\User;
 use Exception;
@@ -46,6 +47,24 @@ class GuruService
             }
 
             $siswa->update(['guru_id' => $guruId]);
+
+            // Pastikan guru memiliki jadwal mengajar default di cabang siswa
+            if (! Jadwal::where('guru_id', $guruId)->exists()) {
+                $targetCabangId = $siswa->cabang_id ?? $guru->cabang->first()?->id;
+                if ($targetCabangId) {
+                    $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                    foreach ($hariList as $hari) {
+                        Jadwal::firstOrCreate([
+                            'guru_id' => $guruId,
+                            'cabang_id' => $targetCabangId,
+                            'hari' => $hari,
+                        ], [
+                            'jam_mulai' => '13:00:00',
+                            'jam_selesai' => '14:30:00',
+                        ]);
+                    }
+                }
+            }
 
             return $siswa;
         });
@@ -215,9 +234,21 @@ class GuruService
                 'is_active' => true,
             ]);
 
-            // 3. Attach ke cabang
+            // 3. Attach ke cabang & jadwal default
             if ($cabangId) {
                 $guru->cabang()->syncWithoutDetaching([$cabangId]);
+
+                $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+                foreach ($hariList as $hari) {
+                    Jadwal::firstOrCreate([
+                        'guru_id' => $guru->id,
+                        'cabang_id' => $cabangId,
+                        'hari' => $hari,
+                    ], [
+                        'jam_mulai' => '13:00:00',
+                        'jam_selesai' => '14:30:00',
+                    ]);
+                }
             }
 
             // 4. Attach kualifikasi jenjang
