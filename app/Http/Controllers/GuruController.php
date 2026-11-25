@@ -169,11 +169,15 @@ class GuruController extends Controller
      */
     public function store(Request $request, GuruService $service): RedirectResponse
     {
+        if ($request->filled('no_telp')) {
+            $request->merge(['no_telp' => preg_replace('/[^0-9]/', '', (string) $request->input('no_telp'))]);
+        }
+
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email|unique:guru,email',
             'no_pegawai' => 'nullable|string|max:50|unique:users,no_pegawai|unique:guru,no_pegawai',
-            'no_telp' => 'nullable|string|max:30',
+            'no_telp' => 'nullable|string|regex:/^[0-9]+$/|max:30',
             'tanggal_lahir' => 'nullable|date',
             'alamat' => 'nullable|string',
             'jenjang' => 'nullable|in:TK,SD,SMP,SMA_SMK',
@@ -183,6 +187,7 @@ class GuruController extends Controller
         ], [
             'nama.required' => 'Nama guru wajib diisi.',
             'cabang_id.required' => 'Cabang penempatan wajib dipilih.',
+            'no_telp.regex' => 'Nomor WhatsApp / HP hanya boleh berupa angka.',
         ]);
 
         $guru = $service->createGuru($validated);
@@ -200,16 +205,22 @@ class GuruController extends Controller
      */
     public function update(Request $request, string $id, GuruService $service): RedirectResponse
     {
+        if ($request->filled('no_telp')) {
+            $request->merge(['no_telp' => preg_replace('/[^0-9]/', '', (string) $request->input('no_telp'))]);
+        }
+
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'no_telp' => 'nullable|string|max:30',
-            'tanggal_lahir' => 'nullable|date',
+            'no_telp' => 'nullable|string|regex:/^[0-9]+$/|max:30',
             'alamat' => 'nullable|string',
             'jenjang' => 'nullable|in:TK,SD,SMP,SMA_SMK',
             'kualifikasi' => 'nullable|array',
             'kualifikasi.*' => 'in:TK,SD,SMP,SMA_SMK',
             'cabang_id' => 'nullable|string|exists:cabang,id',
             'is_active' => 'nullable|boolean',
+        ], [
+            'nama.required' => 'Nama guru wajib diisi.',
+            'no_telp.regex' => 'Nomor WhatsApp / HP hanya boleh berupa angka.',
         ]);
 
         $guru = $service->updateGuru($id, $validated);
