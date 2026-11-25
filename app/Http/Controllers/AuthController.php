@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\RoleMiddleware;
 use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Contracts\View\View;
@@ -9,7 +10,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -106,11 +109,68 @@ class AuthController extends Controller
 
         AuditService::log('Login Pengguna', "Pengguna {$user->name} ({$user->role}) berhasil masuk ke sistem.", $user);
 
+        $redirectUrl = $this->resolvePostLoginUrl($request, $user);
+
         if ($user->role === 'guru') {
-            return redirect()->intended(route('jadwal.index'))->with('success', "Selamat datang, {$user->name}!");
+            return redirect($redirectUrl)->with('success', "Selamat datang, {$user->name}!");
         }
 
-        return redirect()->intended(route('admin.dashboard'))->with('success', "Selamat datang di Sistem Informasi Manajemen Les, {$user->name}!");
+        return redirect($redirectUrl)->with('success', "Selamat datang di Sistem Informasi Manajemen Les, {$user->name}!");
+    }
+
+    /**
+     * Resolve URL tujuan setelah login agar url.intended lintas role tidak memicu 403.
+     */
+    private function resolvePostLoginUrl(Request $request, User $user): string
+    {
+        $defaultUrl = $user->role === 'guru'
+            ? route('jadwal.index')
+            : route('admin.dashboard');
+
+        $intendedUrl = $request->session()->pull('url.intended');
+        if (! is_string($intendedUrl) || $intendedUrl === '') {
+            return $defaultUrl;
+        }
+
+        $parsed = parse_url($intendedUrl);
+        if ($parsed === false) {
+            return $defaultUrl;
+        }
+
+        if (isset($parsed['host']) && strcasecmp($parsed['host'], $request->getHost()) !== 0) {
+            return $defaultUrl;
+        }
+
+        $path = $parsed['path'] ?? '/';
+        $query = isset($parsed['query']) ? '?'.$parsed['query'] : '';
+
+        try {
+            $route = Route::getRoutes()->match(Request::create($path.$query, 'GET'));
+        } catch (Throwable) {
+            return $defaultUrl;
+        }
+
+        foreach ($route->gatherMiddleware() as $middleware) {
+            if (! is_string($middleware)) {
+                continue;
+            }
+
+            $roleList = null;
+            if (str_starts_with($middleware, 'role:')) {
+                $roleList = substr($middleware, 5);
+            } elseif (str_starts_with($middleware, RoleMiddleware::class.':')) {
+                $roleList = substr($middleware, strlen(RoleMiddleware::class) + 1);
+            }
+
+            if ($roleList !== null) {
+                $allowedRoles = explode(',', $roleList);
+                if (! in_array($user->role, $allowedRoles, true)) {
+                    return $defaultUrl;
+                }
+            }
+        }
+
+        return $intendedUrl;
     }
 
     /**

@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
         $middleware->redirectGuestsTo('/login');
+        $middleware->redirectUsersTo(function (Request $request): string {
+            return $request->user()?->role === 'guru'
+                ? route('jadwal.index')
+                : route('admin.dashboard');
+        });
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);
