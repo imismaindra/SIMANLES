@@ -56,9 +56,6 @@
                         Smart QR Aktif
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Sistem presensi mandiri guru berbasis QR dinamis dengan deteksi otomatis datang/pulang dan sinkronisasi jadwal harian.
-                </p>
             </div>
 
             <!-- Action Controls (Kiosk Mode & Scanner Link) -->

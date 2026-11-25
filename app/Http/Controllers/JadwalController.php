@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Absensi;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Siswa;
@@ -28,7 +27,7 @@ class JadwalController extends Controller
         $isGuru = $user?->role === 'guru';
         $loggedGuru = $isGuru ? $user->guru : null;
 
-        $query = Jadwal::with(['guru', 'siswa', 'cabang']);
+        $query = Jadwal::with(['guru.siswa', 'siswa', 'cabang']);
 
         if ($isGuru && $loggedGuru) {
             $query->where('guru_id', $loggedGuru->id);
@@ -44,31 +43,10 @@ class JadwalController extends Controller
             }
         }
 
-        if ($request->filled('hari')) {
-            $query->where('hari', $request->query('hari'));
-        }
+        $allJadwal = $query->orderBy('jam_mulai', 'asc')->get();
 
-        $jadwalList = $query->orderByRaw("CASE hari WHEN 'Senin' THEN 1 WHEN 'Selasa' THEN 2 WHEN 'Rabu' THEN 3 WHEN 'Kamis' THEN 4 WHEN 'Jumat' THEN 5 WHEN 'Sabtu' THEN 6 ELSE 7 END")
-            ->orderBy('jam_mulai', 'asc')
-            ->get();
-
-        // Grouping berdasarkan hari untuk tampilan kalender mingguan
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalPerHari = [];
-        foreach ($hariList as $h) {
-            $jadwalPerHari[$h] = $jadwalList->where('hari', $h);
-        }
-
-        // Riwayat kehadiran khusus guru (UC-08: Melihat Jadwal dan Riwayat Kehadiran)
-        $riwayatPresensiGuru = collect();
-        if ($isGuru && $loggedGuru) {
-            $riwayatPresensiGuru = Absensi::with('cabang')
-                ->where('guru_id', $loggedGuru->id)
-                ->orderBy('tanggal', 'desc')
-                ->orderBy('jam_datang', 'desc')
-                ->take(30)
-                ->get();
-        }
+        // Satu entri representasi per guru (karena jadwal mengajar harian sama setiap hari)
+        $jadwalPerGuru = $allJadwal->unique('guru_id')->values();
 
         // Daftar Guru & Siswa untuk form tambah jadwal
         $daftarGuru = Guru::whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
@@ -80,23 +58,20 @@ class JadwalController extends Controller
             ->orderBy('nama', 'asc')
             ->get();
 
-        $totalSesi = $jadwalList->count();
-        $totalGuruTerjadwal = $jadwalList->pluck('guru_id')->unique()->count();
+        $totalGuruTerjadwal = $jadwalPerGuru->count();
+        $totalSiswaTerjadwal = $jadwalPerGuru->sum(fn ($j) => $j->guru ? $j->guru->siswa->count() : ($j->siswa ? 1 : 0));
         $currentCabang = $context['currentCabang'];
 
         return view('admin.jadwal.index', compact(
-            'jadwalList',
-            'jadwalPerHari',
-            'hariList',
+            'jadwalPerGuru',
             'daftarGuru',
             'daftarSiswa',
-            'totalSesi',
             'totalGuruTerjadwal',
+            'totalSiswaTerjadwal',
             'currentCabang',
             'context',
             'isGuru',
-            'loggedGuru',
-            'riwayatPresensiGuru'
+            'loggedGuru'
         ));
     }
 

@@ -16,13 +16,10 @@
                         {{ $currentCabang['nama'] }}
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Kelola data siswa privat dan bimbel, status aktif/cuti, kenaikan kelas akhir semester, dan registrasi siswa baru.
-                </p>
             </div>
 
             <!-- Header Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex flex-wrap items-center justify-end gap-2.5 w-full lg:w-auto">
                 <!-- Trigger Import Excel Siswa -->
                 <button type="button" onclick="openModal('modal-import-siswa')"
                     class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 font-semibold text-xs border border-emerald-200/80 transition-colors">
@@ -48,7 +45,7 @@
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    <span>+ Daftarkan Siswa Baru</span>
+                    <span>Daftarkan Siswa Baru</span>
                 </button>
             </div>
         </div>
@@ -94,7 +91,7 @@
                 </div>
                 @if($totalBelumAdaGuru > 0)
                     <a href="{{ route('guru.index', ['cabang_id' => $currentCabang['id']]) }}" class="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 hover:underline">
-                        <span>Buka Auto-Assign</span> &rarr;
+                        <span>Kelola Alokasi Guru</span> &rarr;
                     </a>
                 @else
                     <p class="mt-1 text-[11px] text-emerald-700 font-medium">Semua siswa teralokasi</p>
@@ -188,8 +185,7 @@
                     <tr>
                         <th class="py-3 px-4 w-12 text-center">#</th>
                         <th class="py-3 px-4">Nama Siswa</th>
-                        <th class="py-3 px-4">Jenjang & Kelas</th>
-                        <th class="py-3 px-4">Ibu / Kontak WA Ortu</th>
+                        <th class="py-3 px-4">Kelas</th>
                         <th class="py-3 px-4">Guru Pembimbing</th>
                         <th class="py-3 px-4 text-center">Status</th>
                         <th class="py-3 px-4 text-right">Aksi</th>
@@ -202,43 +198,12 @@
                                 {{ $siswaList->firstItem() + $idx }}
                             </td>
                             <td class="py-3 px-4">
-                                <div class="font-bold text-slate-900">{{ $s->nama }}</div>
-                                <div class="text-[11px] text-slate-400 truncate max-w-xs" title="{{ $s->alamat ?: 'Alamat belum diisi' }}">
-                                    {{ $s->alamat ?: 'Alamat belum diisi' }}
-                                </div>
+                                <span class="font-bold text-slate-900 text-xs sm:text-sm">{{ $s->nama }}</span>
                             </td>
                             <td class="py-3 px-4">
-                                @php
-                                    $badgeStyle = match($s->jenjang) {
-                                        'TK' => 'bg-purple-50 text-purple-900 border-purple-200/60',
-                                        'SD' => 'bg-blue-50 text-blue-900 border-blue-200/60',
-                                        'SMP' => 'bg-amber-50 text-amber-900 border-amber-200/60',
-                                        default => 'bg-emerald-50 text-emerald-900 border-emerald-200/60',
-                                    };
-                                @endphp
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border {{ $badgeStyle }}">
-                                    {{ $s->jenjang }} {{ $s->kelas > 0 ? '· Kelas '.$s->kelas : '· TK' }}
+                                <span class="inline-flex items-center justify-center min-w-[26px] px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200/80">
+                                    {{ $s->kelas }}
                                 </span>
-                            </td>
-                            <td class="py-3 px-4">
-                                <div class="text-xs font-medium text-slate-800">{{ $s->nama_ibu ?: '-' }}</div>
-                                @if($s->no_telp_ortu)
-                                    @php
-                                        $cleanWa = preg_replace('/[^0-9]/', '', $s->no_telp_ortu);
-                                        if (str_starts_with($cleanWa, '0')) {
-                                            $cleanWa = '62' . substr($cleanWa, 1);
-                                        }
-                                    @endphp
-                                    <a href="https://wa.me/{{ $cleanWa }}" target="_blank"
-                                        class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 hover:text-emerald-900 hover:underline num-tabular">
-                                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z" />
-                                        </svg>
-                                        <span>{{ $s->no_telp_ortu }}</span>
-                                    </a>
-                                @else
-                                    <span class="text-[11px] text-slate-400">Tidak ada WA</span>
-                                @endif
                             </td>
                             <td class="py-3 px-4">
                                 @if($s->guru)
@@ -272,9 +237,19 @@
                             </td>
                             <td class="py-3 px-4 text-right">
                                 <div class="inline-flex items-center gap-1.5 justify-end">
+                                    <!-- Tombol Detail Siswa (i di dalam lingkaran) -->
+                                    <button type="button" onclick='openDetailSiswa(@json($s))'
+                                        class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100/80 border border-blue-200/80 rounded-lg transition-colors"
+                                        title="Detail Siswa">
+                                        <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>Detail</span>
+                                    </button>
+
                                     <!-- Edit Profil Siswa Button -->
                                     <button type="button" onclick='openEditSiswa(@json($s))'
-                                        class="p-1 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors" title="Edit Profil Siswa">
+                                        class="p-1 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Profil Siswa">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
@@ -294,7 +269,7 @@
                                     <form method="POST" action="{{ route('web.siswa.destroy', $s->id) }}" onsubmit="return confirm('Hapus siswa {{ $s->nama }}? Seluruh riwayat SPP dan kas masa lalu tetap aman tersimpan.');" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 rounded" title="Hapus Siswa">
+                                        <button type="submit" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Hapus Siswa">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
@@ -305,7 +280,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-12 text-center text-slate-400 text-sm">
+                            <td colspan="6" class="py-12 text-center text-slate-400 text-sm">
                                 Tidak ada data siswa yang cocok dengan filter yang dipilih.
                             </td>
                         </tr>
@@ -409,7 +384,7 @@
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Guru Pembimbing (Opsional)</label>
                     <select name="guru_id"
                         class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                        <option value="">-- Alokasikan Nanti (Auto-Assign) --</option>
+                        <option value="">-- Alokasikan Nanti --</option>
                         @foreach($daftarGuru as $g)
                             <option value="{{ $g->id }}" {{ $g->siswa_count >= 6 ? 'disabled' : '' }}>
                                 {{ $g->nama }} ({{ $g->siswa_count }}/6 slot) {{ $g->siswa_count >= 6 ? '— PENUH' : '' }}
@@ -616,8 +591,180 @@
     </div>
 </div>
 
+<!-- Modal 5: Detail Lengkap Siswa -->
+<div id="modal-detail-siswa" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden my-8 animate-in fade-in duration-150">
+        <div class="px-5 py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center shrink-0">
+                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </span>
+                <div>
+                    <h3 class="font-bold text-base text-slate-900">Detail Informasi Siswa</h3>
+                    <p class="text-xs text-slate-500">Alamat domisili, kontak orang tua, dan status bimbingan</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModal('modal-detail-siswa')" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-5 space-y-4">
+            <!-- Header Ringkas Siswa -->
+            <div class="p-3.5 bg-blue-50/60 border border-blue-200/70 rounded-xl flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <h4 class="font-bold text-base text-slate-900 truncate" id="detail-siswa-nama">-</h4>
+                    <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-600 font-medium">
+                        <span class="px-2 py-0.5 bg-white border border-blue-200 rounded text-blue-900 font-semibold" id="detail-siswa-kelas">-</span>
+                        <span>•</span>
+                        <span id="detail-siswa-jenjang">-</span>
+                    </div>
+                </div>
+                <span id="detail-siswa-status" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0">
+                    AKTIF
+                </span>
+            </div>
+
+            <!-- Detail Grid Info -->
+            <div class="space-y-3 text-xs">
+                <!-- Alamat Lengkap -->
+                <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+                    <div class="flex items-center gap-1.5 text-slate-500 mb-1">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="text-[11px] font-bold uppercase tracking-wider">Alamat Lengkap</span>
+                    </div>
+                    <p class="text-slate-800 font-medium leading-relaxed" id="detail-siswa-alamat">-</p>
+                </div>
+
+                <!-- Kontak Orang Tua / Wali -->
+                <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+                    <div class="flex items-center gap-1.5 text-slate-500 mb-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-[11px] font-bold uppercase tracking-wider">Nama Orang Tua & Nomor WhatsApp</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                        <div>
+                            <p class="font-bold text-slate-900 text-sm" id="detail-siswa-ibu">-</p>
+                            <p class="text-slate-600 text-xs font-mono mt-0.5" id="detail-siswa-wa-text">-</p>
+                        </div>
+                        <a id="detail-siswa-wa-link" href="#" target="_blank"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-2xs transition-colors shrink-0">
+                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z" />
+                            </svg>
+                            <span>Chat WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Guru Pembimbing & TTL -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                        <span class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Guru Pembimbing</span>
+                        <p class="font-bold text-slate-900" id="detail-siswa-guru">-</p>
+                        <p class="text-[11px] text-slate-400 font-mono mt-0.5" id="detail-siswa-guru-nip"></p>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                        <span class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tempat & Tanggal Lahir</span>
+                        <p class="font-medium text-slate-800" id="detail-siswa-ttl">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-200/80">
+                <button type="button" onclick="editFromDetail()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>Edit Data Siswa</span>
+                </button>
+                <button type="button" onclick="closeModal('modal-detail-siswa')"
+                    class="px-4 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const baku = {{ $biayaPendaftaranBaku }};
+    let currentDetailSiswa = null;
+
+    function openDetailSiswa(data) {
+        currentDetailSiswa = data;
+        document.getElementById('detail-siswa-nama').textContent = data.nama || '-';
+        document.getElementById('detail-siswa-kelas').textContent = data.kelas !== undefined ? (data.kelas > 0 ? ('Kelas ' + data.kelas) : 'Kelas 0') : '-';
+        document.getElementById('detail-siswa-jenjang').textContent = data.jenjang || '-';
+        document.getElementById('detail-siswa-alamat').textContent = data.alamat || 'Alamat belum diisi';
+        document.getElementById('detail-siswa-ibu').textContent = data.nama_ibu || 'Belum diisi';
+
+        const noWa = data.no_telp_ortu || '';
+        const waText = document.getElementById('detail-siswa-wa-text');
+        const waLink = document.getElementById('detail-siswa-wa-link');
+
+        if (noWa) {
+            waText.textContent = noWa;
+            let cleanWa = noWa.replace(/[^0-9]/g, '');
+            if (cleanWa.startsWith('0')) {
+                cleanWa = '62' + cleanWa.substring(1);
+            }
+            waLink.href = 'https://wa.me/' + cleanWa;
+            waLink.classList.remove('hidden');
+        } else {
+            waText.textContent = 'Tidak ada nomor telepon';
+            waLink.classList.add('hidden');
+        }
+
+        const guruName = data.guru ? data.guru.nama : 'Belum Ada Guru Pembimbing';
+        const guruNip = data.guru && data.guru.no_pegawai ? data.guru.no_pegawai : '';
+        document.getElementById('detail-siswa-guru').textContent = guruName;
+        document.getElementById('detail-siswa-guru-nip').textContent = guruNip;
+
+        const statusEl = document.getElementById('detail-siswa-status');
+        const st = data.status || 'aktif';
+        statusEl.textContent = st.toUpperCase();
+        if (st === 'aktif') {
+            statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0';
+        } else if (st === 'cuti') {
+            statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0';
+        } else {
+            statusEl.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300 shrink-0';
+        }
+
+        const ttl = [];
+        if (data.tempat_lahir) ttl.push(data.tempat_lahir);
+        if (data.tanggal_lahir) {
+            try {
+                const d = new Date(data.tanggal_lahir);
+                ttl.push(d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+            } catch (e) {
+                ttl.push(data.tanggal_lahir.substring(0, 10));
+            }
+        }
+        document.getElementById('detail-siswa-ttl').textContent = ttl.length ? ttl.join(', ') : '-';
+
+        openModal('modal-detail-siswa');
+    }
+
+    function editFromDetail() {
+        if (currentDetailSiswa) {
+            closeModal('modal-detail-siswa');
+            openEditSiswa(currentDetailSiswa);
+        }
+    }
 
     function calculateFee() {
         const diskonEl = document.getElementById('reg-diskon');

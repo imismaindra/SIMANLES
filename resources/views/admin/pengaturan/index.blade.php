@@ -16,9 +16,6 @@
                         Otoritas Pusat & Cabang
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Pengaturan tarif SPP baku per jenjang pendidikan, biaya registrasi pendaftaran siswa baru, dan manajemen multi-cabang fisik LKP Sang Siroju Lillah.
-                </p>
             </div>
 
             <!-- Action: Tambah Cabang Button -->

@@ -19,9 +19,6 @@
                         Periode: {{ $namaBulanList[$selectedBulan] ?? $selectedBulan }} {{ $selectedTahun }}
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Otomasi tagihan SPP bulanan idempoten, pencatatan pelunasan, penerbitan nomor kwitansi resmi, dan pengiriman notifikasi WhatsApp ke orang tua.
-                </p>
             </div>
 
             <!-- Trigger Generate Billing Massal -->

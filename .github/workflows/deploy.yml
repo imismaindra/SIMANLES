@@ -101,6 +101,9 @@ jobs:
             tar -xzf deploy.tar.gz
             rm -f deploy.tar.gz
 
+            # Ensure development hot reload files are removed so production build assets are loaded
+            rm -f public/hot public/fonts-manifest.dev.json
+
             # Install/update dependencies directly on server
             composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 

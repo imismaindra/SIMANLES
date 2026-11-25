@@ -23,24 +23,50 @@
         font-variant-numeric: tabular-nums;
     }
 
-    /* Global Dark Theme Adaptation */
+    /* ==========================================================================
+       Global Dark Theme Design System (Crisp, High-Contrast & Neumorphic Polish)
+       ========================================================================== */
     .dark {
         color-scheme: dark;
     }
 
+    /* 1. Canvas & Structural Surfaces */
     .dark body {
-        background-color: #0b0f19;
-        color: #f1f5f9;
+        background-color: #090d16 !important;
+        color: #f1f5f9 !important;
     }
 
+    .dark .bg-slate-50\/80,
+    .dark .bg-slate-50\/70,
+    .dark .bg-slate-50\/60 {
+        background-color: #090d16 !important;
+    }
+
+    /* Cards, Panels & Modals */
     .dark .bg-white {
         background-color: #0f172a !important;
     }
 
+    /* Borders & Dividers - Clean, crisp separation */
+    .dark .border-slate-200,
+    .dark .border-slate-200\/90,
+    .dark .border-slate-200\/80,
+    .dark .border-slate-200\/70,
+    .dark .border-slate-200\/60,
+    .dark .border-slate-100 {
+        border-color: #1e293b !important;
+    }
+
+    .dark .divide-slate-100,
+    .dark .divide-slate-200,
+    .dark .divide-slate-200\/70,
+    .dark .divide-slate-200\/80 {
+        border-color: #1e293b !important;
+    }
+
+    /* 2. Elevated Neutral Surfaces (Stat Sub-boxes, Table Headers, Inputs) */
     .dark .bg-slate-50,
-    .dark .bg-slate-50\/80,
-    .dark .bg-slate-50\/70,
-    .dark .bg-slate-50\/60 {
+    .dark .bg-slate-50\/90 {
         background-color: #1e293b !important;
     }
 
@@ -49,12 +75,19 @@
         background-color: #334155 !important;
     }
 
+    .dark .bg-slate-200,
+    .dark .bg-slate-200\/70,
+    .dark .bg-slate-200\/60 {
+        background-color: #475569 !important;
+    }
+
+    /* 3. Typography Hierarchy - Razor Sharp Contrast */
     .dark .text-slate-900 {
-        color: #f8fafc !important;
+        color: #ffffff !important;
     }
 
     .dark .text-slate-800 {
-        color: #f1f5f9 !important;
+        color: #f8fafc !important;
     }
 
     .dark .text-slate-700 {
@@ -69,21 +102,141 @@
         color: #94a3b8 !important;
     }
 
-    .dark .border-slate-200,
-    .dark .border-slate-200\/90,
-    .dark .border-slate-200\/80,
-    .dark .border-slate-200\/70,
-    .dark .border-slate-200\/60,
-    .dark .border-slate-100 {
-        border-color: #1e293b !important;
+    .dark .text-slate-400 {
+        color: #94a3b8 !important;
     }
 
-    .dark .divide-slate-200,
-    .dark .divide-slate-200\/70,
-    .dark .divide-slate-200\/80 {
-        border-color: #1e293b !important;
+    /* 4. Semantic Color Tokens (Soft translucent backgrounds, crisp text & borders) */
+    /* BLUE */
+    .dark .bg-blue-50,
+    .dark .bg-blue-50\/60,
+    .dark .bg-blue-50\/70,
+    .dark .bg-blue-50\/80,
+    .dark .bg-blue-100 {
+        background-color: rgba(30, 58, 138, 0.3) !important;
+    }
+    .dark .border-blue-200,
+    .dark .border-blue-200\/60,
+    .dark .border-blue-200\/70,
+    .dark .border-blue-200\/80 {
+        border-color: rgba(96, 165, 250, 0.35) !important;
+    }
+    .dark .text-blue-950 {
+        color: #ffffff !important;
+    }
+    .dark .text-blue-900 {
+        color: #93c5fd !important;
+    }
+    .dark .text-blue-800,
+    .dark .text-blue-700 {
+        color: #60a5fa !important;
+    }
+    .dark .text-blue-600 {
+        color: #38bdf8 !important;
     }
 
+    /* EMERALD / GREEN */
+    .dark .bg-emerald-50,
+    .dark .bg-emerald-50\/60,
+    .dark .bg-emerald-50\/70,
+    .dark .bg-emerald-100,
+    .dark .bg-emerald-200 {
+        background-color: rgba(6, 78, 59, 0.35) !important;
+    }
+    .dark .border-emerald-200,
+    .dark .border-emerald-200\/60,
+    .dark .border-emerald-200\/70,
+    .dark .border-emerald-200\/80 {
+        border-color: rgba(52, 211, 153, 0.35) !important;
+    }
+    .dark .text-emerald-950 {
+        color: #ffffff !important;
+    }
+    .dark .text-emerald-900,
+    .dark .text-emerald-800 {
+        color: #6ee7b7 !important;
+    }
+    .dark .text-emerald-700,
+    .dark .text-emerald-600 {
+        color: #34d399 !important;
+    }
+
+    /* AMBER / ORANGE */
+    .dark .bg-amber-50,
+    .dark .bg-amber-50\/60,
+    .dark .bg-amber-50\/70,
+    .dark .bg-amber-100,
+    .dark .bg-amber-200 {
+        background-color: rgba(120, 53, 15, 0.35) !important;
+    }
+    .dark .border-amber-200,
+    .dark .border-amber-200\/60,
+    .dark .border-amber-200\/70 {
+        border-color: rgba(251, 191, 36, 0.35) !important;
+    }
+    .dark .text-amber-950 {
+        color: #ffffff !important;
+    }
+    .dark .text-amber-900,
+    .dark .text-amber-800 {
+        color: #fcd34d !important;
+    }
+    .dark .text-amber-700,
+    .dark .text-amber-600 {
+        color: #fbbf24 !important;
+    }
+
+    /* ROSE / RED */
+    .dark .bg-rose-50,
+    .dark .bg-rose-50\/60,
+    .dark .bg-rose-100,
+    .dark .bg-red-50,
+    .dark .bg-red-100 {
+        background-color: rgba(136, 19, 55, 0.35) !important;
+    }
+    .dark .border-rose-200,
+    .dark .border-red-200 {
+        border-color: rgba(244, 63, 94, 0.35) !important;
+    }
+    .dark .text-rose-950,
+    .dark .text-red-950 {
+        color: #ffffff !important;
+    }
+    .dark .text-rose-900,
+    .dark .text-rose-800,
+    .dark .text-red-900 {
+        color: #fca5a5 !important;
+    }
+    .dark .text-rose-700,
+    .dark .text-red-700 {
+        color: #fda4af !important;
+    }
+
+    /* PURPLE / INDIGO */
+    .dark .bg-purple-50,
+    .dark .bg-purple-100,
+    .dark .bg-indigo-50 {
+        background-color: rgba(76, 29, 149, 0.35) !important;
+    }
+    .dark .border-purple-200,
+    .dark .border-indigo-200 {
+        border-color: rgba(168, 85, 247, 0.35) !important;
+    }
+    .dark .text-purple-950,
+    .dark .text-purple-900 {
+        color: #d8b4fe !important;
+    }
+
+    /* 5. Primary Action Buttons (Ensure they pop, not dark blue on black) */
+    .dark .bg-blue-900 {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+    }
+    .dark .bg-blue-900:hover {
+        background-color: #3b82f6 !important;
+    }
+
+    /* 6. Form Controls & Inputs */
     .dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
     .dark select,
     .dark textarea {
@@ -94,10 +247,54 @@
 
     .dark input::placeholder,
     .dark textarea::placeholder {
-        color: #64748b !important;
+        color: #94a3b8 !important;
     }
 
+    .dark select option {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+    }
+
+    /* 7. Tables & Interactive Rows */
     .dark tr:hover {
-        background-color: #1e293b80 !important;
+        background-color: rgba(30, 41, 59, 0.6) !important;
+    }
+    .dark .hover\:bg-blue-50\/30:hover {
+        background-color: rgba(30, 58, 138, 0.25) !important;
+    }
+    .dark .hover\:bg-slate-50:hover {
+        background-color: rgba(30, 41, 59, 0.6) !important;
+    }
+
+    /* 8. ApexCharts High-Contrast Dark Rendering */
+    .dark .apexcharts-canvas text {
+        fill: #94a3b8 !important;
+    }
+    .dark .apexcharts-legend-text {
+        color: #e2e8f0 !important;
+    }
+    .dark .apexcharts-gridline {
+        stroke: #1e293b !important;
+    }
+    .dark .apexcharts-tooltip {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+    }
+    .dark .apexcharts-tooltip-title {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #ffffff !important;
+    }
+    .dark .apexcharts-xaxistooltip,
+    .dark .apexcharts-yaxistooltip {
+        background-color: #0f172a !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+    .dark .apexcharts-donut-label text,
+    .dark .apexcharts-pie-label text {
+        fill: #ffffff !important;
     }
 }

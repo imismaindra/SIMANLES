@@ -2,10 +2,20 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\SimanlesSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminDashboardTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(SimanlesSeeder::class);
+    }
+
     /**
      * Test admin dashboard renders successfully on home route with concept specs.
      */
@@ -18,9 +28,7 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('logo.png');
         $response->assertSee('Dashboard Operasional');
         $response->assertSee('Cabang Ponokawan');
-        $response->assertSee('Auto-Assign');
         $response->assertSee('Kapasitas Slot Guru');
-        $response->assertSee('Jadwal Sesi Mengajar Hari Ini');
         $response->assertSee('KW/CAB-PNK/2026/10/');
         $response->assertSee('Master Tarif SPP Global');
 

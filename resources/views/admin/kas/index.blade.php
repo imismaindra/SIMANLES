@@ -19,9 +19,6 @@
                         Periode: {{ $namaBulanList[$selectedBulan] ?? $selectedBulan }} {{ $selectedTahun }}
                     </span>
                 </div>
-                <p class="mt-1 text-xs sm:text-sm text-slate-500">
-                    Pencatatan mutasi kas masuk (pendaftaran & SPP) dan kas keluar operasional, pemantauan saldo riil, serta rekapitulasi Laba/Rugi cabang.
-                </p>
             </div>
 
             <!-- Trigger Modal Catat Kas -->
