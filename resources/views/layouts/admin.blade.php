@@ -15,21 +15,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        })();
-
-        function toggleDarkMode() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            window.dispatchEvent(new CustomEvent('theme-changed', { detail: { isDark } }));
-        }
+        document.documentElement.classList.remove('dark');
+        try { localStorage.removeItem('theme'); } catch(e) {}
     </script>
 
     <style>
@@ -59,7 +46,7 @@
     @stack('styles')
 </head>
 
-<body class="h-full font-sans text-slate-800 antialiased bg-slate-50/80 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-100 selection:text-blue-900 transition-colors duration-200">
+<body class="h-full font-sans text-slate-800 antialiased bg-slate-50/80 selection:bg-blue-100 selection:text-blue-900 transition-colors duration-200">
     @php
         $authUser = Auth::user();
         $userRole = $authUser?->role ?? ($viewRole ?? 'cabang');
@@ -67,7 +54,7 @@
         $isCabang = $userRole === 'cabang';
         $isGuru = $userRole === 'guru';
     @endphp
-    <div class="min-h-screen flex flex-row w-full bg-slate-50/80 dark:bg-slate-950">
+    <div class="min-h-screen flex flex-row w-full bg-slate-50/80">
 
         <!-- Mobile Sidebar Backdrop (Smooth Fade Transition) -->
         <div id="mobile-backdrop"
@@ -479,37 +466,18 @@
 
                                 <!-- Menu Edit Profil (Guru) -->
                                 <a href="{{ route('guru.profil') }}"
-                                    class="flex items-center gap-2.5 px-3.5 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors">
-                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    class="flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-blue-900 font-medium transition-colors">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                     <span>Edit Profil Guru</span>
                                 </a>
 
-                                <!-- Slide Toggle: Mode Gelap / Terang -->
-                                <div onclick="toggleDarkMode()"
-                                    class="px-3.5 py-2 flex items-center justify-between text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80 rounded-lg transition-colors cursor-pointer select-none"
-                                    title="Klik untuk beralih mode gelap / terang">
-                                    <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-amber-400 hidden dark:block shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                                        </svg>
-                                        <svg class="w-4 h-4 text-slate-500 block dark:hidden shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                                        </svg>
-                                        <span class="font-medium text-xs">Mode Gelap</span>
-                                    </div>
-                                    <!-- Sliding Switch Control -->
-                                    <div class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-slate-300 dark:bg-blue-600 pointer-events-none">
-                                        <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out translate-x-0 dark:translate-x-4"></span>
-                                    </div>
-                                </div>
-
-                                <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                                <div class="border-t border-slate-100 my-1"></div>
 
                                 <!-- Logout Button -->
                                 <button type="button" onclick="closeProfileDropdown(); openModal('modal-confirm-logout')"
-                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-medium transition-colors text-left cursor-pointer">
+                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-rose-600 hover:bg-rose-50 font-medium transition-colors text-left cursor-pointer">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                     </svg>
@@ -518,23 +486,9 @@
                             </div>
                         </div>
                     @else
-                        <!-- Dark Mode Toggle Button (Admin Cabang & Admin Pusat) -->
-                        <button type="button" onclick="toggleDarkMode()"
-                            class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
-                            title="Ganti Tema (Gelap/Terang)">
-                            <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            <svg class="w-4 h-4 block dark:hidden text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                            </svg>
-                        </button>
-
                         <!-- Tombol Logout Mobile (Admin Cabang & Admin Pusat) -->
                         <button type="button" onclick="openModal('modal-confirm-logout')"
-                            class="sm:hidden inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900 transition-colors shadow-2xs"
+                            class="sm:hidden inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors shadow-2xs"
                             title="Keluar dari akun">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

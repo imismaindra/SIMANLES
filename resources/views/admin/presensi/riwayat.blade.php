@@ -217,20 +217,39 @@
                                 </span>
                             </td>
                             <td class="py-3.5 px-4 text-right whitespace-nowrap">
-                                @if($abs->jam_pulang)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        Selesai Mengajar
-                                    </span>
-                                @elseif($abs->jam_datang)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                        Sedang Mengajar
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
-                                        Tercatat
-                                    </span>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    @if($abs->validitas === 'valid')
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" title="{{ $abs->keterangan_validitas }}">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            Valid
+                                        </span>
+                                    @elseif($abs->validitas === 'sedang_mengajar')
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200" title="{{ $abs->keterangan_validitas }}">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                            Sedang Mengajar
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200" title="{{ $abs->keterangan_validitas }}">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                            Tidak Valid
+                                        </span>
+                                    @endif
+
+                                    @if(! $isGuru)
+                                        <button type="button"
+                                            onclick="openValidasiModal('{{ $abs->id }}', '{{ addslashes($abs->guru->nama ?? 'Guru') }}', '{{ $abs->validitas }}', '{{ addslashes($abs->alasan_validasi ?? '') }}')"
+                                            class="p-1 rounded-lg text-slate-400 hover:text-blue-900 hover:bg-slate-100 transition-colors"
+                                            title="Ubah Status Validasi">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                                @if($abs->is_manual_override)
+                                    <div class="text-[10px] text-blue-800 font-medium mt-0.5" title="{{ $abs->alasan_validasi }}">Manual: {{ $abs->alasan_validasi ?: 'Diubah Admin' }}</div>
+                                @elseif($abs->validitas === 'tidak_valid')
+                                    <div class="text-[10px] text-rose-600 font-medium mt-0.5">{{ $abs->keterangan_validitas }}</div>
                                 @endif
                             </td>
                         </tr>
@@ -257,6 +276,78 @@
         </div>
         @endif
     </div>
+
+    @if(! $isGuru)
+    <!-- Modal Validasi Manual Override -->
+    <div id="modal-validasi" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-slate-900 text-sm">Sesuaikan Status Validasi Presensi</h3>
+                <button type="button" onclick="closeValidasiModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="form-validasi" method="POST" action="" class="mt-4 space-y-4">
+                @csrf
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs">
+                    <p class="text-slate-500">Guru: <span id="validasi-guru-nama" class="font-bold text-slate-800"></span></p>
+                    <p class="text-[11px] text-slate-400 mt-1">Ubah status menjadi <strong>Valid</strong> jika terjadi kendala sistem atau jaringan pada jam mengajar (18:00 - 20:00).</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status Validasi *</label>
+                    <select name="status_validasi" id="validasi-status-select" required
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="valid">Valid (Disetujui Hadir Penuh)</option>
+                        <option value="tidak_valid">Tidak Valid</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Alasan / Catatan Penyesuaian</label>
+                    <input type="text" name="alasan_validasi" id="validasi-alasan-input"
+                        placeholder="Contoh: Gangguan server/jaringan saat checkout 20:00"
+                        class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeValidasiModal()"
+                        class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold shadow-xs">
+                        Simpan Validasi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+    function openValidasiModal(absensiId, guruNama, currentValiditas, alasan) {
+        const modal = document.getElementById('modal-validasi');
+        const form = document.getElementById('form-validasi');
+        const nameEl = document.getElementById('validasi-guru-nama');
+        const selectEl = document.getElementById('validasi-status-select');
+        const alasanEl = document.getElementById('validasi-alasan-input');
+
+        form.action = '/presensi/' + absensiId + '/validasi';
+        nameEl.textContent = guruNama;
+        selectEl.value = (currentValiditas === 'valid') ? 'valid' : 'tidak_valid';
+        alasanEl.value = alasan || '';
+
+        modal.classList.remove('hidden');
+    }
+    function closeValidasiModal() {
+        document.getElementById('modal-validasi').classList.add('hidden');
+    }
+    </script>
+    @endpush
+    @endif
 
 </div>
 @endsection

@@ -177,6 +177,12 @@ class PresensiService
                     ]);
                 }
 
+                if (! $absensi->is_manual_override) {
+                    $absensi->update([
+                        'status_validasi' => $absensi->validitas,
+                    ]);
+                }
+
                 $jam = $now->format('H:i:s');
             } else {
                 // Sesi Pulang
@@ -192,6 +198,13 @@ class PresensiService
                 $absensi->update([
                     'jam_pulang' => $now,
                 ]);
+
+                if (! $absensi->is_manual_override) {
+                    $absensi->update([
+                        'status_validasi' => $absensi->validitas,
+                    ]);
+                }
+
                 $jam = $now->format('H:i:s');
             }
 
@@ -266,10 +279,16 @@ class PresensiService
         }
 
         if (! $absensi) {
-            return Absensi::create($data);
+            $absensi = Absensi::create($data);
+        } else {
+            $absensi->update($data);
         }
 
-        $absensi->update($data);
+        if (! $absensi->is_manual_override && $absensi->status === 'hadir') {
+            $absensi->update([
+                'status_validasi' => $absensi->validitas,
+            ]);
+        }
 
         return $absensi->fresh();
     }

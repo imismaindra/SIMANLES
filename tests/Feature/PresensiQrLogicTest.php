@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Cabang;
 use App\Models\Guru;
+use App\Models\User;
 use App\Services\PresensiService;
 use Exception;
 use Illuminate\Support\Carbon;
@@ -378,5 +379,121 @@ class PresensiQrLogicTest extends TestCase
         $res = $service->scan($digitsOnly, $guru->id);
         $this->assertTrue($res['ok']);
         $this->assertSame('datang', $res['tipe']);
+    }
+
+    /**
+     * Test aturan validitas jam mengajar 18:00 - 20:00:
+     * Check-in <= 18:00 dan Check-out >= 20:00 -> Valid
+     * Check-out < 20:00 -> Tidak Valid
+     * Check-in > 18:00 -> Tidak Valid
+     */
+    public function test_guru_attendance_validity_rules_1800_to_2000(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'CVAL_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang Validasi Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru Validasi Rule',
+            'email' => 'guru.val.'.uniqid().'@test.com',
+            'no_telp' => '081234567891',
+            'jenjang' => 'SD',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        $service = app(PresensiService::class);
+
+        // Kasus 1: Check-in tepat waktu (17:50 <= 18:00) & Checkout tepat waktu (20:05 >= 20:00) -> VALID
+        $absensiValid = $service->recordManual(
+            cabangId: $cabang->id,
+            guruId: $guru->id,
+            tanggal: '2026-11-26',
+            status: 'hadir',
+            jamDatang: '17:50',
+            jamPulang: '20:05'
+        );
+        $this->assertSame('valid', $absensiValid->validitas);
+
+        // Kasus 2: Check-in tepat waktu (17:55 <= 18:00) tapi Checkout awal (19:45 < 20:00) -> TIDAK VALID
+        $absensiPulangAwal = $service->recordManual(
+            cabangId: $cabang->id,
+            guruId: $guru->id,
+            tanggal: '2026-11-25',
+            status: 'hadir',
+            jamDatang: '17:55',
+            jamPulang: '19:45'
+        );
+        $this->assertSame('tidak_valid', $absensiPulangAwal->validitas);
+        $this->assertStringContainsString('Checkout sebelum jam 20:00', $absensiPulangAwal->keterangan_validitas);
+
+        // Kasus 3: Check-in terlambat (18:15 > 18:00) Checkout 20:10 -> TIDAK VALID
+        $absensiDatangTelat = $service->recordManual(
+            cabangId: $cabang->id,
+            guruId: $guru->id,
+            tanggal: '2026-11-24',
+            status: 'hadir',
+            jamDatang: '18:15',
+            jamPulang: '20:10'
+        );
+        $this->assertSame('tidak_valid', $absensiDatangTelat->validitas);
+        $this->assertStringContainsString('Check-in setelah jam 18:00', $absensiDatangTelat->keterangan_validitas);
+    }
+
+    /**
+     * Test penyesuaian validitas manual oleh Admin/Cabang jika ada kendala sistem.
+     */
+    public function test_admin_can_override_validity_on_system_error(): void
+    {
+        $cabang = Cabang::create([
+            'kode' => 'COVR_'.mt_rand(1000, 9999),
+            'nama' => 'Cabang Override Test',
+            'alamat' => 'Alamat',
+            'status' => 'aktif',
+        ]);
+
+        $guru = Guru::create([
+            'nama' => 'Guru Override Test',
+            'email' => 'guru.ovr.'.uniqid().'@test.com',
+            'no_telp' => '081234567892',
+            'jenjang' => 'SMP',
+            'is_active' => true,
+        ]);
+        DB::table('guru_cabang')->insert(['guru_id' => $guru->id, 'cabang_id' => $cabang->id]);
+
+        $service = app(PresensiService::class);
+
+        // Status awal: Checkout lebih awal (19:50) sehingga otomatis tidak_valid
+        $absensi = $service->recordManual(
+            cabangId: $cabang->id,
+            guruId: $guru->id,
+            tanggal: '2026-11-26',
+            status: 'hadir',
+            jamDatang: '17:50',
+            jamPulang: '19:50'
+        );
+        $this->assertSame('tidak_valid', $absensi->validitas);
+
+        // Admin/Pimpinan cabang melakukan penyesuaian manual karena sistem error
+        $adminUser = User::factory()->create([
+            'role' => 'cabang',
+            'cabang_id' => $cabang->id,
+        ]);
+
+        $response = $this->actingAs($adminUser)->post(route('web.presensi.update-validasi', $absensi->id), [
+            'status_validasi' => 'valid',
+            'alasan_validasi' => 'Sistem HP guru error saat scan checkout pukul 20:00',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect();
+
+        $absensi->refresh();
+        $this->assertTrue($absensi->is_manual_override);
+        $this->assertSame('valid', $absensi->validitas);
+        $this->assertStringContainsString('Sistem HP guru error', $absensi->keterangan_validitas);
     }
 }

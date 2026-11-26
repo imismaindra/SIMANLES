@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/qr', [PresensiController::class, 'generateQr'])->name('web.presensi.qr')->middleware('role:pusat,cabang');
         Route::post('/scan', [PresensiController::class, 'scanWeb'])->name('web.presensi.scan');
         Route::post('/manual', [PresensiController::class, 'storeManual'])->name('web.presensi.manual')->middleware('role:pusat,cabang');
+        Route::post('/{id}/validasi', [PresensiController::class, 'updateValidasi'])->name('web.presensi.update-validasi')->middleware('role:pusat,cabang');
     });
 
     // 5.5. Profil Guru & Keamanan Akun (Akses: Guru)

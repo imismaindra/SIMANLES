@@ -285,13 +285,13 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Mulai *</label>
-                    <input type="time" name="jam_mulai" required value="13:00"
+                    <input type="time" name="jam_mulai" required value="18:00"
                         class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Selesai *</label>
-                    <input type="time" name="jam_selesai" required value="14:30"
+                    <input type="time" name="jam_selesai" required value="20:00"
                         class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
                 </div>
             </div>

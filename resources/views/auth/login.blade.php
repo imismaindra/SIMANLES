@@ -29,35 +29,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script>
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        })();
-
-        function toggleDarkMode() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeIcons();
-        }
-
-        function updateThemeIcons() {
-            const isDark = document.documentElement.classList.contains('dark');
-            const sunIcons = document.querySelectorAll('.theme-icon-sun');
-            const moonIcons = document.querySelectorAll('.theme-icon-moon');
-            sunIcons.forEach(el => el.classList.toggle('hidden', !isDark));
-            moonIcons.forEach(el => el.classList.toggle('hidden', isDark));
-        }
-
-        document.addEventListener('DOMContentLoaded', updateThemeIcons);
+        document.documentElement.classList.remove('dark');
+        try { localStorage.removeItem('theme'); } catch(e) {}
     </script>
 </head>
 
-<body class="min-h-screen relative flex items-center justify-center p-3 sm:p-6 lg:p-8 antialiased selection:bg-[#0a52be] selection:text-white transition-colors duration-200 lg:bg-gradient-to-br lg:from-[#ffffff] lg:via-[#edf4fd] lg:to-[#dce8f8] dark:lg:from-[#090d16] dark:lg:via-[#0c1424] dark:lg:to-[#090d16] text-slate-800 dark:text-slate-100">
+<body class="min-h-screen relative flex items-center justify-center p-3 sm:p-6 lg:p-8 antialiased selection:bg-[#0a52be] selection:text-white transition-colors duration-200 lg:bg-gradient-to-br lg:from-[#ffffff] lg:via-[#edf4fd] lg:to-[#dce8f8] text-slate-800">
 
     <!-- Subtle Ambient Gradient Lighting for Desktop Web -->
     <div class="hidden lg:block fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
@@ -80,27 +57,12 @@
         <!-- LEFT COLUMN: Form Login -->
         <div class="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-between z-10">
             
-            <!-- Top Action Row (Theme Switcher at top right like reference image) -->
+            <!-- Top Action Row -->
             <div class="flex items-center justify-between w-full mb-1">
                 <span class="sr-only">SIMANLES LKP Sang Siroju Lillah</span>
-                <div class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 hidden sm:block tracking-wide">
+                <div class="text-[10px] font-semibold text-slate-400 hidden sm:block tracking-wide">
                     SIMANLES &bull; Portal Layanan
                 </div>
-                <!-- Sleek Theme Toggle Button at top right (just like in image) -->
-                <button type="button" onclick="toggleDarkMode()"
-                    class="ml-auto w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-slate-50/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/90 active:scale-95 flex items-center justify-center transition-all shadow-2xs"
-                    aria-label="Ganti tema tampilan">
-                    <!-- Moon Icon (Default Light Mode) -->
-                    <svg class="theme-icon-moon w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                    <!-- Sun Icon (Dark Mode Active) -->
-                    <svg class="theme-icon-sun w-3.5 h-3.5 hidden text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                </button>
             </div>
 
             <!-- Form Content -->

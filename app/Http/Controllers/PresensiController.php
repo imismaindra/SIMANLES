@@ -201,6 +201,8 @@ class PresensiController extends Controller
                     'jam_pulang' => $item->jam_pulang ? $item->jam_pulang->format('H:i:s') : null,
                     'durasi_menit' => $diffMinutes,
                     'status' => $statusLabel,
+                    'validitas' => $item->validitas,
+                    'keterangan_validitas' => $item->keterangan_validitas,
                     'raw_status' => $item->status ?? 'hadir',
                     'metode' => $item->metode ?? 'qr',
                     'keterangan' => $item->keterangan,
@@ -288,6 +290,26 @@ class PresensiController extends Controller
         } catch (Exception $e) {
             return back()->withErrors(['manual' => $e->getMessage()])->withInput();
         }
+    }
+
+    /**
+     * Update validasi presensi secara manual oleh Admin/Cabang (override sistem).
+     */
+    public function updateValidasi(Request $request, string $id): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status_validasi' => 'required|in:valid,tidak_valid',
+            'alasan_validasi' => 'nullable|string|max:255',
+        ]);
+
+        $absensi = Absensi::findOrFail($id);
+        $absensi->update([
+            'status_validasi' => $validated['status_validasi'],
+            'is_manual_override' => true,
+            'alasan_validasi' => $validated['alasan_validasi'] ?: 'Divalidasi manual oleh Pimpinan Cabang',
+        ]);
+
+        return back()->with('success', 'Status validasi kehadiran guru berhasil diperbarui.');
     }
 
     /**
