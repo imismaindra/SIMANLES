@@ -17,17 +17,17 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Live Toast Notification Banner for Realtime Attendance -->
-    <div id="live-scan-toast" class="hidden fixed bottom-6 right-6 z-50 max-w-sm w-full bg-slate-900 border border-emerald-500/60 text-white rounded-2xl p-4 shadow-2xl transition-all duration-300 transform translate-y-4">
+    <!-- Live Toast Notification Banner for Realtime Attendance (Top-Right Popup) -->
+    <div id="live-scan-toast" class="hidden fixed top-4 right-4 z-50 max-w-sm sm:max-w-md w-[calc(100%-2rem)] bg-slate-900/95 backdrop-blur-xs border border-emerald-500/60 text-white rounded-2xl p-3.5 shadow-2xl transition-all duration-300 transform -translate-y-4">
         <div class="flex items-center gap-3">
-            <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <span class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                 </svg>
             </span>
             <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between">
-                    <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider" id="toast-tipe">Presensi Datang</p>
+                    <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider" id="toast-tipe">Presensi Datang</p>
                     <span class="text-[10px] text-slate-400 font-mono" id="toast-jam">14:02:15 WIB</span>
                 </div>
                 <p class="text-sm font-bold text-white truncate" id="toast-nama">Nama Guru</p>
@@ -1000,15 +1000,16 @@
         document.getElementById('toast-nama').textContent = scan.guru_nama;
         document.getElementById('toast-jam').textContent = `${scan.jam} WIB`;
 
-        toast.classList.remove('hidden', 'translate-y-4');
+        toast.classList.remove('hidden', '-translate-y-4');
         setTimeout(() => {
             hideToast();
-        }, 6000);
+        }, 4500);
     }
 
     function hideToast() {
         const toast = document.getElementById('live-scan-toast');
-        toast.classList.add('translate-y-4');
+        if (!toast) return;
+        toast.classList.add('-translate-y-4');
         setTimeout(() => toast.classList.add('hidden'), 300);
     }
 

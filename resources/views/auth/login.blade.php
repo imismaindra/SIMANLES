@@ -67,6 +67,64 @@
 
             <!-- Form Content -->
             <div class="my-auto py-1">
+                <!-- Top-Right Toast Notifications for Login -->
+                <div id="login-toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2.5 max-w-sm w-[calc(100%-2rem)] pointer-events-none">
+                    @if(session('success'))
+                        <div class="toast-item pointer-events-auto bg-white border border-emerald-300 rounded-2xl p-3.5 shadow-xl flex items-center justify-between gap-3 transition-all duration-300">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-slate-900">Berhasil</p>
+                                    <p class="text-xs text-slate-600 font-medium truncate sm:whitespace-normal">{{ session('success') }}</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="this.closest('.toast-item').remove()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    @endif
+
+                    @if(isset($errors) && $errors->any())
+                        <div class="toast-item pointer-events-auto bg-white border border-rose-300 rounded-2xl p-3.5 shadow-xl flex items-start justify-between gap-3 transition-all duration-300">
+                            <div class="flex items-start gap-2.5 min-w-0">
+                                <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </span>
+                                <div class="min-w-0 text-xs">
+                                    <p class="font-bold text-rose-900">Gagal Masuk</p>
+                                    <ul class="list-disc list-inside mt-1 space-y-0.5 text-[11px] text-rose-700 font-medium">
+                                        @foreach($errors->all() as $err)
+                                            <li>{{ $err }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                            <button type="button" onclick="this.closest('.toast-item').remove()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                    @endif
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const toasts = document.querySelectorAll('#login-toast-container .toast-item');
+                        toasts.forEach(toast => {
+                            setTimeout(() => {
+                                toast.style.opacity = '0';
+                                toast.style.transform = 'translateY(-10px)';
+                                setTimeout(() => toast.remove(), 250);
+                            }, 4000);
+                        });
+                    });
+                </script>
+
                 <!-- Centered Logo: logoo.png -->
                 <div class="flex justify-center mb-3">
                     <img src="{{ asset('logoo.png') }}" alt="Logo LKP Sang Siroju Lillah" loading="lazy" decoding="async"
@@ -82,32 +140,6 @@
                         Masuk untuk mengakses sistem LKP Sang Siroju Lillah
                     </p>
                 </div>
-
-                <!-- Feedback Messages -->
-                @if(session('success'))
-                    <div class="mb-3 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center gap-2">
-                        <svg class="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>{{ session('success') }}</span>
-                    </div>
-                @endif
-
-                @if(isset($errors) && $errors->any())
-                    <div class="mb-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-[11px]">
-                        <div class="flex items-center gap-1.5 font-bold mb-1">
-                            <svg class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Gagal Masuk</span>
-                        </div>
-                        <ul class="list-disc list-inside space-y-0.5 pl-1 text-[10px]">
-                            @foreach($errors->all() as $err)
-                                <li>{{ $err }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
                 <!-- Form Login (Mirrors reference input style) -->
                 <form action="{{ route('login.post') }}" method="POST" class="space-y-3.5">

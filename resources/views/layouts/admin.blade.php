@@ -532,64 +532,79 @@
 
             <!-- Main Canvas Body (Fluid with bottom padding for mobile navbar clearance) -->
             <main class="flex-1 p-3 sm:p-4 lg:p-6 pb-24 sm:pb-28 lg:pb-6 w-full max-w-[1600px] mx-auto">
-                {{-- Global Flash Messages: Floating Top-Right Toast for Welcome/Success --}}
-                @if(session('success'))
-                    <div id="toast-welcome"
-                        class="fixed top-4 right-4 z-50 max-w-sm sm:max-w-md w-[calc(100%-2rem)] bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700/80 rounded-xl p-3.5 shadow-xl flex items-center justify-between gap-3 transition-all duration-300">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <span class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                                <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                {{-- Global Flash Messages: Floating Top-Right Toast Popups --}}
+                <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2.5 max-w-sm sm:max-w-md w-[calc(100%-2rem)] pointer-events-none">
+                    @if(session('success'))
+                        <div class="toast-item pointer-events-auto bg-white border border-emerald-300 rounded-2xl p-3.5 shadow-xl flex items-center justify-between gap-3 transition-all duration-300 transform translate-y-0 opacity-100">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center shrink-0">
+                                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-slate-900">Berhasil</p>
+                                    <p class="text-xs text-slate-600 font-medium truncate sm:whitespace-normal">{{ session('success') }}</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="dismissToast(this.closest('.toast-item'))"
+                                class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors shrink-0"
+                                aria-label="Tutup notifikasi">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
-                            </span>
-                            <div class="min-w-0">
-                                <p class="text-xs font-bold text-slate-900 dark:text-white">Pemberitahuan</p>
-                                <p class="text-xs text-slate-600 dark:text-slate-300 font-medium truncate sm:whitespace-normal">{{ session('success') }}</p>
-                            </div>
+                            </button>
                         </div>
-                        <button type="button" onclick="closeToastWelcome()"
-                            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
-                            aria-label="Tutup notifikasi">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                    <script>
-                        function closeToastWelcome() {
-                            const toast = document.getElementById('toast-welcome');
-                            if (toast) {
-                                toast.style.opacity = '0';
-                                toast.style.transform = 'translateY(-10px)';
-                                setTimeout(() => toast.remove(), 300);
-                            }
-                        }
-                        setTimeout(closeToastWelcome, 5000);
-                    </script>
-                @endif
+                    @endif
 
-                @if(session('error') || $errors->any())
-                    <div class="mb-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-sm flex items-start justify-between gap-3 shadow-2xs">
-                        <div class="flex items-start gap-2.5">
-                            <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <div>
-                                @if(session('error'))
-                                    <span class="font-semibold">{{ session('error') }}</span>
-                                @else
-                                    <span class="font-semibold">Periksa kembali data yang dimasukkan:</span>
-                                    <ul class="list-disc list-inside mt-1 space-y-0.5 text-xs text-rose-700">
-                                        @foreach($errors->all() as $err)
-                                            <li>{{ $err }}</li>
-                                        @endforeach
-                                    </ul>
-                                @endif
+                    @if(session('error') || $errors->any())
+                        <div class="toast-item pointer-events-auto bg-white border border-rose-300 rounded-2xl p-3.5 shadow-xl flex items-start justify-between gap-3 transition-all duration-300 transform translate-y-0 opacity-100">
+                            <div class="flex items-start gap-2.5 min-w-0">
+                                <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </span>
+                                <div class="min-w-0 text-xs">
+                                    <p class="font-bold text-rose-900">Perhatian</p>
+                                    @if(session('error'))
+                                        <p class="text-slate-600 font-medium mt-0.5">{{ session('error') }}</p>
+                                    @endif
+                                    @if($errors->any())
+                                        <ul class="list-disc list-inside mt-1 space-y-0.5 text-[11px] text-rose-700 font-medium">
+                                            @foreach($errors->all() as $err)
+                                                <li>{{ $err }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
                             </div>
+                            <button type="button" onclick="dismissToast(this.closest('.toast-item'))"
+                                class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors shrink-0"
+                                aria-label="Tutup notifikasi">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
-                        <button type="button" onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-900 font-bold p-1">&times;</button>
-                    </div>
-                @endif
+                    @endif
+                </div>
+
+                <script>
+                    function dismissToast(el) {
+                        if (!el) return;
+                        el.style.opacity = '0';
+                        el.style.transform = 'translateY(-10px)';
+                        setTimeout(() => el.remove(), 250);
+                    }
+
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const toasts = document.querySelectorAll('#toast-container .toast-item');
+                        toasts.forEach(toast => {
+                            setTimeout(() => dismissToast(toast), 4000);
+                        });
+                    });
+                </script>
 
                 @yield('content')
             </main>

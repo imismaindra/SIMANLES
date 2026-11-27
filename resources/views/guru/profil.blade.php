@@ -51,31 +51,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2.5 animate-in fade-in">
-            <svg class="w-4.5 h-4.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="font-medium">{{ session('success') }}</span>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1 animate-in fade-in">
-            <p class="font-bold flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Terjadi kesalahan pada formulir:
-            </p>
-            <ul class="list-disc list-inside pl-1 text-[11.5px] space-y-0.5">
-                @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Kolom Kiri: Informasi Profil & Kontak (2 Kolom) -->
