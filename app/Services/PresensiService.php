@@ -20,6 +20,8 @@ use Illuminate\Validation\ValidationException;
 
 class PresensiService
 {
+    private const AUTO_CHECKOUT_COOLDOWN_SECONDS = 300;
+
     /**
      * Generate token QR dinamis (default 60 detik) untuk sesi auto, datang, atau pulang.
      * Token baru secara otomatis menggantikan token lama cabang tersebut.
@@ -137,10 +139,12 @@ class PresensiService
                     if (! $absensi || ! $absensi->jam_datang) {
                         $effectiveTipe = 'datang';
                     } elseif (! $absensi->jam_pulang) {
-                        // Proteksi debounce minimal 1 menit agar tidak sengaja dobel scan
-                        if ($absensi->jam_datang && $absensi->jam_datang->diffInSeconds($now) < 60) {
+                        // Proteksi jeda minimal 5 menit agar tidak langsung checkout setelah checkin
+                        $elapsedSeconds = $absensi->jam_datang ? (int) $absensi->jam_datang->diffInSeconds($now) : self::AUTO_CHECKOUT_COOLDOWN_SECONDS;
+                        if ($absensi->jam_datang && $elapsedSeconds < self::AUTO_CHECKOUT_COOLDOWN_SECONDS) {
                             $jamFormat = $absensi->jam_datang->format('H:i');
-                            throw new Exception("Anda baru saja melakukan absensi datang pada pukul {$jamFormat} WIB. Silakan lakukan absensi pulang setelah selesai mengajar.");
+                            $sisaMenit = (int) ceil((self::AUTO_CHECKOUT_COOLDOWN_SECONDS - $elapsedSeconds) / 60);
+                            throw new Exception("Anda baru saja melakukan absensi datang pada pukul {$jamFormat} WIB. Tunggu minimal {$sisaMenit} menit lagi sebelum melakukan absensi pulang.");
                         }
                         $effectiveTipe = 'pulang';
                     } else {

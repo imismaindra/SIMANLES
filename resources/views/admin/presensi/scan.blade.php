@@ -342,6 +342,10 @@
     let html5QrCode = null;
     let currentFacingMode = "environment";
     let isProcessing = false;
+    let scanCooldownUntil = 0;
+    let scanCooldownTimer = null;
+    const SCAN_SUCCESS_COOLDOWN_MS = 10000;
+    const SCAN_ERROR_COOLDOWN_MS = 4000;
     let activeTab = 'camera';
 
     function isSecureContextEnvironment() {
@@ -757,8 +761,32 @@
         await requestCameraAccess();
     }
 
+    function startScanCooldown(durationMs) {
+        scanCooldownUntil = Date.now() + durationMs;
+        if (scanCooldownTimer) clearInterval(scanCooldownTimer);
+
+        const updateStatus = () => {
+            const remainingSec = Math.ceil((scanCooldownUntil - Date.now()) / 1000);
+            const statusEl = document.getElementById('camera-status');
+            if (!statusEl) return;
+
+            if (remainingSec > 0) {
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> Jeda scan (${remainingSec}d)...`;
+            } else {
+                clearInterval(scanCooldownTimer);
+                scanCooldownTimer = null;
+                if (html5QrCode && html5QrCode.isScanning) {
+                    statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Kamera Aktif';
+                }
+            }
+        };
+
+        updateStatus();
+        scanCooldownTimer = setInterval(updateStatus, 500);
+    }
+
     async function onScanSuccess(decodedText) {
-        if (isProcessing) return;
+        if (isProcessing || Date.now() < scanCooldownUntil) return;
         isProcessing = true;
 
         if (navigator.vibrate) navigator.vibrate(80);
@@ -772,12 +800,14 @@
         const guruId = document.getElementById('select-guru').value;
         if (!guruId) {
             showResult(false, 'Pilih Guru Terlebih Dahulu', 'Silakan pilih nama Anda pada pilihan pengajar di atas.');
-            setTimeout(() => { isProcessing = false; }, 2000);
+            startScanCooldown(SCAN_ERROR_COOLDOWN_MS);
+            isProcessing = false;
             return;
         }
 
-        await executeAttendance(token, guruId);
-        setTimeout(() => { isProcessing = false; }, 3000);
+        const ok = await executeAttendance(token, guruId);
+        startScanCooldown(ok ? SCAN_SUCCESS_COOLDOWN_MS : SCAN_ERROR_COOLDOWN_MS);
+        isProcessing = false;
     }
 
     async function submitScannedToken(token) {
@@ -895,10 +925,13 @@
             } else {
                 const msg = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Gagal mencatat presensi');
                 showResult(false, 'Presensi Gagal', msg);
+                return false;
             }
+            return true;
         } catch (err) {
             console.error(err);
             showResult(false, 'Terjadi Kesalahan', 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+            return false;
         }
     }
 

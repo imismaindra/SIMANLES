@@ -295,10 +295,20 @@ class PresensiQrLogicTest extends TestCase
         $this->assertSame('datang', $resDatang['tipe']);
         $this->assertNotNull($resDatang['jam_datang']);
 
-        // 2. Majukan waktu 2 jam untuk simulasi selesai sesi les
+        // 2. Majukan waktu 1 menit (masih dalam jeda 5 menit) -> Harus ditolak agar tidak langsung checkout
+        Carbon::setTestNow(Carbon::now()->addMinute());
+        $tokenTooSoon = $service->generateQrToken($cabang->id, 'auto', 60);
+        try {
+            $service->scan($tokenTooSoon->token, $guru->id);
+            $this->fail('Harusnya ditolak karena baru saja melakukan absensi datang.');
+        } catch (Exception $e) {
+            $this->assertStringContainsString('Tunggu minimal', $e->getMessage());
+        }
+
+        // 3. Majukan waktu 2 jam untuk simulasi selesai sesi les
         Carbon::setTestNow(Carbon::now()->addHours(2));
 
-        // 3. Scan kedua dengan token baru mode 'auto' -> harus otomatis tercatat sebagai 'pulang'
+        // 4. Scan kedua dengan token baru mode 'auto' -> harus otomatis tercatat sebagai 'pulang'
         $tokenAuto2 = $service->generateQrToken($cabang->id, 'auto', 60);
         $resPulang = $service->scan($tokenAuto2->token, $guru->id);
 
