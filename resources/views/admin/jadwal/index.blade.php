@@ -145,6 +145,9 @@
                                     </svg>
                                     <span>Daftar Siswa Bimbingan ({{ $muridList->count() }})</span>
                                 </h4>
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-xl shrink-0 {{ $muridList->count() >= 6 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
+                                    {{ $muridList->count() }}/6 Siswa
+                                </span>
                             </div>
 
                             @if($muridList->isNotEmpty())
