@@ -458,6 +458,7 @@
             if (!inputs.length || !card) return;
 
             let blurTimer = null;
+            let baseViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
 
             const moveCardTop = () => {
                 if (window.innerWidth >= 1024) return;
@@ -468,29 +469,53 @@
                 card.scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
 
-            const restoreCardCenter = () => {
+            const applyCenter = () => {
+                document.body.classList.add('items-center');
+                document.body.classList.remove('items-start', 'pt-4');
+                card.classList.add('my-auto');
+            };
+
+            const restoreCardCenter = (immediate = false) => {
                 if (window.innerWidth >= 1024) return;
                 clearTimeout(blurTimer);
+                if (immediate) {
+                    applyCenter();
+                    return;
+                }
                 blurTimer = setTimeout(() => {
                     if (!inputs.includes(document.activeElement)) {
-                        document.body.classList.add('items-center');
-                        document.body.classList.remove('items-start', 'pt-4');
-                        card.classList.add('my-auto');
+                        applyCenter();
                     }
                 }, 150);
             };
 
             inputs.forEach((input) => {
                 input.addEventListener('focus', () => {
-                    setTimeout(moveCardTop, 160);
+                    setTimeout(() => {
+                        if (inputs.includes(document.activeElement)) {
+                            moveCardTop();
+                        }
+                    }, 160);
                 });
-                input.addEventListener('blur', restoreCardCenter);
+                input.addEventListener('blur', () => restoreCardCenter(false));
             });
 
             if (window.visualViewport) {
                 window.visualViewport.addEventListener('resize', () => {
-                    if (inputs.includes(document.activeElement)) {
+                    if (window.innerWidth >= 1024) return;
+                    const currentHeight = window.visualViewport.height;
+                    if (currentHeight > baseViewportHeight) {
+                        baseViewportHeight = currentHeight;
+                    }
+                    const keyboardOpen = (baseViewportHeight - currentHeight) > 120;
+
+                    if (keyboardOpen && inputs.includes(document.activeElement)) {
                         moveCardTop();
+                    } else if (!keyboardOpen) {
+                        if (inputs.includes(document.activeElement)) {
+                            document.activeElement.blur();
+                        }
+                        restoreCardCenter(true);
                     }
                 });
             }
