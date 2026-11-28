@@ -48,7 +48,7 @@ class MenuPagesTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Jadwal Mengajar');
-r        $response->assertSee('Siswa Bimbingan');
+        $response->assertSee('Siswa Bimbingan');
     }
 
     public function test_presensi_page_loads_successfully(): void
