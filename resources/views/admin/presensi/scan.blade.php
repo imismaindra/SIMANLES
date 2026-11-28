@@ -150,28 +150,9 @@
         </div>
     </div>
 
-    <!-- Scanner / Input Container Card -->
+    <!-- Scanner Container Card -->
     <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3.5">
-        <!-- Switch Tab: Scan Kamera vs Input Kode -->
-        <div class="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/60">
-            <button type="button" id="tab-btn-camera" onclick="switchTab('camera')"
-                class="flex-1 py-1.5 text-xs font-bold rounded-lg text-white bg-blue-900 transition-all flex items-center justify-center gap-1.5 shadow-2xs">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Scan Kamera</span>
-            </button>
-            <button type="button" id="tab-btn-manual" onclick="switchTab('manual')"
-                class="flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                <span>Input Kode</span>
-            </button>
-        </div>
-
-        <!-- TAB 1: Camera Scanner -->
+        <!-- Camera Scanner -->
         <div id="panel-camera" class="space-y-3">
             <!-- Alert HTTPS jika diperlukan -->
             <div id="insecure-context-alert" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
@@ -234,104 +215,16 @@
             <!-- Alternative Quick Scan Via Native Camera File Input -->
             <div class="pt-2 border-t border-slate-100">
                 <input type="file" id="qr-file-camera" accept="image/*" capture="environment" class="hidden" onchange="handleQrFile(this)">
-                <input type="file" id="qr-file-gallery" accept="image/*" class="hidden" onchange="handleQrFile(this)">
 
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="document.getElementById('qr-file-camera').click()"
-                        class="py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 flex items-center justify-center gap-1.5 transition-colors">
-                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Ambil Foto QR</span>
-                    </button>
-                    <button type="button" onclick="document.getElementById('qr-file-gallery').click()"
-                        class="py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 flex items-center justify-center gap-1.5 transition-colors">
-                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>Pilih Gambar QR</span>
-                    </button>
-                </div>
+                <button type="button" onclick="document.getElementById('qr-file-camera').click()"
+                    class="w-full py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 flex items-center justify-center gap-1.5 transition-colors">
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Ambil Foto QR</span>
+                </button>
             </div>
-        </div>
-
-        <!-- TAB 2: Manual Code Input -->
-        <div id="panel-manual" class="space-y-3 hidden">
-            <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Kode Token Presensi *
-                </label>
-                <input type="text" id="manual-token-input" value="{{ $token ?? '' }}"
-                    placeholder="Contoh: SIROJU-8492 atau 8492"
-                    class="w-full px-3.5 py-2.5 text-sm font-mono font-bold tracking-wider uppercase rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:bg-white">
-                <p class="text-[11px] text-slate-500 mt-1">Masukkan 4 digit kode token yang tertera pada layar cabang.</p>
-            </div>
-
-            <button type="button" onclick="submitManualAttendance()" id="btn-submit-manual"
-                class="w-full py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Konfirmasi Presensi Sekarang</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Log Riwayat Singkat Presensi Saya -->
-    <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-3">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Log Kehadiran Saya</span>
-            </h3>
-            <a href="{{ route('presensi.riwayat') }}" class="text-[11px] text-blue-800 hover:underline font-semibold">
-                Lihat Lengkap &rarr;
-            </a>
-        </div>
-
-        <div id="log-scan-empty" class="{{ isset($riwayatPresensi) && $riwayatPresensi->isNotEmpty() ? 'hidden' : '' }} text-center py-3 text-xs text-slate-400">
-            Belum ada catatan presensi terbaru.
-        </div>
-
-        <div id="log-scan-list" class="space-y-2 max-h-48 overflow-y-auto pr-0.5">
-            @if(isset($riwayatPresensi) && $riwayatPresensi->isNotEmpty())
-                @foreach($riwayatPresensi as $item)
-                    @php
-                        $durasi = ($item->jam_datang && $item->jam_pulang) ? (int)$item->jam_datang->diffInMinutes($item->jam_pulang) : null;
-                    @endphp
-                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2 text-xs">
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-1.5">
-                                <span class="font-bold text-slate-900">{{ $item->tanggal ? $item->tanggal->format('d/m/Y') : '-' }}</span>
-                                <span class="text-[10px] text-slate-500">· {{ $item->cabang->nama ?? 'Cabang' }}</span>
-                            </div>
-                            <div class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2 font-mono">
-                                <span class="text-emerald-700 font-semibold">Masuk: {{ $item->jam_datang ? $item->jam_datang->format('H:i') : '-' }}</span>
-                                <span>·</span>
-                                <span class="text-blue-700 font-semibold">Pulang: {{ $item->jam_pulang ? $item->jam_pulang->format('H:i') : '-' }}</span>
-                            </div>
-                        </div>
-                        <div class="text-right shrink-0">
-                            @if($item->jam_pulang)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                    {{ $durasi ? $durasi . ' mnt' : 'Selesai' }}
-                                </span>
-                            @elseif($item->jam_datang)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 animate-pulse">
-                                    Mengajar
-                                </span>
-                            @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
-                                    Tercatat
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            @endif
         </div>
     </div>
 
@@ -346,7 +239,6 @@
     let scanCooldownTimer = null;
     const SCAN_SUCCESS_COOLDOWN_MS = 10000;
     const SCAN_ERROR_COOLDOWN_MS = 4000;
-    let activeTab = 'camera';
 
     function isSecureContextEnvironment() {
         if (window.isSecureContext) return true;
@@ -385,14 +277,10 @@
 
         const urlToken = "{{ $token ?? '' }}";
         if (urlToken) {
-            switchTab('manual');
-            const manualInput = document.getElementById('manual-token-input');
-            if (manualInput) manualInput.value = urlToken;
-
             const activeGuruId = selectGuru ? selectGuru.value : null;
             if (activeGuruId) {
                 setTimeout(() => {
-                    submitManualAttendance();
+                    submitScannedToken(urlToken);
                 }, 500);
             }
         } else {
@@ -468,32 +356,6 @@
         }
     }
 
-    function switchTab(tab) {
-        activeTab = tab;
-        const btnCam = document.getElementById('tab-btn-camera');
-        const btnMan = document.getElementById('tab-btn-manual');
-        const panelCam = document.getElementById('panel-camera');
-        const panelMan = document.getElementById('panel-manual');
-
-        if (tab === 'camera') {
-            btnCam.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-white bg-blue-900 transition-all flex items-center justify-center gap-1.5 shadow-2xs';
-            btnMan.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5';
-            panelCam.classList.remove('hidden');
-            panelMan.classList.add('hidden');
-            if (!isSecureContextEnvironment()) {
-                renderInsecureContextHelp();
-            } else {
-                startCameraScanner().catch(err => handleCameraError(err));
-            }
-        } else {
-            btnMan.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-white bg-blue-900 transition-all flex items-center justify-center gap-1.5 shadow-2xs';
-            btnCam.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5';
-            panelMan.classList.remove('hidden');
-            panelCam.classList.add('hidden');
-            stopCameraScanner();
-        }
-    }
-
     async function requestCameraAccess(toggleFacing = false) {
         if (toggleFacing) {
             currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
@@ -535,8 +397,6 @@
     }
 
     async function startCameraScanner() {
-        if (activeTab !== 'camera') return;
-
         if (!isSecureContextEnvironment()) {
             renderInsecureContextHelp();
             return;
@@ -666,12 +526,9 @@
                     <button type="button" onclick="requestCameraAccess()" class="w-full py-2 px-3 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs">
                         Izinkan & Buka Kamera
                     </button>
-                    <div class="pt-0.5 flex gap-2">
-                        <button type="button" onclick="document.getElementById('qr-file-camera').click()" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-800 text-emerald-300 text-[11px] font-semibold border border-slate-700">
+                    <div class="pt-0.5">
+                        <button type="button" onclick="document.getElementById('qr-file-camera').click()" class="w-full py-1.5 px-2 rounded-lg bg-slate-800 text-emerald-300 text-[11px] font-semibold border border-slate-700">
                             Foto QR
-                        </button>
-                        <button type="button" onclick="switchTab('manual')" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-800 text-slate-300 text-[11px] font-semibold border border-slate-700">
-                            Input Kode
                         </button>
                     </div>
                 </div>
@@ -702,9 +559,6 @@
                 </p>
                 <button type="button" onclick="document.getElementById('qr-file-camera').click()" class="w-full py-2 px-3 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-xs">
                     📸 Ambil Foto QR Sekarang
-                </button>
-                <button type="button" onclick="switchTab('manual')" class="w-full py-1.5 px-3 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700">
-                    Input Kode Token Manual
                 </button>
             </div>
         `;
@@ -827,39 +681,6 @@
         btn.innerHTML = `
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Konfirmasi Presensi Sekarang</span>
-        `;
-    }
-
-    async function submitManualAttendance() {
-        let token = document.getElementById('manual-token-input').value.trim();
-        const guruId = document.getElementById('select-guru').value;
-
-        if (!guruId) {
-            showResult(false, 'Pilih Guru Terlebih Dahulu', 'Silakan pilih nama Anda pada pilihan pengajar di atas.');
-            return;
-        }
-
-        if (!token) {
-            showResult(false, 'Kode Token Kosong', 'Silakan masukkan kode token presensi dari layar cabang.');
-            return;
-        }
-
-        if (/^\d{4,6}$/.test(token)) {
-            token = 'SIROJU-' + token;
-        }
-
-        const btn = document.getElementById('btn-submit-manual');
-        btn.disabled = true;
-        btn.innerHTML = 'Memproses Presensi...';
-
-        await executeAttendance(token, guruId);
-
-        btn.disabled = false;
-        btn.innerHTML = `
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             <span>Konfirmasi Presensi Sekarang</span>
         `;

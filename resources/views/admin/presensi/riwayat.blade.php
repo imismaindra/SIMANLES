@@ -13,12 +13,7 @@
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                         {{ $isGuru ? 'Riwayat Kehadiran Saya' : 'Riwayat Kehadiran Guru' }}
                     </h1>
-                    @if($isGuru)
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/70">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            {{ $loggedGuru->nama ?? auth()->user()->name }} (Pengajar)
-                        </span>
-                    @else
+                    @if(! $isGuru)
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200/70">
                             <span class="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
                             {{ $currentCabang['nama'] }}
@@ -28,35 +23,26 @@
             </div>
 
             <!-- Action Buttons -->
+            @if(! $isGuru)
             <div class="flex items-center gap-2 shrink-0">
-                @if($isGuru)
-                    <a href="{{ route('presensi.scanner') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-xs transition-colors">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Scan Presensi QR</span>
-                    </a>
-                @else
-                    <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id']]) }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-xs shadow-xs transition-colors">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <rect x="7" y="7" width="3" height="3" rx="0.5" />
-                            <rect x="14" y="7" width="3" height="3" rx="0.5" />
-                            <rect x="7" y="14" width="3" height="3" rx="0.5" />
-                            <path d="M14 14h.01" />
-                            <path d="M17 14v3" />
-                            <path d="M14 17h3" />
-                        </svg>
-                        <span>Layar QR Kiosk Presensi</span>
-                    </a>
-                @endif
+                <a href="{{ route('presensi.index', ['cabang_id' => $currentCabang['id']]) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-semibold text-xs shadow-xs transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <rect x="7" y="7" width="3" height="3" rx="0.5" />
+                        <rect x="14" y="7" width="3" height="3" rx="0.5" />
+                        <rect x="7" y="14" width="3" height="3" rx="0.5" />
+                        <path d="M14 14h.01" />
+                        <path d="M17 14v3" />
+                        <path d="M14 17h3" />
+                    </svg>
+                    <span>Layar QR Kiosk Presensi</span>
+                </a>
             </div>
+            @endif
         </div>
 
-        <!-- 4 Metric KPI Strip -->
-        <div class="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Metric KPI Strip -->
+        <div class="mt-4 grid grid-cols-2 {{ $isGuru ? '' : 'lg:grid-cols-4' }} gap-3 sm:gap-4">
             <!-- Metric 1: Total Sesi Hadir -->
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
                 <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Kehadiran</p>
@@ -67,6 +53,7 @@
                 <p class="mt-1 text-[11px] text-slate-400">Total akumulasi presensi</p>
             </div>
 
+            @if(! $isGuru)
             <!-- Metric 2: Selesai Mengajar -->
             <div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200/60">
                 <div class="flex items-center justify-between">
@@ -94,6 +81,7 @@
                 </div>
                 <p class="mt-1 text-[11px] text-slate-400">Sudah check-in, belum check-out</p>
             </div>
+            @endif
 
             <!-- Metric 4: Rata-rata Durasi -->
             <div class="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/60">
@@ -107,171 +95,229 @@
         </div>
 
         <!-- Filter Toolbar -->
-        @if(! $isGuru)
         <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <form method="GET" action="{{ route('presensi.riwayat') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <input type="hidden" name="cabang_id" value="{{ request('cabang_id', $currentCabang['id']) }}">
+            @if($isGuru)
+                @php
+                    $selectedBulan = request('bulan');
+                    $selectedTahun = request('tahun', now()->year);
+                    $isBulanIni = (string) $selectedBulan === (string) now()->month && (string) $selectedTahun === (string) now()->year;
+                    $isSemuaBulan = empty($selectedBulan);
+                @endphp
+                <form method="GET" action="{{ route('presensi.riwayat') }}" class="flex items-center gap-2 overflow-x-auto flex-nowrap pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <a href="{{ route('presensi.riwayat') }}"
+                        class="shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $isSemuaBulan ? 'bg-blue-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                        Semua Bulan
+                    </a>
+                    <a href="{{ route('presensi.riwayat', ['bulan' => now()->month, 'tahun' => now()->year]) }}"
+                        class="shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $isBulanIni ? 'bg-blue-900 text-white shadow-2xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}">
+                        Bulan Ini
+                    </a>
 
-                <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Guru</label>
-                    <select name="guru_id" onchange="this.form.submit()"
-                        class="w-full py-2 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                        <option value="">Semua Guru Pengajar</option>
-                        @foreach($daftarGuru as $g)
-                            <option value="{{ $g->id }}" {{ request('guru_id') === $g->id ? 'selected' : '' }}>{{ $g->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Bulan</label>
                     <select name="bulan" onchange="this.form.submit()"
-                        class="w-full py-2 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                        <option value="">Semua Bulan</option>
+                        class="shrink-0 py-1.5 px-3 text-xs font-semibold rounded-full bg-slate-100 border border-slate-200 text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="">Pilih Bulan...</option>
                         @for($m = 1; $m <= 12; $m++)
-                            @php $monthName = \Carbon\Carbon::create(2026, $m, 1)->translatedFormat('F'); @endphp
-                            <option value="{{ $m }}" {{ request('bulan') == $m ? 'selected' : '' }}>{{ $monthName }}</option>
+                            @php $monthName = \Carbon\Carbon::create(2026, $m, 1)->locale('id')->translatedFormat('F'); @endphp
+                            <option value="{{ $m }}" {{ (string) $selectedBulan === (string) $m ? 'selected' : '' }}>{{ $monthName }}</option>
                         @endfor
                     </select>
-                </div>
 
-                <div class="flex items-end gap-2">
-                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 w-full flex items-center justify-between text-xs">
-                        <span class="text-slate-500">Total Log:</span>
-                        <span class="font-bold text-slate-900 num-tabular">{{ $riwayatPresensi->total() }} Catatan</span>
+                    <select name="tahun" onchange="this.form.submit()"
+                        class="shrink-0 py-1.5 px-3 text-xs font-semibold rounded-full bg-slate-100 border border-slate-200 text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        @for($y = now()->year; $y >= now()->year - 2; $y--)
+                            <option value="{{ $y }}" {{ (string) $selectedTahun === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+                </form>
+            @else
+                <form method="GET" action="{{ route('presensi.riwayat') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input type="hidden" name="cabang_id" value="{{ request('cabang_id', $currentCabang['id']) }}">
+
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Guru</label>
+                        <select name="guru_id" onchange="this.form.submit()"
+                            class="w-full py-2 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="">Semua Guru Pengajar</option>
+                            @foreach($daftarGuru as $g)
+                                <option value="{{ $g->id }}" {{ request('guru_id') === $g->id ? 'selected' : '' }}>{{ $g->nama }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    @if(request()->hasAny(['guru_id', 'bulan', 'tahun']))
-                        <a href="{{ route('presensi.riwayat', ['cabang_id' => request('cabang_id', $currentCabang['id'])]) }}"
-                            class="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-xs font-semibold shrink-0">
-                            Reset
-                        </a>
-                    @endif
-                </div>
-            </form>
+
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Filter Bulan</label>
+                        <select name="bulan" onchange="this.form.submit()"
+                            class="w-full py-2 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="">Semua Bulan</option>
+                            @for($m = 1; $m <= 12; $m++)
+                                @php $monthName = \Carbon\Carbon::create(2026, $m, 1)->locale('id')->translatedFormat('F'); @endphp
+                                <option value="{{ $m }}" {{ request('bulan') == $m ? 'selected' : '' }}>{{ $monthName }}</option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div class="flex items-end gap-2">
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 w-full flex items-center justify-between text-xs">
+                            <span class="text-slate-500">Total Log:</span>
+                            <span class="font-bold text-slate-900 num-tabular">{{ $riwayatPresensi->total() }} Catatan</span>
+                        </div>
+                        @if(request()->hasAny(['guru_id', 'bulan', 'tahun']))
+                            <a href="{{ route('presensi.riwayat', ['cabang_id' => request('cabang_id', $currentCabang['id'])]) }}"
+                                class="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-xs font-semibold shrink-0">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            @endif
         </div>
-        @endif
     </div>
 
-    <!-- Attendance History Table -->
-    <div class="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs">
-        <div class="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
-            <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700">Daftar Log Riwayat Presensi</h3>
-            <span class="text-xs text-slate-500 num-tabular">{{ $riwayatPresensi->total() }} catatan</span>
-        </div>
+    <!-- Attendance History Card List -->
+    @php
+        $groupedPresensi = $riwayatPresensi->getCollection()->groupBy(
+            fn ($item) => $item->tanggal ? $item->tanggal->format('Y-m') : 'lainnya'
+        );
+    @endphp
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs sm:text-sm text-slate-600 border-collapse">
-                <thead class="bg-slate-50 text-slate-700 text-[11px] uppercase tracking-wider font-bold border-b border-slate-200/80">
-                    <tr>
-                        <th class="py-3 px-4 w-12 text-center">#</th>
-                        <th class="py-3 px-4">Tanggal & Hari</th>
-                        @if(! $isGuru)
-                            <th class="py-3 px-4">Guru Pengajar</th>
-                        @endif
-                        <th class="py-3 px-4">Jam Datang</th>
-                        <th class="py-3 px-4">Jam Pulang</th>
-                        <th class="py-3 px-4">Durasi Sesi</th>
-                        <th class="py-3 px-4">Cabang</th>
-                        <th class="py-3 px-4 text-right">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                    @forelse($riwayatPresensi as $idx => $abs)
+    <div class="space-y-5">
+        @forelse($groupedPresensi as $monthKey => $items)
+            @php
+                $firstDate = $items->first()?->tanggal;
+                $monthLabel = $firstDate ? $firstDate->locale('id')->translatedFormat('F Y') : 'Lainnya';
+                $validCount = $items->filter(fn ($i) => $i->validitas === 'valid')->count();
+                $otherCount = $items->count() - $validCount;
+            @endphp
+
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between px-1">
+                    <h3 class="font-bold text-sm text-slate-900">{{ $monthLabel }}</h3>
+                    <div class="text-xs font-semibold">
+                        <span class="text-emerald-700">{{ $validCount }} valid</span>
+                        <span class="text-slate-400 mx-1">·</span>
+                        <span class="text-slate-500">{{ $otherCount }} lainnya</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5">
+                    @foreach($items as $abs)
                         @php
                             $durasi = null;
                             if ($abs->jam_datang && $abs->jam_pulang) {
                                 $durasi = (int) $abs->jam_datang->diffInMinutes($abs->jam_pulang);
                             }
+                            $jamDurasi = $durasi !== null ? intdiv($durasi, 60) : 0;
+                            $menitDurasi = $durasi !== null ? ($durasi % 60) : 0;
                         @endphp
-                        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                            <td class="py-3.5 px-4 text-center text-xs text-slate-400 num-tabular">
-                                {{ $riwayatPresensi->firstItem() + $idx }}
-                            </td>
-                            <td class="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">
-                                {{ $abs->tanggal ? $abs->tanggal->isoFormat('dddd, D MMMM Y') : '-' }}
-                            </td>
-                            @if(! $isGuru)
-                            <td class="py-3.5 px-4">
-                                <div class="font-bold text-slate-900">{{ $abs->guru->nama ?? 'Guru' }}</div>
-                                <div class="text-[10px] text-slate-400 font-mono">{{ $abs->guru->no_pegawai ?? 'NIP' }}</div>
-                            </td>
-                            @endif
-                            <td class="py-3.5 px-4 font-mono font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                                {{ $abs->jam_datang ? $abs->jam_datang->format('H:i:s') . ' WIB' : '-' }}
-                            </td>
-                            <td class="py-3.5 px-4 font-mono font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                                {{ $abs->jam_pulang ? $abs->jam_pulang->format('H:i:s') . ' WIB' : '-' }}
-                            </td>
-                            <td class="py-3.5 px-4 whitespace-nowrap">
-                                @if($durasi !== null)
-                                    <span class="font-bold text-slate-900 num-tabular">{{ $durasi }} menit</span>
-                                @elseif($abs->jam_datang)
-                                    <span class="text-amber-600 dark:text-amber-400 font-medium text-xs">Sedang berlangsung</span>
-                                @else
-                                    <span class="text-slate-400">-</span>
-                                @endif
-                            </td>
-                            <td class="py-3.5 px-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                                    {{ $abs->cabang->nama ?? 'Cabang' }}
+
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-2xs flex items-center justify-between gap-3 sm:gap-4 hover:border-blue-200 transition-colors">
+                            <!-- Left: Date Badge -->
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-blue-50/80 border border-blue-200/70 flex flex-col items-center justify-center shrink-0">
+                                <span class="text-base sm:text-lg font-bold text-blue-950 leading-none num-tabular">
+                                    {{ $abs->tanggal ? $abs->tanggal->format('d') : '--' }}
                                 </span>
-                            </td>
-                            <td class="py-3.5 px-4 text-right whitespace-nowrap">
-                                <div class="flex items-center justify-end gap-1.5">
-                                    @if($abs->validitas === 'valid')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" title="{{ $abs->keterangan_validitas }}">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            Valid
+                                <span class="text-[11px] font-semibold text-blue-800 mt-1">
+                                    {{ $abs->tanggal ? $abs->tanggal->locale('id')->isoFormat('ddd') : '-' }}
+                                </span>
+                            </div>
+
+                            <!-- Center: Timeline & Duration -->
+                            <div class="flex-1 min-w-0">
+                                @if(! $isGuru)
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                        <span class="font-bold text-xs text-slate-900 truncate">{{ $abs->guru->nama ?? 'Guru' }}</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold shrink-0">{{ $abs->cabang->nama ?? 'Cabang' }}</span>
+                                    </div>
+                                @endif
+
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-sm font-bold text-slate-900 font-mono num-tabular shrink-0">
+                                        {{ $abs->jam_datang ? $abs->jam_datang->format('H:i') : '--:--' }}
+                                    </span>
+                                    <div class="flex-1 h-1 rounded-full {{ $abs->jam_pulang ? 'bg-blue-900' : ($abs->jam_datang ? 'bg-amber-400' : 'bg-slate-200') }}"></div>
+                                    <span class="text-sm font-bold text-slate-900 font-mono num-tabular shrink-0">
+                                        {{ $abs->jam_pulang ? $abs->jam_pulang->format('H:i') : '--:--' }}
+                                    </span>
+                                </div>
+
+                                <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                                    @if($durasi !== null)
+                                        <span class="font-medium text-slate-600 num-tabular">
+                                            {{ $jamDurasi > 0 ? $jamDurasi . ' jam ' : '' }}{{ $menitDurasi }} menit
                                         </span>
-                                    @elseif($abs->validitas === 'sedang_mengajar')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200" title="{{ $abs->keterangan_validitas }}">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Sedang Mengajar
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 num-tabular">
+                                            <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <span>{{ $jamDurasi > 0 ? $jamDurasi . 'j ' : '' }}{{ $menitDurasi }}m</span>
                                         </span>
+                                    @elseif($abs->jam_datang)
+                                        <span class="text-amber-700 font-medium">Sedang berlangsung</span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200" title="{{ $abs->keterangan_validitas }}">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                            Tidak Valid
-                                        </span>
+                                        <span class="text-slate-400">-</span>
                                     @endif
 
-                                    @if(! $isGuru)
-                                        <button type="button"
-                                            onclick="openValidasiModal('{{ $abs->id }}', '{{ addslashes($abs->guru->nama ?? 'Guru') }}', '{{ $abs->validitas }}', '{{ addslashes($abs->alasan_validasi ?? '') }}')"
-                                            class="p-1 rounded-lg text-slate-400 hover:text-blue-900 hover:bg-slate-100 transition-colors"
-                                            title="Ubah Status Validasi">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </button>
+                                    @if($isGuru && $abs->cabang)
+                                        <span class="text-[11px] text-slate-400">· {{ $abs->cabang->nama }}</span>
                                     @endif
                                 </div>
+
                                 @if($abs->is_manual_override)
-                                    <div class="text-[10px] text-blue-800 font-medium mt-0.5" title="{{ $abs->alasan_validasi }}">Manual: {{ $abs->alasan_validasi ?: 'Diubah Admin' }}</div>
-                                @elseif($abs->validitas === 'tidak_valid')
-                                    <div class="text-[10px] text-rose-600 font-medium mt-0.5">{{ $abs->keterangan_validitas }}</div>
+                                    <div class="text-[10.5px] text-blue-800 font-medium mt-1">
+                                        Manual: {{ $abs->alasan_validasi ?: 'Diubah Admin' }}
+                                    </div>
+                                @elseif($abs->validitas === 'tidak_valid' && $abs->keterangan_validitas)
+                                    <div class="text-[10.5px] text-slate-500 font-medium mt-1">
+                                        {{ $abs->keterangan_validitas }}
+                                    </div>
                                 @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="{{ $isGuru ? '7' : '8' }}" class="py-12 text-center text-slate-400 text-sm">
-                                <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <p class="font-semibold text-slate-700 dark:text-slate-200">Belum Ada Catatan Presensi</p>
-                                <p class="text-xs text-slate-400 mt-0.5">Catatan kehadiran akan muncul otomatis saat Anda melakukan scan QR presensi.</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            </div>
+
+                            <!-- Right: Status Pill & Optional Admin Action -->
+                            <div class="flex flex-col items-end gap-1.5 shrink-0">
+                                @if($abs->validitas === 'valid')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200" title="{{ $abs->keterangan_validitas }}">
+                                        VALID
+                                    </span>
+                                @elseif($abs->validitas === 'sedang_mengajar')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200" title="{{ $abs->keterangan_validitas }}">
+                                        AKTIF
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200" title="{{ $abs->keterangan_validitas }}">
+                                        TIDAK VALID
+                                    </span>
+                                @endif
+
+                                @if(! $isGuru)
+                                    <button type="button"
+                                        onclick="openValidasiModal('{{ $abs->id }}', '{{ addslashes($abs->guru->nama ?? 'Guru') }}', '{{ $abs->validitas }}', '{{ addslashes($abs->alasan_validasi ?? '') }}')"
+                                        class="p-1 rounded-lg text-slate-400 hover:text-blue-900 hover:bg-slate-100 transition-colors"
+                                        title="Ubah Status Validasi">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @empty
+            <div class="bg-white border border-slate-200/90 rounded-2xl py-12 px-4 text-center text-slate-400 text-sm shadow-2xs">
+                <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="font-semibold text-slate-700">Belum Ada Catatan Presensi</p>
+                <p class="text-xs text-slate-400 mt-0.5">Catatan kehadiran akan muncul otomatis saat Anda melakukan scan QR presensi.</p>
+            </div>
+        @endforelse
 
         @if($riwayatPresensi->hasPages())
-        <div class="px-5 py-3 border-t border-slate-100 dark:border-slate-800">
+        <div class="bg-white border border-slate-200/90 rounded-2xl px-5 py-3 shadow-2xs">
             {{ $riwayatPresensi->links() }}
         </div>
         @endif

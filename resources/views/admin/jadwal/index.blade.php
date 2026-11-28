@@ -9,16 +9,27 @@
     <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-2xs">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200/70">
             <div>
+                @if($isGuru)
+                    @php
+                        $jamSekarang = now()->hour;
+                        $salamWaktu = match (true) {
+                            $jamSekarang >= 4 && $jamSekarang < 11 => 'Selamat Pagi',
+                            $jamSekarang >= 11 && $jamSekarang < 15 => 'Selamat Siang',
+                            $jamSekarang >= 15 && $jamSekarang < 18 => 'Selamat Sore',
+                            default => 'Selamat Malam',
+                        };
+                        $namaGuruSapaan = trim($loggedGuru->nama ?? auth()->user()->name);
+                        $namaGuruSapaan = preg_match('/^(bu|ibu)\b/i', $namaGuruSapaan) ? $namaGuruSapaan : 'Bu ' . $namaGuruSapaan;
+                    @endphp
+                    <p class="text-sm sm:text-base font-bold text-blue-900 mb-1">
+                        {{ $salamWaktu }}, {{ $namaGuruSapaan }}
+                    </p>
+                @endif
                 <div class="flex items-center gap-2.5 flex-wrap">
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                         Jadwal Mengajar & Siswa Bimbingan
                     </h1>
-                    @if($isGuru)
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/70">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            {{ $loggedGuru->nama ?? auth()->user()->name }} (Pengajar)
-                        </span>
-                    @else
+                    @if(! $isGuru)
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200/70">
                             <span class="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
                             {{ $currentCabang['nama'] }}
@@ -89,6 +100,7 @@
                 class="jadwal-card-item w-full bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-2xs flex flex-col justify-between space-y-4">
                 
                 <div>
+                    @if(! $isGuru)
                     <!-- Top: Teacher Header (Avatar, Name, NIP & Status Kuota) -->
                     <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-3 min-w-0">
@@ -121,24 +133,88 @@
                             {{ $muridList->count() }}/6 Siswa
                         </span>
                     </div>
+                    @endif
 
-                    <!-- Trigger Popup Modal List Siswa -->
-                    <button type="button" 
-                        onclick="openModal('modal-siswa-{{ $j->id }}')" 
-                        class="w-full mt-3 flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-blue-50/90 active:bg-blue-100 text-slate-700 hover:text-blue-900 border border-slate-200/90 font-semibold text-xs transition-all shadow-2xs group cursor-pointer">
-                        <span class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-blue-900 group-hover:scale-110 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            <span>List Siswa ({{ $muridList->count() }})</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-[11px] font-semibold text-blue-700 group-hover:underline">
-                            <span>Lihat List</span>
-                            <svg class="w-3.5 h-3.5 text-blue-600 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </span>
-                    </button>
+                    @if($isGuru)
+                        <!-- Daftar Lengkap Siswa Bimbingan (Langsung Tampil untuk Guru) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2.5">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-blue-900 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <span>Daftar Siswa Bimbingan ({{ $muridList->count() }})</span>
+                                </h4>
+                            </div>
+
+                            @if($muridList->isNotEmpty())
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    @foreach($muridList as $sw)
+                                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-2 transition-all hover:border-blue-300 hover:shadow-xs">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <div class="font-bold text-slate-900 dark:text-white text-sm truncate">
+                                                    {{ $sw->nama }}
+                                                </div>
+                                                <span class="shrink-0 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                                    Kelas {{ $sw->kelas }}
+                                                </span>
+                                            </div>
+
+                                            <div class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824z" />
+                                                </svg>
+                                                @if($sw->no_telp_ortu)
+                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $sw->no_telp_ortu) }}" target="_blank"
+                                                        class="font-mono text-emerald-700 dark:text-emerald-400 font-semibold hover:underline truncate"
+                                                        title="Hubungi Orang Tua via WhatsApp">
+                                                        {{ $sw->no_telp_ortu }}
+                                                    </a>
+                                                    @if($sw->nama_ibu)
+                                                        <span class="text-[11px] text-slate-400 truncate">({{ $sw->nama_ibu }})</span>
+                                                    @endif
+                                                @else
+                                                    <span class="font-mono text-slate-400">-</span>
+                                                @endif
+                                            </div>
+
+                                            <div class="flex items-start gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                                <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                <span class="line-clamp-2 leading-relaxed" title="{{ $sw->alamat }}">
+                                                    {{ $sw->alamat ?: 'Alamat belum diisi' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="py-8 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 text-xs italic">
+                                    Belum ada siswa bimbingan dialokasikan untuk Anda.
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <!-- Trigger Popup Modal List Siswa -->
+                        <button type="button" 
+                            onclick="openModal('modal-siswa-{{ $j->id }}')" 
+                            class="w-full mt-3 flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-blue-50/90 active:bg-blue-100 text-slate-700 hover:text-blue-900 border border-slate-200/90 font-semibold text-xs transition-all shadow-2xs group cursor-pointer">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-900 group-hover:scale-110 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <span>List Siswa ({{ $muridList->count() }})</span>
+                            </span>
+                            <span class="flex items-center gap-1 text-[11px] font-semibold text-blue-700 group-hover:underline">
+                                <span>Lihat List</span>
+                                <svg class="w-3.5 h-3.5 text-blue-600 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                        </button>
+                    @endif
                 </div>
 
                 @if(! $isGuru)
@@ -155,6 +231,7 @@
                 @endif
             </div>
 
+            @if(! $isGuru)
             <!-- Popup Modal List Siswa -->
             <div id="modal-siswa-{{ $j->id }}" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
                 <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in duration-150" onclick="event.stopPropagation()">
@@ -235,6 +312,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         @empty
             <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200">
                 <div class="w-12 h-12 mx-auto rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
