@@ -171,7 +171,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            <input type="text" name="identifier" id="identifier" value="{{ old('identifier', 'admin@lespintar.id') }}" required autofocus
+                            <input type="text" name="identifier" id="identifier" value="{{ old('identifier', 'admin@lespintar.id') }}" required
                                 autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
                                 placeholder="lppm_user"
                                 class="w-full bg-transparent border-none text-slate-900 dark:text-slate-100 text-xs sm:text-[13px] font-medium focus:outline-none placeholder:text-slate-400">
@@ -214,9 +214,8 @@
                     <div class="pt-2 flex justify-center">
                         <button type="submit" id="btn-login-submit"
                             class="bg-gradient-to-r from-[#0a52be] via-[#2563eb] to-[#0ea5e9] hover:from-[#084299] hover:via-[#1d4ed8] hover:to-[#0284c7] active:from-[#07367c] active:to-[#0369a1] text-white font-semibold text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 group cursor-pointer overflow-hidden">
-                            <span id="btn-login-label" class="flex items-center justify-center gap-2 whitespace-nowrap">
+                            <span id="btn-login-label" class="flex items-center justify-center whitespace-nowrap">
                                 <span>Masuk Sekarang</span>
-                                <span class="text-base font-bold transition-transform group-hover:translate-x-1">&rarr;</span>
                             </span>
                             <svg id="btn-login-spinner" class="hidden w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3.5"></circle>
@@ -459,8 +458,6 @@
             if (!inputs.length || !card) return;
 
             let blurTimer = null;
-            let readyForFocus = false;
-            setTimeout(() => { readyForFocus = true; }, 350);
 
             const moveCardTop = () => {
                 if (window.innerWidth >= 1024) return;
@@ -468,9 +465,7 @@
                 document.body.classList.remove('items-center');
                 document.body.classList.add('items-start', 'pt-4');
                 card.classList.remove('my-auto');
-                setTimeout(() => {
-                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 120);
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
 
             const restoreCardCenter = () => {
@@ -486,9 +481,8 @@
             };
 
             inputs.forEach((input) => {
-                input.addEventListener('pointerdown', moveCardTop);
                 input.addEventListener('focus', () => {
-                    if (readyForFocus) moveCardTop();
+                    setTimeout(moveCardTop, 160);
                 });
                 input.addEventListener('blur', restoreCardCenter);
             });
