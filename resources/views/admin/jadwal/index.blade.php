@@ -21,21 +21,20 @@
                         $namaGuruSapaan = trim($loggedGuru->nama ?? auth()->user()->name);
                         $namaGuruSapaan = preg_match('/^(bu|ibu)\b/i', $namaGuruSapaan) ? $namaGuruSapaan : 'Bu ' . $namaGuruSapaan;
                     @endphp
-                    <p class="text-sm sm:text-base font-bold text-blue-900 mb-1">
-                        {{ $salamWaktu }}, {{ $namaGuruSapaan }}
-                    </p>
-                @endif
-                <div class="flex items-center gap-2.5 flex-wrap">
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-                        Jadwal Mengajar & Siswa Bimbingan
+                        {{ $salamWaktu }}, {{ $namaGuruSapaan }}
                     </h1>
-                    @if(! $isGuru)
+                @else
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                            Jadwal Mengajar & Siswa Bimbingan
+                        </h1>
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200/70">
                             <span class="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
                             {{ $currentCabang['nama'] }}
                         </span>
-                    @endif
-                </div>
+                    </div>
+                @endif
             </div>
 
             @if(! $isGuru)
@@ -143,11 +142,8 @@
                                     <svg class="w-4 h-4 text-blue-900 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                     </svg>
-                                    <span>Daftar Siswa Bimbingan ({{ $muridList->count() }})</span>
+                                    <span>Daftar Siswa Bimbingan</span>
                                 </h4>
-                                <span class="text-xs font-bold px-2.5 py-1 rounded-xl shrink-0 {{ $muridList->count() >= 6 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
-                                    {{ $muridList->count() }}/6 Siswa
-                                </span>
                             </div>
 
                             @if($muridList->isNotEmpty())

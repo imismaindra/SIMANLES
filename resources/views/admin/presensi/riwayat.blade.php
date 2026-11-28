@@ -50,7 +50,9 @@
                     <span class="text-2xl font-bold text-slate-900 num-tabular">{{ $totalHadir }}</span>
                     <span class="text-xs text-slate-500">sesi tercatat</span>
                 </div>
-                <p class="mt-1 text-[11px] text-slate-400">Total akumulasi presensi</p>
+                @if(! $isGuru)
+                    <p class="mt-1 text-[11px] text-slate-400">Total akumulasi presensi</p>
+                @endif
             </div>
 
             @if(! $isGuru)
@@ -90,7 +92,9 @@
                     <span class="text-2xl font-bold text-blue-950 num-tabular">{{ $avgDurasi }}</span>
                     <span class="text-xs text-blue-700">menit / sesi</span>
                 </div>
-                <p class="mt-1 text-[11px] text-blue-800 font-medium">Durasi bimbingan efektif</p>
+                @if(! $isGuru)
+                    <p class="mt-1 text-[11px] text-blue-800 font-medium">Durasi bimbingan efektif</p>
+                @endif
             </div>
         </div>
 

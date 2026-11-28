@@ -149,7 +149,7 @@ class JadwalLogicTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Siswa Bimbingan Unik');
         $response->assertSee('Guru Bimbingan Test');
-        $response->assertSee('1/6 Siswa');
+        $response->assertSee('Daftar Siswa Bimbingan');
     }
 
     public function test_jadwal_page_displays_guru_profile_photo_when_logged_in_as_guru(): void
