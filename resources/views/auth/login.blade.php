@@ -459,6 +459,8 @@
 
             let blurTimer = null;
             let baseViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            let wasKeyboardOpen = false;
+            let keyboardOpenedAt = 0;
 
             const moveCardTop = () => {
                 if (window.innerWidth >= 1024) return;
@@ -509,9 +511,16 @@
                     }
                     const keyboardOpen = (baseViewportHeight - currentHeight) > 120;
 
-                    if (keyboardOpen && inputs.includes(document.activeElement)) {
-                        moveCardTop();
-                    } else if (!keyboardOpen) {
+                    if (keyboardOpen) {
+                        if (!wasKeyboardOpen) {
+                            wasKeyboardOpen = true;
+                            keyboardOpenedAt = Date.now();
+                        }
+                        if (inputs.includes(document.activeElement)) {
+                            moveCardTop();
+                        }
+                    } else if (wasKeyboardOpen && (Date.now() - keyboardOpenedAt) > 400) {
+                        wasKeyboardOpen = false;
                         if (inputs.includes(document.activeElement)) {
                             document.activeElement.blur();
                         }
