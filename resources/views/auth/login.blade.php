@@ -41,7 +41,8 @@
             padding: 0;
         }
         #btn-login-submit.is-success {
-            background-color: #059669;
+            background-image: none !important;
+            background-color: #059669 !important;
         }
     </style>
 
@@ -54,25 +55,19 @@
     </script>
 </head>
 
-<body class="min-h-screen relative flex items-center justify-center p-3 sm:p-6 lg:p-8 antialiased selection:bg-[#0a52be] selection:text-white transition-colors duration-200 lg:bg-gradient-to-br lg:from-[#ffffff] lg:via-[#edf4fd] lg:to-[#dce8f8] text-slate-800">
+<body class="min-h-[100dvh] relative flex items-center justify-center p-3 sm:p-6 lg:p-8 antialiased selection:bg-[#0a52be] selection:text-white transition-colors duration-200 bg-gradient-to-br from-[#ffffff] via-[#edf4fd] to-[#dbeafe] text-slate-800">
 
-    <!-- Subtle Ambient Gradient Lighting for Desktop Web -->
-    <div class="hidden lg:block fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
-        <div class="absolute -top-32 left-1/4 w-[38rem] h-[38rem] bg-gradient-to-b from-blue-200/50 via-sky-100/30 to-transparent dark:from-blue-600/10 dark:via-indigo-600/5 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-32 right-1/4 w-[38rem] h-[38rem] bg-gradient-to-t from-blue-300/40 via-blue-100/20 to-transparent dark:from-blue-500/10 dark:via-sky-600/5 rounded-full blur-3xl"></div>
+    <!-- Subtle Ambient Gradient Lighting -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
+        <div class="absolute -top-32 left-1/4 w-[38rem] h-[38rem] bg-gradient-to-b from-blue-200/50 via-sky-100/30 to-transparent rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-32 right-1/4 w-[38rem] h-[38rem] bg-gradient-to-t from-blue-300/40 via-blue-100/20 to-transparent rounded-full blur-3xl"></div>
     </div>
 
-    <!-- Dynamic Animated Topographic Contour Lines Canvas (Mirrors reference image) -->
+    <!-- Dynamic Animated Blue Wave Lines Canvas -->
     <canvas id="topo-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
-    <!-- Mobile Fullscreen Background (belajar.webp with dark blur overlay, < lg only) -->
-    <div class="fixed inset-0 bg-cover bg-center z-0 lg:hidden"
-        style="background-image: url('{{ asset('belajar.webp') }}');">
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/80 to-slate-950/95 backdrop-blur-[3px]"></div>
-    </div>
-
     <!-- Center Card Container -->
-    <div class="w-full max-w-md lg:max-w-5xl bg-white/95 dark:bg-[#101726]/95 backdrop-blur-md lg:backdrop-blur-none lg:bg-white lg:dark:bg-[#101726] rounded-[28px] sm:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 dark:shadow-black/70 border border-slate-200/80 dark:border-slate-800/80 grid grid-cols-1 lg:grid-cols-2 relative z-10 my-auto">
+    <div id="login-card" class="w-full max-w-md lg:max-w-5xl bg-white/95 dark:bg-[#101726]/95 backdrop-blur-md lg:backdrop-blur-none lg:bg-white lg:dark:bg-[#101726] rounded-[28px] sm:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 dark:shadow-black/70 border border-slate-200/80 dark:border-slate-800/80 grid grid-cols-1 lg:grid-cols-2 relative z-10 my-auto">
 
         <!-- LEFT COLUMN: Form Login -->
         <div class="relative p-6 sm:p-10 lg:p-12 flex flex-col justify-between z-10">
@@ -218,7 +213,7 @@
                     <!-- Submit Button: "Masuk Sekarang →" -->
                     <div class="pt-2 flex justify-center">
                         <button type="submit" id="btn-login-submit"
-                            class="bg-[#0a52be] hover:bg-[#084299] active:bg-[#07367c] text-white font-semibold text-sm shadow-md shadow-blue-700/20 flex items-center justify-center gap-2 group cursor-pointer overflow-hidden">
+                            class="bg-gradient-to-r from-[#0a52be] via-[#2563eb] to-[#0ea5e9] hover:from-[#084299] hover:via-[#1d4ed8] hover:to-[#0284c7] active:from-[#07367c] active:to-[#0369a1] text-white font-semibold text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 group cursor-pointer overflow-hidden">
                             <span id="btn-login-label" class="flex items-center justify-center gap-2 whitespace-nowrap">
                                 <span>Masuk Sekarang</span>
                                 <span class="text-base font-bold transition-transform group-hover:translate-x-1">&rarr;</span>
@@ -458,13 +453,61 @@
             });
         })();
 
-        // Dynamic Animated Straight Lines (Garis lurus solid, tidak putus-putus, bergerak dinamis)
-        (function initStraightLinesBackground() {
+        (function initMobileKeyboardScroll() {
+            const inputs = [document.getElementById('identifier'), document.getElementById('password')].filter(Boolean);
+            const card = document.getElementById('login-card');
+            if (!inputs.length || !card) return;
+
+            let blurTimer = null;
+            let readyForFocus = false;
+            setTimeout(() => { readyForFocus = true; }, 350);
+
+            const moveCardTop = () => {
+                if (window.innerWidth >= 1024) return;
+                clearTimeout(blurTimer);
+                document.body.classList.remove('items-center');
+                document.body.classList.add('items-start', 'pt-4');
+                card.classList.remove('my-auto');
+                setTimeout(() => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 120);
+            };
+
+            const restoreCardCenter = () => {
+                if (window.innerWidth >= 1024) return;
+                clearTimeout(blurTimer);
+                blurTimer = setTimeout(() => {
+                    if (!inputs.includes(document.activeElement)) {
+                        document.body.classList.add('items-center');
+                        document.body.classList.remove('items-start', 'pt-4');
+                        card.classList.add('my-auto');
+                    }
+                }, 150);
+            };
+
+            inputs.forEach((input) => {
+                input.addEventListener('pointerdown', moveCardTop);
+                input.addEventListener('focus', () => {
+                    if (readyForFocus) moveCardTop();
+                });
+                input.addEventListener('blur', restoreCardCenter);
+            });
+
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', () => {
+                    if (inputs.includes(document.activeElement)) {
+                        moveCardTop();
+                    }
+                });
+            }
+        })();
+
+        // Dynamic Animated Blue Wave Lines (Garis gelombang bergerak berwarna biru bermacam-macam)
+        (function initBlueWaveLinesBackground() {
             const canvas = document.getElementById('topo-canvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             let width, height;
-            let animFrame;
 
             function resize() {
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -478,90 +521,74 @@
             window.addEventListener('resize', resize);
             resize();
 
-            // Sudut kemiringan garis lurus (-32 derajat untuk kesan modern dan dinamis)
-            const angle = -32 * (Math.PI / 180);
-            const cosA = Math.cos(angle);
-            const sinA = Math.sin(angle);
-            const uX = -sinA; // Arah sejajar garis lurus
-            const uY = cosA;
-            const nX = cosA;  // Arah tegak lurus untuk pergerakan
-            const nY = sinA;
+            const bluePalette = [
+                [10, 82, 190],   // #0a52be (primary deep blue)
+                [37, 99, 235],   // #2563eb (royal blue)
+                [14, 165, 233],  // #0ea5e9 (sky blue)
+                [59, 130, 246],  // #3b82f6 (bright blue)
+                [56, 189, 248],  // #38bdf8 (cyan blue)
+                [30, 64, 175],   // #1e40af (navy blue)
+                [96, 165, 250],  // #60a5fa (soft blue)
+            ];
 
-            // 14 garis lurus solid dengan offset dan kecepatan dinamis
-            const numLines = 14;
-            const lines = [];
-            for (let i = 0; i < numLines; i++) {
-                lines.push({
-                    offset: (i / numLines) * 2 - 1, // Normalized offset [-1, 1]
-                    speed: 0.025 + (i % 4) * 0.012,  // Kecepatan gerak halus
-                    width: (i % 3 === 0) ? 1.5 : 1.1,
-                    isAccent: (i % 3 === 0),
-                    alpha: 0.16 + (i % 4) * 0.06
-                });
-            }
+            const waves = Array.from({ length: 14 }, (_, i) => ({
+                yRatio: 0.08 + (i / 13) * 0.84,
+                amplitude: 16 + (i % 4) * 11,
+                wavelength: 220 + (i % 5) * 75,
+                speed: (0.45 + (i % 4) * 0.22) * (i % 2 === 0 ? 1 : -1),
+                phase: i * 0.75,
+                lineWidth: 1.2 + (i % 3) * 0.65,
+                alpha: 0.18 + (i % 4) * 0.07,
+                colorA: bluePalette[i % bluePalette.length],
+                colorB: bluePalette[(i + 2) % bluePalette.length],
+            }));
 
             let lastTime = performance.now();
 
             function render(now) {
                 if (document.hidden) {
-                    animFrame = requestAnimationFrame(render);
+                    requestAnimationFrame(render);
                     return;
                 }
 
                 const dt = Math.min((now - lastTime) / 1000, 0.1);
                 lastTime = now;
                 ctx.clearRect(0, 0, width, height);
-
-                // Pastikan garis selalu lurus solid dan tidak putus-putus
                 ctx.setLineDash([]);
 
-                const isDark = document.documentElement.classList.contains('dark');
-                const baseColor = isDark ? [148, 163, 184] : [71, 85, 105];   // slate tone
-                const accentColor = isDark ? [96, 165, 250] : [37, 99, 235];  // royal blue accent
+                waves.forEach((w) => {
+                    w.phase += w.speed * dt;
+                    const baseY = height * w.yRatio;
 
-                // Rentang jarak tegak lurus layar dari pusat
-                const maxExtent = (width * Math.abs(cosA) + height * Math.abs(sinA)) * 0.6 + 200;
-                const centerX = width / 2;
-                const centerY = height / 2;
-                const lineHalfLength = Math.max(width, height) * 1.6;
-
-                lines.forEach(line => {
-                    // Update pergerakan garis
-                    line.offset += line.speed * dt;
-                    if (line.offset > 1.0) {
-                        line.offset -= 2.0; // Loop mulus ke sisi berlawanan
-                    }
-
-                    const currentDist = line.offset * maxExtent;
-                    const px = centerX + currentDist * nX;
-                    const py = centerY + currentDist * nY;
-
-                    const x1 = px - lineHalfLength * uX;
-                    const y1 = py - lineHalfLength * uY;
-                    const x2 = px + lineHalfLength * uX;
-                    const y2 = py + lineHalfLength * uY;
-
-                    // Gradasi lembut di kedua ujung garis agar menyatu dengan latar
-                    const grad = ctx.createLinearGradient(x1, y1, x2, y2);
-                    const rgb = line.isAccent ? accentColor : baseColor;
-                    const a = line.alpha;
-                    grad.addColorStop(0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0)`);
-                    grad.addColorStop(0.2, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${a})`);
-                    grad.addColorStop(0.8, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${a})`);
-                    grad.addColorStop(1, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0)`);
+                    const grad = ctx.createLinearGradient(0, baseY, width, baseY);
+                    grad.addColorStop(0, `rgba(${w.colorA[0]}, ${w.colorA[1]}, ${w.colorA[2]}, 0)`);
+                    grad.addColorStop(0.2, `rgba(${w.colorA[0]}, ${w.colorA[1]}, ${w.colorA[2]}, ${w.alpha})`);
+                    grad.addColorStop(0.5, `rgba(${w.colorB[0]}, ${w.colorB[1]}, ${w.colorB[2]}, ${w.alpha + 0.08})`);
+                    grad.addColorStop(0.8, `rgba(${w.colorA[0]}, ${w.colorA[1]}, ${w.colorA[2]}, ${w.alpha})`);
+                    grad.addColorStop(1, `rgba(${w.colorB[0]}, ${w.colorB[1]}, ${w.colorB[2]}, 0)`);
 
                     ctx.beginPath();
-                    ctx.moveTo(x1, y1);
-                    ctx.lineTo(x2, y2);
+                    const step = 12;
+                    for (let x = 0; x <= width + step; x += step) {
+                        const y = baseY
+                            + Math.sin((x / w.wavelength) * Math.PI * 2 + w.phase) * w.amplitude
+                            + Math.cos((x / (w.wavelength * 0.6)) * Math.PI * 2 - w.phase * 0.6) * (w.amplitude * 0.3);
+                        if (x === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+
                     ctx.strokeStyle = grad;
-                    ctx.lineWidth = line.width;
+                    ctx.lineWidth = w.lineWidth;
                     ctx.stroke();
                 });
 
-                animFrame = requestAnimationFrame(render);
+                requestAnimationFrame(render);
             }
 
-            animFrame = requestAnimationFrame(render);
+            requestAnimationFrame(render);
         })();
     </script>
 </body>
