@@ -9,41 +9,8 @@
         <div class="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-2xs">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-200/70">
                 <div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-slate-900">Dashboard
-                            Operasional</h1>
-                        <span
-                            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-200/70">
-                            <span class="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
-                            {{ $currentCabang['nama'] }}
-                        </span>
-                        <span
-                            class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-100 text-slate-700">
-                            {{ $currentCabang['kode'] }}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Quick Action Buttons (Stacked on mobile, row on tablet/desktop) -->
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 shrink-0 pt-1 lg:pt-0">
-                    <!-- Buka Layar QR Presensi Guru -->
-                    <button type="button" onclick="openModal('modal-qr-display')"
-                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-800 font-semibold text-xs shadow-2xs transition-colors shrink-0">
-                        <svg class="w-3.5 h-3.5 text-blue-900" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                            <rect x="7" y="7" width="3" height="3" rx="0.5" />
-                            <rect x="14" y="7" width="3" height="3" rx="0.5" />
-                            <rect x="7" y="14" width="3" height="3" rx="0.5" />
-                            <path d="M14 14h.01" />
-                            <path d="M17 14v3" />
-                            <path d="M14 17h3" />
-                        </svg>
-                        <span>Layar QR Absen</span>
-                    </button>
+                    <h1 class="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-slate-900">Dashboard
+                        Operasional</h1>
                 </div>
             </div>
 
@@ -247,36 +214,20 @@
                 <!-- 1. Mobile Cards View (< 640px) -->
                 <div class="sm:hidden space-y-2 mt-2.5">
                     @foreach($unassignedStudents as $st)
-                        <div class="p-2.5 bg-white border border-amber-200/90 rounded-lg space-y-1.5">
-                            <div class="flex items-start justify-between gap-2">
-                                <div>
-                                    <span class="font-bold text-slate-900 text-xs block">{{ $st['nama'] }}</span>
-                                    <span class="text-[9.5px] text-slate-400 font-mono">{{ $st['id'] }} ·
-                                        {{ $st['tanggal_daftar'] }}</span>
-                                </div>
+                        <div class="p-3 bg-white border border-amber-200/90 rounded-lg space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="font-bold text-slate-900 text-xs truncate">{{ $st['nama'] }}</span>
                                 <span
                                     class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-50 text-amber-900 border border-amber-200 shrink-0">
                                     {{ $st['jenjang'] }} · Kls {{ $st['kelas'] == 0 ? 'TK' : $st['kelas'] }}
                                 </span>
                             </div>
 
-                            <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-100">
-                                <span>Wali: {{ $st['nama_ibu'] }}</span>
-                                <span class="font-mono text-[10px] text-slate-500">{{ $st['no_telp_ortu'] }}</span>
-                            </div>
-
-                            <div class="flex items-center justify-between pt-1">
-                                <span class="text-[10px] text-slate-500">
-                                    @if($st['diskon'] > 0)
-                                        <span class="text-emerald-800 font-semibold">Diskon Rp
-                                            {{ number_format($st['diskon'], 0, ',', '.') }}</span>
-                                    @else
-                                        <span class="text-slate-400">Normal</span>
-                                    @endif
-                                </span>
+                            <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-100">
+                                <span class="text-[11px] text-slate-600 truncate">Wali: {{ $st['nama_ibu'] }}</span>
                                 <button type="button"
                                     onclick="openManualAssignModal('{{ $st['id'] }}', '{{ $st['nama'] }}', '{{ $st['jenjang'] }}')"
-                                    class="px-2.5 py-1 rounded bg-blue-900 text-white font-semibold text-xs active:bg-blue-950 transition-colors">
+                                    class="px-2.5 py-1 rounded bg-blue-900 text-white font-semibold text-xs active:bg-blue-950 transition-colors shrink-0">
                                     Tugaskan Guru
                                 </button>
                             </div>
@@ -289,11 +240,9 @@
                     <table class="w-full text-left text-xs">
                         <thead>
                             <tr class="text-slate-500 font-semibold border-b border-amber-200/60 pb-2">
-                                <th class="py-1.5 pr-3">ID & Nama Siswa</th>
+                                <th class="py-1.5 pr-3">Nama Siswa</th>
                                 <th class="py-1.5 px-3">Jenjang & Kelas</th>
-                                <th class="py-1.5 px-3">Tgl Daftar</th>
-                                <th class="py-1.5 px-3">Orang Tua & WhatsApp</th>
-                                <th class="py-1.5 px-3">Diskon</th>
+                                <th class="py-1.5 px-3">Wali</th>
                                 <th class="py-1.5 pl-3 text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -302,7 +251,6 @@
                                 <tr class="text-slate-800">
                                     <td class="py-2 pr-3">
                                         <span class="font-bold text-slate-900">{{ $st['nama'] }}</span>
-                                        <span class="block text-[9.5px] text-slate-400 font-mono">{{ $st['id'] }}</span>
                                     </td>
                                     <td class="py-2 px-3">
                                         <span
@@ -310,19 +258,7 @@
                                             {{ $st['jenjang'] }} · Kelas {{ $st['kelas'] == 0 ? 'TK' : $st['kelas'] }}
                                         </span>
                                     </td>
-                                    <td class="py-2 px-3 text-slate-600 num-tabular">{{ $st['tanggal_daftar'] }}</td>
-                                    <td class="py-2 px-3">
-                                        <span>{{ $st['nama_ibu'] }}</span>
-                                        <span class="block text-[9.5px] text-slate-500 font-mono">{{ $st['no_telp_ortu'] }}</span>
-                                    </td>
-                                    <td class="py-2 px-3 num-tabular">
-                                        @if($st['diskon'] > 0)
-                                            <span class="text-emerald-800 font-semibold">Diskon Rp
-                                                {{ number_format($st['diskon'], 0, ',', '.') }}</span>
-                                        @else
-                                            <span class="text-slate-400">Normal</span>
-                                        @endif
-                                    </td>
+                                    <td class="py-2 px-3 text-slate-700">{{ $st['nama_ibu'] }}</td>
                                     <td class="py-2 pl-3 text-right">
                                         <button type="button"
                                             onclick="openManualAssignModal('{{ $st['id'] }}', '{{ $st['nama'] }}', '{{ $st['jenjang'] }}')"

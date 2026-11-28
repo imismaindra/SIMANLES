@@ -39,7 +39,7 @@
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    <span>+ Tambah Guru</span>
+                    <span>Tambah Guru</span>
                 </button>
             </div>
         </div>
@@ -282,7 +282,7 @@
                                     <line x1="12" y1="5" x2="12" y2="19" />
                                     <line x1="5" y1="12" x2="19" y2="12" />
                                 </svg>
-                                <span>+ Tambah Siswa Bimbingan</span>
+                                <span>Tambah Siswa Bimbingan</span>
                             </button>
                         @else
                             <div class="text-center py-1.5 text-xs text-emerald-800 font-semibold bg-emerald-50/80 border border-emerald-200/80 rounded-xl">

@@ -382,18 +382,15 @@
                     </a>
 
                     @if(! $isGuru)
-                    <!-- Branch Selector Dropdown (Fluid on small mobile) -->
-                    <div class="flex items-center gap-1.5 min-w-0">
-                        <label for="topbar-cabang-select"
-                            class="text-slate-500 text-xs font-medium hidden md:inline">Cabang:</label>
-                        <select id="topbar-cabang-select" onchange="window.location.href = '?cabang_id=' + this.value;"
-                            class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/70 border border-slate-200 dark:border-slate-700 rounded-lg py-1.5 px-2 sm:px-2.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-600 cursor-pointer max-w-[170px] sm:max-w-xs truncate">
-                            @foreach($daftarCabang as $cb)
-                                <option value="{{ $cb['id'] }}" {{ ($currentCabang['id'] ?? '') === $cb['id'] ? 'selected' : '' }}>
-                                    {{ $cb['nama'] }} ({{ $cb['kode'] }})
-                                </option>
-                            @endforeach
-                        </select>
+                    <!-- Static Cabang Label (Tidak bisa pindah cabang dari header) -->
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-2 h-2 rounded-full bg-blue-700 shrink-0"></span>
+                        <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
+                            {{ $currentCabang['nama'] ?? 'Cabang Ponokawan' }}
+                            @if(!empty($currentCabang['kode']))
+                                <span class="text-[11px] font-mono font-semibold text-slate-500 ml-0.5">({{ $currentCabang['kode'] }})</span>
+                            @endif
+                        </span>
                     </div>
                     @else
                     <div class="flex items-center gap-2">
@@ -464,7 +461,7 @@
                     @else
                         <!-- Tombol Logout Mobile (Admin Cabang & Admin Pusat) -->
                         <button type="button" onclick="openModal('modal-confirm-logout')"
-                            class="sm:hidden inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors shadow-2xs"
+                            class="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white border border-rose-700 transition-colors shadow-xs"
                             title="Keluar dari akun">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

@@ -33,7 +33,14 @@ class GuruController extends Controller
             ->where('is_active', true)
             ->whereHas('cabang', fn ($q) => $q->where('cabang.id', $cabangId))
             ->orderBy('nama', 'asc')
-            ->get();
+            ->get()
+            ->sortBy(fn (Guru $g): string => sprintf(
+                '%d-%02d-%s',
+                $g->siswa->count() >= 6 ? 1 : 0,
+                $g->siswa->count(),
+                strtolower($g->nama)
+            ))
+            ->values();
 
         // Siswa aktif tanpa guru di cabang ini
         $unassignedStudents = Siswa::where('cabang_id', $cabangId)

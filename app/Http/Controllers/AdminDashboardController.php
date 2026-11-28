@@ -327,7 +327,12 @@ class AdminDashboardController extends Controller
                 'inisial' => $initials ?: 'GR',
                 'warna' => $bgColors[$idx % count($bgColors)],
             ];
-        })->all();
+        })->sortBy(fn (array $t): string => sprintf(
+            '%d-%02d-%s',
+            $t['sisa_slot'] > 0 ? 0 : 1,
+            $t['siswa_count'],
+            strtolower($t['nama'])
+        ))->values()->all();
 
         // 7. Jadwal Sesi Mengajar Hari Ini
         $jadwals = Jadwal::with(['guru', 'siswa'])->where('cabang_id', $cabangId)->get();
