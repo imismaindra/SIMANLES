@@ -439,38 +439,14 @@
 
                             <!-- Dropdown Menu (Khusus Guru) -->
                             <div id="user-profile-dropdown"
-                                class="hidden absolute right-0 mt-2 w-60 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xl z-50 py-1.5 text-xs animate-in fade-in duration-150">
-                                <!-- Info Pengguna -->
-                                <div class="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                                    @if($authUser?->foto_url)
-                                        <div class="relative overflow-hidden w-9 h-9 rounded-xl shrink-0 border border-slate-200 dark:border-slate-700 shadow-xs bg-slate-200 dark:bg-slate-800">
-                                            <div class="skeleton-shimmer absolute inset-0"></div>
-                                            <img src="{{ $authUser->foto_url }}" alt="{{ $authUser->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling?.classList.remove('hidden');">
-                                        </div>
-                                        <div class="hidden w-9 h-9 rounded-xl bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
-                                            {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}
-                                        </div>
-                                    @else
-                                        <div class="w-9 h-9 rounded-xl bg-blue-900 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
-                                            {{ strtoupper(substr($authUser?->name ?? 'U', 0, 1)) }}
-                                        </div>
-                                    @endif
-                                    <div class="min-w-0 flex-1">
-                                        <p class="font-bold text-slate-900 dark:text-white truncate leading-tight">{{ $authUser?->name }}</p>
-                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ $authUser?->email }}</p>
-                                        <span class="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900">
-                                            Guru Pengajar
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Menu Edit Profil (Guru) -->
+                                class="hidden absolute right-0 mt-2 w-48 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xl z-50 py-1.5 text-xs animate-in fade-in duration-150">
+                                <!-- Menu Edit Foto Profil (Guru) -->
                                 <a href="{{ route('guru.profil') }}"
                                     class="flex items-center gap-2.5 px-3.5 py-2 text-slate-700 hover:bg-slate-50 hover:text-blue-900 font-medium transition-colors">
                                     <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
-                                    <span>Edit Profil Guru</span>
+                                    <span>Edit Foto Profil</span>
                                 </a>
 
                                 <div class="border-t border-slate-100 my-1"></div>
