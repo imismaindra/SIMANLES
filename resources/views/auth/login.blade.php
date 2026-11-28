@@ -23,6 +23,26 @@
         body, input, button, select, textarea {
             font-family: var(--font-sans);
         }
+        #btn-login-submit {
+            width: 100%;
+            height: 3rem;
+            border-radius: 0.75rem;
+            transition: width 0.38s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.38s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease, transform 0.15s ease;
+        }
+        @media (min-width: 640px) {
+            #btn-login-submit {
+                height: 3.25rem;
+            }
+        }
+        #btn-login-submit.is-circle {
+            width: 3.25rem;
+            height: 3.25rem;
+            border-radius: 9999px;
+            padding: 0;
+        }
+        #btn-login-submit.is-success {
+            background-color: #059669;
+        }
     </style>
 
     <!-- Scripts & Styles via Vite -->
@@ -142,7 +162,7 @@
                 </div>
 
                 <!-- Form Login (Mirrors reference input style) -->
-                <form action="{{ route('login.post') }}" method="POST" class="space-y-3.5">
+                <form id="login-form" action="{{ route('login.post') }}" method="POST" class="space-y-3.5">
                     @csrf
 
                     <!-- Field 1: USERNAME -->
@@ -196,11 +216,22 @@
                     <input type="hidden" name="remember" value="1">
 
                     <!-- Submit Button: "Masuk Sekarang →" -->
-                    <button type="submit"
-                        class="w-full h-10 sm:h-11 mt-4 rounded-xl bg-[#0a52be] hover:bg-[#084299] active:bg-[#07367c] text-white font-semibold text-xs sm:text-[13px] transition-all duration-150 shadow-md shadow-blue-700/20 flex items-center justify-center gap-1.5 group cursor-pointer">
-                        <span>Masuk Sekarang</span>
-                        <span class="text-sm font-bold transition-transform group-hover:translate-x-1">&rarr;</span>
-                    </button>
+                    <div class="pt-2 flex justify-center">
+                        <button type="submit" id="btn-login-submit"
+                            class="bg-[#0a52be] hover:bg-[#084299] active:bg-[#07367c] text-white font-semibold text-sm shadow-md shadow-blue-700/20 flex items-center justify-center gap-2 group cursor-pointer overflow-hidden">
+                            <span id="btn-login-label" class="flex items-center justify-center gap-2 whitespace-nowrap">
+                                <span>Masuk Sekarang</span>
+                                <span class="text-base font-bold transition-transform group-hover:translate-x-1">&rarr;</span>
+                            </span>
+                            <svg id="btn-login-spinner" class="hidden w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3.5"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v3.5a4.5 4.5 0 00-4.5 4.5H4z"></path>
+                            </svg>
+                            <svg id="btn-login-check" class="hidden w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </button>
+                    </div>
                 </form>
 
                 <!-- Quick Role Presets Helper -->
@@ -361,6 +392,71 @@
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
             }
         }
+
+        (function initLoginButtonMorph() {
+            const form = document.getElementById('login-form');
+            const btn = document.getElementById('btn-login-submit');
+            const label = document.getElementById('btn-login-label');
+            const spinner = document.getElementById('btn-login-spinner');
+            const check = document.getElementById('btn-login-check');
+            if (!form || !btn) return;
+
+            let isSubmitting = false;
+
+            const resetButton = () => {
+                isSubmitting = false;
+                btn.disabled = false;
+                btn.classList.remove('is-circle', 'is-success');
+                spinner?.classList.add('hidden');
+                check?.classList.add('hidden');
+                label?.classList.remove('hidden');
+            };
+
+            form.addEventListener('submit', async (e) => {
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return;
+                }
+                e.preventDefault();
+                isSubmitting = true;
+                btn.disabled = true;
+
+                label?.classList.add('hidden');
+                btn.classList.add('is-circle');
+                spinner?.classList.remove('hidden');
+
+                const startedAt = Date.now();
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        credentials: 'same-origin',
+                    });
+
+                    const elapsed = Date.now() - startedAt;
+                    const minSpinnerMs = 550;
+                    if (elapsed < minSpinnerMs) {
+                        await new Promise((r) => setTimeout(r, minSpinnerMs - elapsed));
+                    }
+
+                    if (response.ok && response.redirected && !response.url.includes('/login')) {
+                        spinner?.classList.add('hidden');
+                        btn.classList.add('is-success');
+                        check?.classList.remove('hidden');
+                        setTimeout(() => {
+                            window.location.href = response.url;
+                        }, 550);
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Login fetch fallback:', err);
+                }
+
+                // Fallback to standard submit so Laravel validation errors render normally
+                resetButton();
+                form.submit();
+            });
+        })();
 
         // Dynamic Animated Straight Lines (Garis lurus solid, tidak putus-putus, bergerak dinamis)
         (function initStraightLinesBackground() {

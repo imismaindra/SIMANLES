@@ -31,23 +31,23 @@
             title="Ketuk untuk ganti foto profil"
             class="relative group cursor-pointer focus:outline-none">
             @if($headerAvatarUrl)
-                <div id="hero-avatar-container" class="relative overflow-hidden w-24 h-24 rounded-full shrink-0 shadow-md shadow-blue-950/15 border-2 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-800">
+                <div id="hero-avatar-container" class="relative overflow-hidden w-24 h-24 rounded-full shrink-0 shadow-md shadow-blue-950/15 ring-4 ring-blue-50 dark:ring-slate-800 bg-slate-200 dark:bg-slate-800">
                     <div class="skeleton-shimmer absolute inset-0"></div>
                     <img id="hero-avatar-img" src="{{ $headerAvatarUrl }}" alt="{{ $guru->nama ?? $user->name }}" loading="lazy" decoding="async" class="w-full h-full object-cover relative z-10 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.previousElementSibling?.remove();" onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling?.classList.remove('hidden');">
                 </div>
-                <div id="hero-avatar-placeholder" class="hidden w-24 h-24 rounded-full bg-blue-900 text-white font-bold text-2xl flex items-center justify-center shrink-0 shadow-md shadow-blue-950/15 border-2 border-white dark:border-slate-800">
+                <div id="hero-avatar-placeholder" class="hidden w-24 h-24 rounded-full bg-blue-900 text-white font-bold text-2xl flex items-center justify-center shrink-0 shadow-md shadow-blue-950/15 ring-4 ring-blue-50 dark:ring-slate-800">
                     {{ strtoupper(substr($guru->nama ?? $user->name, 0, 2)) }}
                 </div>
             @else
-                <div id="hero-avatar-container" class="hidden relative overflow-hidden w-24 h-24 rounded-full shrink-0 shadow-md shadow-blue-950/15 border-2 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-800">
+                <div id="hero-avatar-container" class="hidden relative overflow-hidden w-24 h-24 rounded-full shrink-0 shadow-md shadow-blue-950/15 ring-4 ring-blue-50 dark:ring-slate-800 bg-slate-200 dark:bg-slate-800">
                     <img id="hero-avatar-img" src="" alt="{{ $guru->nama ?? $user->name }}" class="w-full h-full object-cover">
                 </div>
-                <div id="hero-avatar-placeholder" class="w-24 h-24 rounded-full bg-blue-900 text-white font-bold text-2xl flex items-center justify-center shrink-0 shadow-md shadow-blue-950/15 border-2 border-white dark:border-slate-800 group-hover:bg-blue-800 transition-colors">
+                <div id="hero-avatar-placeholder" class="w-24 h-24 rounded-full bg-blue-900 text-white font-bold text-2xl flex items-center justify-center shrink-0 shadow-md shadow-blue-950/15 ring-4 ring-blue-50 dark:ring-slate-800 group-hover:bg-blue-800 transition-colors">
                     {{ strtoupper(substr($guru->nama ?? $user->name, 0, 2)) }}
                 </div>
             @endif
 
-            <span class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-blue-900 group-hover:bg-blue-800 text-white flex items-center justify-center shadow-sm border-2 border-white dark:border-slate-900 transition-colors">
+            <span class="absolute bottom-0.5 right-0.5 w-7 h-7 rounded-full bg-blue-900 group-hover:bg-blue-800 text-white flex items-center justify-center shadow-sm border-2 border-white dark:border-slate-900 transition-colors">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -57,46 +57,45 @@
 
         @if($headerAvatarUrl)
             <button type="button" onclick="deleteAvatarNow()"
-                class="mt-1.5 text-[11px] font-semibold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer">
+                class="mt-2 text-[11px] font-semibold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer">
                 Hapus Foto
             </button>
         @endif
 
-        <h1 class="mt-3 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h1 class="mt-3.5 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             {{ $guru->nama ?? $user->name }}
         </h1>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {{ $user->email }} | {{ $guru->no_telp ?: '-' }}
+            {{ $user->email }} <span class="mx-1 text-slate-300">|</span> {{ $guru->no_telp ?: '-' }}
         </p>
-        <span class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-900">
+        <span class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-900">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             Guru Pengajar Aktif
         </span>
     </div>
 
-    <!-- Detail Akun Card (Style referensi dengan warna SIMANLES) -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-4">
-        <div class="flex items-center justify-between gap-2">
+    <!-- Detail Akun Card -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs space-y-3.5">
+        <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
             <span class="text-sm font-bold text-slate-900 dark:text-white">Detail Akun</span>
-            <span class="text-xs font-semibold text-blue-900 dark:text-blue-400">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-300 border border-blue-200/70 dark:border-blue-900">
                 {{ $currentCabang['nama'] ?? 'Cabang Ponokawan' }}
             </span>
         </div>
 
-        <div class="flex items-center justify-between gap-2">
-            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
-                {{ $guru->nama ?? $user->name }} <span class="font-mono text-slate-500">({{ $nipDisplay }})</span>
-            </p>
-            <button type="button" onclick="toggleProfileSection('section-edit-profil')"
-                class="p-1.5 rounded-lg text-slate-400 hover:text-blue-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
-                title="Edit Profil">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 pt-1 border-t border-slate-100 dark:border-slate-800">
+        <div class="grid grid-cols-2 gap-x-4 gap-y-3.5">
+            <div>
+                <p class="text-[11px] text-slate-400">Nama Pengajar</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-white mt-0.5 truncate">
+                    {{ $guru->nama ?? $user->name }}
+                </p>
+            </div>
+            <div>
+                <p class="text-[11px] text-slate-400">Nomor Pegawai</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-white font-mono mt-0.5">
+                    {{ $nipDisplay }}
+                </p>
+            </div>
             <div>
                 <p class="text-[11px] text-slate-400">Tanggal Lahir</p>
                 <p class="text-sm font-bold text-slate-900 dark:text-white font-mono mt-0.5">
